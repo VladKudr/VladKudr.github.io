@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131656501-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'UA-131656501-1');
+    </script>
+
+    <title>Vlad Kudryavtsev</title>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vlad Kudryavtsev">
+    <meta name="author" content="Vlad Kudryavtsev">
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link href='https://fonts.googleapis.com/css?family=Lato:300,400,300italic,400italic' rel='stylesheet'
+          type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <!-- FontAwesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"
+            integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9"
+            crossorigin="anonymous"></script>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="../../assets/plugins/bootstrap/css/bootstrap.min.css">
+
+    <!-- github calendar css -->
+    <link rel="stylesheet" href="../../assets/plugins/github-calendar/dist/github-calendar.css">
+    <!-- github acitivity css -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/octicons/2.0.2/octicons.min.css">
+    <link rel="stylesheet" href="../../assets/plugins/github-activity/github-activity-0.1.5.min.css">
+
+    <!-- Theme CSS -->
+    <link id="theme-style" rel="stylesheet" href="../../assets/css/styles.css">
+</head>
+
+<body>
+<!-- ******HEADER****** -->
+<header class="header">
+    <div class="container clearfix">
+        <img class="profile-image img-fluid float-left  rounded-circle" src="../../assets/images/profile.png" alt=""/>
+        <div class="profile-content float-left">
+            <h1 class="name">Влад Кудрявцев</h1>
+            <h2 class="desc">Product Owner / Java Developer / Human</h2>
+            <ul class="social list-inline">
+                <!--<li class="list-inline-item"><a href="#"><i class="fab fa-twitter"></i></a></li>                   -->
+                <li class="list-inline-item"><a href="https://plus.google.com/u/2/106427358158494083952"><i
+                        class="fab fa-google-plus-g"></i></a></li>
+                <!--<li class="list-inline-item"><a href="#"><i class="fab fa-linkedin-in"></i></a></li>-->
+                <li class="list-inline-item"><a href="https://github.com/VladKudr"><i class="fab fa-github-alt"></i></a>
+                </li>
+                <li class="list-inline-item"><a href="https://stackoverflow.com/users/6869417/vlad-kudryavtsev"><i
+                        class="fab fa-stack-overflow"></i></a></li>
+                <!--<li class="list-inline-item last-item"><a href="#"><i class="fab fa-codepen"></i></a></li>                -->
+            </ul>
+        </div><!--//profile-->
+        <a class="btn btn-cta-primary float-right" href="mailto:vd.kudryavtsev@gmail.com" target="_blank"><i
+                class="fas fa-paper-plane"></i> Связаться со мной</a>
+    </div><!--//container-->
+</header><!--//header-->
+
+<div class="container sections-wrapper">
+    <div class="row">
+
+        <section class="section">
+            <div class="section-inner">
+
+                <div class="content">
+
+                    <div class="item row">
+                        <h2>Аутентификация по сертификату <b>согласно ПИР 31</b></h2>
+                        <div>
+                            <section id="topper">
+                                <h5>Что планируем сделать</h5>
+                                <p>Задачу по аутентификации по сертификату можно разделить на подзадачи:
+                                <ul>
+                                    <li>Иниициализация сертификата;</li>
+                                    <li>Вызов методов УПШ СББОЛ;</li>
+                                    <li>Генерация ЭП для соли, возвращаемой от УПШ СББОЛ.</li>
+                                </ul>
+
+                                Предлагаю также вам открыть спецификацию форматов
+                                и порядка обмена данными от Сбербанка.</p>
+                            </section>
+
+
+                            <section id="preLoginSignRequest">
+                                <h5>Вызов метода preLoginSign</h5>
+                                <p> Вы выполняете первым шагом вызов preLoginSign со структурой аналогичной ниже:</p>
+                                <div class="card card-body">
+                                    <h6>XML структура soap запроса preLoginSign</h6>
+                                    <pre><code class="xml">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:upg="http://upg.sbns.bssys.com/"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;upg:preLoginSign&gt;
+         &lt;upg:serial&gt;73371DD0130BD53CA6E1&lt;/upg:serial&gt;
+         &lt;upg:issue&gt;CN=Иванов Иван Иванович&lt;/upg:issue&gt;
+      &lt;/upg:preLoginSign&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;</code></pre>
+
+                                </div>
+                                <p>
+
+                                    <a class="btn btn-success btn-sm" data-toggle="collapse" href="#multiCollapseJava"
+                                       role="button" aria-expanded="false" aria-controls="multiCollapseJava">SOAP запрос
+                                        из Java </a>
+
+
+                                </p>
+
+                                <div class="row">
+                                    <div class="collapse multi-collapse" id="multiCollapseJava">
+                                        <div class="card card-body">
+                                            <h6>Пример вызова preLoginSign из Java</h6>
+                                            <pre><code class="java">URL url;
+UniversalPaymentGate universalPaymentGate = new UniversalPaymentGate(url);
+List&lt;byte[]&gt; preLoginSignResponse = paymentGate.getUniversalPaymentGateSbrfImplPort().preLoginSign(сertificateSerial, сertificateIssue);</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </section>
+                            <section id="preLoginSignResponse">
+                                <h5>Результат вызова preLoginSign
+
+                                </h5>
+                                <p> в случае успеха будет следующим</p>
+                                <div class="card card-body">
+                                    <h6>XML структура soap ответа на preLoginSign</h6>
+                                    <pre><code class="xml">&lt;soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+   &lt;soap:Body&gt;
+      &lt;preLoginSignResponse xmlns="http://upg.sbns.bssys.com/"&gt;
+         &lt;return/&gt;
+         &lt;return&gt;ED134K9rP3/zxMkVuulnD9c7jWYmIDp7jh5XDWZ0hqs=&lt;/return&gt;
+         &lt;return&gt;Mjc5ZTE5ZTktOGVhOC00ZGVjLWE0MjAtZGEzNjBhZjc1MmZm&lt;/return&gt;
+         &lt;return&gt;AA==&lt;/return&gt;
+         &lt;return&gt;TUFJTg==&lt;/return&gt;
+      &lt;/preLoginSignResponse&gt;
+   &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</code></pre>
+                                </div>
+                                <p>
+
+
+                                    <!--<a class="btn btn-success btn-sm" data-toggle="collapse"-->
+                                    <!--href="#multiCollapseXMLPreLoginResponse"-->
+                                    <!--role="button" aria-expanded="false"-->
+                                    <!--aria-controls="multiCollapseXMLPreLoginResponse">preLoginResponse XML </a>-->
+                                    <!--<a class="btn btn-success btn-sm" data-toggle="collapse"-->
+                                    <!--href="#multiCollapseJavaPreLoginResponse"-->
+                                    <!--role="button" aria-expanded="false"-->
+                                    <!--aria-controls="multiCollapseJavaPreLoginResponse">обработка preLoginResponse-->
+                                    <!--из Java </a>-->
+                                    <!--&lt;!&ndash;<a class="btn btn-success btn-sm" data-toggle="collapse" href="#multiCollapseSoapUI"&ndash;&gt;-->
+                                    <!--role="button" aria-expanded="false" aria-controls="multiCollapseSoapUI">SOAP запрос-->
+                                    <!--SoapUI </a>-->
+
+
+                                    <!--<button class="btn  btn-success btn-sm " type="button" data-toggle="collapse"-->
+                                    <!--data-target=".multi-collapse" aria-expanded="false"-->
+                                    <!--aria-controls="multiCollapseExample1 multiCollapseExample2">Свернуть все-->
+                                    <!--</button>-->
+
+
+                                </p>
+
+
+                            </section>
+
+                            <section id="preLoginSignResponseExplanation">
+                                <p>Разберем ответ возвращаемый в preLoginSignResponse</p>
+
+                                <table class="table table-bordered">
+
+                                    <tr>
+                                        <td>№</td>
+                                        <td>Назначение параметра</td>
+                                        <td>Краткое наименование</td>
+                                        <td>Пример значение</td>
+                                        <td>Комментарий</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>пустой параметр</td>
+                                        <td></td>
+                                        <td>null</td>
+                                        <td>Возвращается всегда пустое значение</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Соль</td>
+                                        <td>S</td>
+                                        <td>ED134K9rP3/zxMkVuulnD9c7jWYmIDp7jh5XDWZ0hqs=</td>
+                                        <td></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Session ID</td>
+                                        <td>sessionID</td>
+                                        <td>Mjc5ZTE5ZTktOGVhOC00ZGVjLWE0MjAtZGEzNjBhZjc1MmZm</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Код возврата</td>
+                                        <td></td>
+                                        <td>AA==</td>
+                                        <td>В случае успешного возврата</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>4</td>
+                                        <td>Режим работы сервера</td>
+                                        <td></td>
+                                        <td>TUFJTg==</td>
+                                        <td></td>
+                                    </tr>
+
+                                </table>
+
+                            </section>
+
+                            <section id="SaltSignatureExplanation" class="container-fluid">
+                                <h5>Формирование подписи хеша</h5>
+                                <p>Не будем повторять инструкцию из спецификации, разберем как выполнить получение
+                                    подписи, используя различные СКЗИ</p>
+                                <p>
+
+
+                                    <a class="btn btn-success btn-sm" data-toggle="collapse"
+                                       href="#multiCollapseJavaSignatureBicrypt"
+                                       role="button" aria-expanded="false"
+                                       aria-controls="multiCollapseJavaSignatureBicrypt">Вариант получения ЭП СКЗИ
+                                        Бикрипт</a>
+                                    <a class="btn btn-success btn-sm" data-toggle="collapse"
+                                       href="#multiCollapseJavaSignatureJCP"
+                                       role="button" aria-expanded="false"
+                                       aria-controls="multiCollapseJavaSignatureJCP">Вариант получения ЭП СКЗИ КриптоПРО
+                                        JCP</a>
+
+                                    <a class="btn btn-success btn-sm" data-toggle="collapse"
+                                       href="#multiCollapseJavaSignatureCryptCP"
+                                       role="button" aria-expanded="false"
+                                       aria-controls="multiCollapseJavaSignatureCryptCP">Вариант получения ЭП СКЗИ
+                                        КриптоПРО cryptcp.exe</a>
+                                    <!--<a class="btn btn-success btn-sm" data-toggle="collapse" href="#multiCollapseSoapUI"-->
+                                    <!--role="button" aria-expanded="false" aria-controls="multiCollapseSoapUI">SOAP запрос-->
+                                    <!--SoapUI </a>-->
+
+
+                                    <!--<button class="btn  btn-success btn-sm " type="button" data-toggle="collapse"-->
+                                    <!--data-target=".multi-collapse" aria-expanded="false"-->
+                                    <!--aria-controls="multiCollapseExample1 multiCollapseExample2">Свернуть все-->
+                                    <!--</button>-->
+
+
+                                </p>
+                                <div class="row">
+                                    <div class="collapse multi-collapse" id="multiCollapseJavaSignatureBicrypt">
+                                        <div class="card card-body">
+                                            <h6>Вариант получения ЭП СКЗИ Бикрипт</h6>
+                                            <pre><code class="java">    public byte[] signHashSalt(String keyPath, String keyPassw, byte[] salt) throws BicryptException {
+
+		//Определим съемный носитель, на который будет находится закрытый ключ пользователя
+        String removableDrive = GeneralUtils.defineRemovableDevice(keyPath);
+		//Определим разрядность ОС и ининициализируем требуемые dll
+        if (System.getProperty("os.arch", "?").equals("amd64")) {
+            //64 bit os
+            System.loadLibrary("Grn64");
+
+            System.loadLibrary("Bicr5_64");
+            System.loadLibrary("CryptoX509_64");
+        } else //32 bit os
+        {
+
+            System.loadLibrary("Grn");
+
+            System.loadLibrary("CryptoX509");
+            System.loadLibrary("Bicr5");
+        }
+
+		// определим константные величины из спецификации Бикрипта
+        long[] mas = new long[1];
+        int cry_error = 0;
+        long param[] = new long[10];
+        int param_int[] = new int[10];
+        long h_init;
+
+        int tmn_blen[] = new int[1];
+        tmn_blen[0] = 32;
+
+
+
+		//Проведем инициализация СКЗИ Бикрипт
+        cry_error = Bicr4.cr_init(0, "", "", "", null, null, param_int, param);
+        detectBicryptException(cry_error);
+
+        h_init = param[0];
+
+
+        detectBicryptException(cry_error);
+
+		//выполним инициализацию ДСПЧ
+        String pathPrnd = removableDrive + "/" + "prnd.db3";
+        File prndFile = new File(pathPrnd);
+        if (prndFile.exists()) {
+            cry_error = Bicr4.cr_init_prnd(h_init, pathPrnd, 0);
+        } else {
+            cry_error = Bicr4.cr_init_prnd(h_init, pathPrnd, 1);
+        }
+
+        detectBicryptException(cry_error);
+
+
+
+		//выполним инициацилизацию хэш функции бикрипта
+        cry_error = Bicr4.cr_hash_open(mas);
+        detectBicryptException(cry_error);
+
+
+		//выполним расчет хэша
+        cry_error = Bicr4.cr_hash_calc(mas[0], salt, salt.length);
+        detectBicryptException(cry_error);
+
+
+        byte[] hash = new byte[32];
+        int[] lengt = new int[1];
+
+		//получим значение хэша
+        cry_error = Bicr4.cr_hash_return(mas[0], hash, lengt);
+
+
+        detectBicryptException(cry_error);
+
+
+        String key = keyPath;
+        String password = keyPassw;
+        StringBuffer stringBuffer = new StringBuffer();
+        long[] UserID = new long[10];
+
+		//инициализируем закрытый ключ
+        cry_error = Bicr4.cr_read_skey(h_init, password, key, stringBuffer, UserID);
+        detectBicryptException(cry_error);
+
+
+
+        byte[] sign = new byte[64];
+        int[] sign_len = new int[1];
+
+		//выполним подписание ранее расчитанного хэша
+        cry_error = Bicr4.cr_sign_hash(h_init, UserID[0], hash, lengt[0], sign, sign_len);
+        detectBicryptException(cry_error);
+
+        long[] pkey_handle = new long[10];
+
+
+		//генерация открытого ключа для проверки - только для теста
+        cry_error = Bicr4.cr_gen_pubkey(h_init, UserID[0], pkey_handle);
+        detectBicryptException(cry_error);
+
+
+        cry_error = Bicr4.cr_check_hash(h_init, pkey_handle[0], hash, lengt[0], sign, sign_len[0]);
+        detectBicryptException(cry_error);
+
+		// деинициализация бикрипта
+        cry_error = Bicr4.cr_uninit(h_init);
+        detectBicryptException(cry_error);
+
+        sign = GeneralUtils.arrayReverse(sign);
+
+        return sign;
+    }</code></pre>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="collapse multi-collapse" id="multiCollapseJavaSignatureCryptCP">
+                                        <div class="card card-body">
+                                            <h6>Вариант получения ЭП СКЗИ КриптоПРО JCP</h6>
+                                            <pre><code class="java">//Появится в ближайшее время</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="collapse multi-collapse" id="multiCollapseJavaSignatureJCP">
+                                        <div class="card card-body">
+                                            <h6>Вариант получения ЭП СКЗИ КриптоПРО cryptcp.exe</h6>
+                                            <pre><code class="java">//Появится в ближайшее время</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </section>
+
+
+                            <section id="LoginSignRequest">
+                                <h5>Вызов метода LoginSign</h5>
+                                <p> Вы выполняете первым шагом вызов preLogin со структурой аналогичной ниже:</p>
+                                <div class="card card-body">
+                                    <h6>XML структура soap запроса LoginSign</h6>
+                                    <pre><code class="xml">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:upg="http://upg.sbns.bssys.com/"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;upg:loginSign&gt;
+         &lt;upg:sessionId&gt;279e19e9-8ea8-4dec-a420-da360af752ff&lt;/upg:sessionId&gt;
+         &lt;upg:clientAuthData&gt;ЗНАЧЕНИЕ ЭП В BASE64&lt;/upg:clientAuthData&gt;
+      &lt;/upg:loginSign&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;</code></pre>
+
+                                </div>
+
+                                <p>
+
+
+                                    <a class="btn btn-success btn-sm" data-toggle="collapse"
+                                       href="#multiCollapseJavaLoginSignRequest"
+                                       role="button" aria-expanded="false"
+                                       aria-controls="multiCollapseJavaLoginSignRequest">SOAP запрос
+                                        из Java </a>
+                                    <!--<a class="btn btn-success btn-sm" data-toggle="collapse" href="#multiCollapseSoapUI"-->
+                                    <!--role="button" aria-expanded="false" aria-controls="multiCollapseSoapUI">SOAP запрос-->
+                                    <!--SoapUI </a>-->
+
+
+                                    <!--<button class="btn  btn-success btn-sm " type="button" data-toggle="collapse"-->
+                                    <!--data-target=".multi-collapse" aria-expanded="false"-->
+                                    <!--aria-controls="multiCollapseExample1 multiCollapseExample2">Свернуть все-->
+                                    <!--</button>-->
+
+
+                                </p>
+                                <div class="row">
+                                    <div class="collapse multi-collapse" id="multiCollapseXMLLoginSignRequest">
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="collapse multi-collapse" id="multiCollapseJavaLoginSignRequest">
+                                        <div class="card card-body">
+                                            <h6>Пример вызова LoginSign из Java</h6>
+                                            <pre><code class="java">//sessionID
+String sessionID = new String(preLoginSignResponse.get(2));
+
+java.util.Base64 base64 = null;
+//соль, которую мы будем подписывать
+byte[] toSign = preLoginSignResponse.get(1);
+
+//получение подписи
+byte[] authrad = crypt.signHashSalt(keyPath, keyPsw, toSign);
+//отправка запроса
+List&lt;byte[]&gt; loginSignResponse = paymentGate.getUniversalPaymentGateSbrfImplPort().loginSign(sessionID, authrad);
+</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </section>
+
+                            <section id="LoginSignResponse">
+                                <h5>Результат вызова LoginSign
+
+                                </h5>
+                                <p> в случае успеха будет следующим</p>
+
+                                <div class="card card-body">
+                                    <h6>XML структура soap ответа на LoginSign</h6>
+                                    <pre><code class="xml">&lt;soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+   &lt;soap:Body&gt;
+      &lt;loginResponse xmlns="http://upg.sbns.bssys.com/"&gt;
+         &lt;return&gt;&lt;/return&gt;
+         &lt;return&gt;AA==&lt;/return&gt;
+         &lt;return&gt;Mjc5ZTE5ZTktOGVhOC00ZGVjLWE0MjAtZGEzNjBhZjc1MmZm&lt;/return&gt;
+      &lt;/loginResponse&gt;
+   &lt;/soap:Body&gt;
+&lt;/soap:Envelope&gt;</code></pre>
+
+                                </div>
+                                <!--<div class="row">-->
+                                <!--<div class="collapse multi-collapse" id="multiCollapseJavaLoginResponse">-->
+                                <!--<div class="card card-body">-->
+                                <!--<h6>Пример вызова Login из Java</h6>-->
+                                <!--<pre><code class="java">List&lt;byte[]&gt; preLoginResponse = paymentGate.getUniversalPaymentGateSbrfImplPort().preLogin(userLogin, false);-->
+                                <!--String sessionID = new String(preLoginResponse.get(2));-->
+                                <!--SRPService srp = new SRPService();-->
+                                <!--List&lt;byte[]&gt; KandA = srp.getKandAWNew(userLogin, password, preLoginResponse.get(0), preLoginResponse.get(1));-->
+                                <!--</code></pre>-->
+                                <!--</div>-->
+                                <!--</div>-->
+                                <!--</div>-->
+
+                            </section>
+                            <section id="LoginResponseExplanation">
+                                <p>Разберем ответ возвращаемый в LoginResponse</p>
+
+                                <table class="table table-bordered">
+
+                                    <tr>
+                                        <td>№</td>
+                                        <td>Назначение параметра</td>
+                                        <td>Краткое наименование</td>
+                                        <td>Пример значение</td>
+                                        <td>Комментарий</td>
+                                    </tr>
+                                    <tr>
+                                        <td>0</td>
+                                        <td>null</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Код возврата</td>
+                                        <td></td>
+                                        <td>AA==</td>
+                                        <td>В случае успешного возврата</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Session ID</td>
+                                        <td>sessionID</td>
+                                        <td>Mjc5ZTE5ZTktOGVhOC00ZGVjLWE0MjAtZGEzNjBhZjc1MmZm</td>
+                                        <td></td>
+                                    </tr>
+
+
+                                </table>
+
+                            </section>
+                            <section id="footer">
+                                <p>Надеюсь объяснил все достаточно подробно, но, если есть вопросы, вы всегда можете
+                                    написать мне.</p>
+                                <p>Разъяснения ниже по частозадаваемым вопросам:</p>
+                                <p><a class="more-link"
+                                      href="../../NotFound.html"
+                                      target="_blank"><i class="fas fa-external-link-alt"></i>Если вы хотите узнать, как
+                                    из wsdl сделать сгенерированный SOAP клиент</a></p>
+                                <p><a class="more-link"
+                                      href="../../NotFound.html"
+                                      target="_blank"><i class="fas fa-external-link-alt"></i>Если вы хотите узнать, как
+                                    из сертификата получить значения серийного номера и издателя</a></p>
+
+                            </section>
+
+
+                        </div><!--//desc-->
+                    </div><!--//item-->
+
+
+                </div><!--//content-->
+            </div><!--//section-inner-->
+        </section><!--//section-->
+
+
+    </div><!--//primary-->
+
+</div><!--//secondary-->
+</div><!--//row-->
+</div><!--//masonry-->
+
+<!-- ******FOOTER****** -->
+<footer class="footer">
+    <div class="container text-center">
+        <!--/* This template is released under the Creative Commons Attribution 3.0 License. Please keep the attribution link below when using for your own project. Thank you for your support. :) If you'd like to use the template without the attribution, you can check out our commercial license options via our website: themes.3rdwavemedia.com */-->
+        <small class="copyright">Designed with <i class="fas fa-heart"></i> by <a href="https://themes.3rdwavemedia.com"
+                                                                                  target="_blank">Xiaoying Riley</a> for
+            developers
+        </small>
+    </div><!--//container-->
+</footer><!--//footer-->
+
+<!-- Javascript -->
+<script type="text/javascript" src="../../assets/plugins/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../../assets/plugins/popper.min.js"></script>
+<script type="text/javascript" src="../../assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../assets/plugins/jquery-rss/dist/jquery.rss.min.js"></script>
+
+
+<script type="text/javascript" src="../../assets/plugins/github-activity/github-activity-0.1.5.min.js"></script>
+<!-- custom js -->
+<script type="text/javascript" src="../../assets/js/main.js"></script>
+</body>
+</html> 
+
