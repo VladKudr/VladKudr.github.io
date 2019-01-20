@@ -26,7 +26,10 @@
     <link href='https://fonts.googleapis.com/css?family=Lato:300,400,300italic,400italic' rel='stylesheet'
           type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
-
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
     <!-- FontAwesome JS -->
     <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"
             integrity="sha384-3LK/3kTpDE/Pkp8gTNp2gR/2gOiwQ6QaO7Td0zV76UFJVhqLl4Vl3KL1We6q6wR9"
@@ -41,10 +44,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/octicons/2.0.2/octicons.min.css">
     <link rel="stylesheet" href="../../assets/plugins/github-activity/github-activity-0.1.5.min.css">
 
-
     <!-- Theme CSS -->
     <link id="theme-style" rel="stylesheet" href="../../assets/css/styles.css">
-
 </head>
 
 <body>
@@ -67,59 +68,67 @@
                 <!--<li class="list-inline-item last-item"><a href="#"><i class="fab fa-codepen"></i></a></li>                -->
             </ul>
         </div><!--//profile-->
-
         <a class="btn btn-cta-primary float-right" href="mailto:vd.kudryavtsev@gmail.com" target="_blank"><i
                 class="fas fa-paper-plane"></i> Связаться со мной</a>
-
     </div><!--//container-->
 </header><!--//header-->
 
 <div class="container sections-wrapper">
     <div class="row">
 
-        <section class="latest section">
+        <section class="section">
             <div class="section-inner">
-                <h2 class="heading"></h2>
+
                 <div class="content">
 
                     <div class="item row">
-                        <div class="desc col-md-8 col-12">
-                            <h3 class="title"><a
-                                    href="../../NotFound.html"
-                                    target="_blank">Базовые моменты для начала работы по каналу УПШ СББОЛ</a></h3>
-                            <p class="mb-2">Здесь попытаюсь изложить список базовых моментов по аутентификации, выпуску сертификатов, выполнению подписания отправляемых объектов</p>
-                            <p><a class="more-link"
-                                  href="sbb_authLoginPassword.html"
-                                  target="_blank"><i class="fas fa-external-link-alt"></i>Аутентификация по паре логин/пароль</a></p>
-                            <p><a class="more-link"
-                                  href="sbb_authCertificate.html"
-                                  target="_blank"><i class="fas fa-external-link-alt"></i>Аутентификация по сертификату</a></p>
-                            <p><a class="more-link"
-                                  href="../../NotFound.html"
-                                  target="_blank"><i class="fas fa-external-link-alt"></i>Выпуск ключей транспортного уровня и для конечных пользователей</a></p>
-                            <p><a class="more-link"
-                                  href="../../NotFound.html"
-                                  target="_blank"><i class="fas fa-external-link-alt"></i>Подписание объектов обмена</a></p>
+                        <h2>Генерация Java SOAP клиента из WSDL файла </h2>
+                        <div>
+                            <section id="topper">
+                                <h5>Что планируем сделать</h5>
+                                <p>Выполнить генерация различными способами:
+                                <ul>
+                                    <li>Используя Apache CXF и командную строку</li>
+                                </ul>
+                                </p>
+                            </section>
 
 
-                        </div><!--//desc-->
-                    </div><!--//item-->
+                            <section id="generateApacheCXF">
+                                <h5>Используя Apache CXF и командную строку</h5>
+                                <p>Предварительно Вам нужно скачать Apache CXF: <a
+                                        href="http://cxf.apache.org/download.html"
+                                        target="_blank">Apache CXF</a></p>
+                                <p>сохраняете его в любую директорию, структура для версии <b>Apache CXF 3.2.1</b>
+                                    выглядит: </p>
+                                <img class="img-fluid project-image"
+                                     src="../../assets/images/projects/ApacheASFXDirectoryStr.PNG"
+                                     alt=" Apache CXF"/>
 
-                    <div class="item row">
-                        <a class="col-md-4 col-12"
-                           href="../java/generateWSDL2Java.html"
-                           target="_blank">
-                            <img class="img-fluid project-image" src="../../assets/images/projects/JavaSoapClient.png"
-                                 alt="project name"/>
-                        </a>
-                        <div class="desc col-md-8 col-12">
-                            <h3 class="title"><a
-                                    href="../java/generateWSDL2Java.html"
-                                    target="_blank">Генерация SOAP клиента Java из предоставляемой wsdl</a></h3>
-                            <p class="mb-2">Обзор вариантов по генерации Java Soap клиента из предоставляемого wsdl файла.</p>
-                            <p><a class="more-link"
-                                  href="../java/generateWSDL2Java.html"
-                                  target="_blank"><i class="fas fa-external-link-alt"></i>Узнать больше</a></p>
+                                <p>Вызываете командную строку: </p>
+                                <img class="img-fluid project-image"
+                                     src="../../assets/images/projects/ApacheCFXCallCMD.PNG"
+                                     alt=" Apache CXF call"/>
+                                <p><i>Предварительно у вас должен быть установлена Java и прописана JAVA_HOME</i></p>
+
+                                <p>После запуска вы получите Java классы, которые можете испозовать как Java Soap Client
+                                    в вашей интеграции. Каталог классов:</p>
+                                <img class="img-fluid project-image"
+                                     src="../../assets/images/projects/ApacheCFXJavaClasses.PNG"
+                                     alt=" Apache CXF Java Classes"/>
+
+
+                            </section>
+
+
+                            <section id="footer">
+                                <p>Надеюсь объяснил все достаточно подробно, но, если есть вопросы, вы всегда можете
+                                    написать мне.</p>
+
+
+                            </section>
+
+
                         </div><!--//desc-->
                     </div><!--//item-->
 
@@ -131,7 +140,7 @@
 
     </div><!--//primary-->
 
-    </div><!--//secondary-->
+</div><!--//secondary-->
 </div><!--//row-->
 </div><!--//masonry-->
 
@@ -151,10 +160,8 @@
 <script type="text/javascript" src="../../assets/plugins/popper.min.js"></script>
 <script type="text/javascript" src="../../assets/plugins/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../../assets/plugins/jquery-rss/dist/jquery.rss.min.js"></script>
-<!-- github calendar plugin -->
-<script type="text/javascript" src="../../assets/plugins/github-calendar/dist/github-calendar.min.js"></script>
-<!-- github activity plugin -->
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.2/mustache.min.js"></script>
+
+
 <script type="text/javascript" src="../../assets/plugins/github-activity/github-activity-0.1.5.min.js"></script>
 <!-- custom js -->
 <script type="text/javascript" src="../../assets/js/main.js"></script>
