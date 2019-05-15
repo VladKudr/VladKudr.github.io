@@ -2,11 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="23712c1e-f7e7-48d8-ad5f-47c35aa6b95a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NotFound.html" beforeDir="false" afterPath="$PROJECT_DIR$/NotFound.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aboutMe.html" beforeDir="false" afterPath="$PROJECT_DIR$/aboutMe.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/developing/developing.html" beforeDir="false" afterPath="$PROJECT_DIR$/developing/developing.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/developing/java/generateWSDL2Java.html" beforeDir="false" afterPath="$PROJECT_DIR$/developing/java/generateWSDL2Java.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html" beforeDir="false" afterPath="$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/developing/sbb/sbb_authLoginPassword.html" beforeDir="false" afterPath="$PROJECT_DIR$/developing/sbb/sbb_authLoginPassword.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/developing/sbb/sbb_dev.html" beforeDir="false" afterPath="$PROJECT_DIR$/developing/sbb/sbb_dev.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/thoughts.html" beforeDir="false" afterPath="$PROJECT_DIR$/thoughts.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,15 +25,16 @@
     <session id="1465722668">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="8" />
+          <entry key="project.closed" value="11" />
           <entry key="project.open.time.0" value="2" />
-          <entry key="project.open.time.1" value="2" />
+          <entry key="project.open.time.1" value="4" />
+          <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.25" value="1" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="9" />
+          <entry key="project.opened" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -35,12 +42,13 @@
           <entry key="Gemfile" value="1" />
           <entry key="css" value="3" />
           <entry key="gitignore" value="2" />
-          <entry key="html" value="23" />
+          <entry key="html" value="26" />
           <entry key="ico" value="3" />
           <entry key="js" value="7" />
           <entry key="png" value="16" />
           <entry key="rnc" value="1" />
           <entry key="svg" value="1" />
+          <entry key="txt" value="1" />
           <entry key="xml" value="1" />
           <entry key="yml" value="1" />
         </counts>
@@ -48,10 +56,10 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="CSS" value="3" />
-          <entry key="HTML" value="23" />
+          <entry key="HTML" value="26" />
           <entry key="Image" value="19" />
           <entry key="JavaScript" value="7" />
-          <entry key="PLAIN_TEXT" value="3" />
+          <entry key="PLAIN_TEXT" value="4" />
           <entry key="RNG Compact" value="1" />
           <entry key="SVG" value="1" />
           <entry key="XML" value="1" />
@@ -60,15 +68,15 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="html" value="9390" />
-          <entry key="txt" value="910" />
+          <entry key="html" value="9402" />
+          <entry key="txt" value="929" />
           <entry key="yml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="HTML" value="9390" />
-          <entry key="PLAIN_TEXT" value="910" />
+          <entry key="HTML" value="9402" />
+          <entry key="PLAIN_TEXT" value="929" />
           <entry key="YAML" value="1" />
         </counts>
       </usages-collector>
@@ -79,121 +87,36 @@
       <file pinned="true" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_dev.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1955">
-              <caret line="115" column="48" selection-start-line="115" selection-start-column="48" selection-end-line="115" selection-end-column="48" />
+            <state relative-caret-position="306">
+              <caret line="18" selection-start-line="18" selection-end-line="18" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="true" current-in-tab="false">
+      <file pinned="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/developing/java/generateWSDL2Java.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="22" column="68" selection-start-line="22" selection-start-column="68" selection-end-line="22" selection-end-column="68" />
+            <state relative-caret-position="289">
+              <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
               <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#section#1;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_authLoginPassword.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="22" column="84" selection-start-line="22" selection-start-column="84" selection-end-line="22" selection-end-column="84" />
+            <state relative-caret-position="289">
+              <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
               <folding>
-                <element signature="e#11095#11099#0" expanded="true" />
-                <element signature="e#11106#11110#0" expanded="true" />
-                <element signature="e#11120#11124#0" expanded="true" />
-                <element signature="e#11130#11134#0" expanded="true" />
-                <element signature="e#11138#11142#0" expanded="true" />
-                <element signature="e#11149#11153#0" expanded="true" />
-                <element signature="e#11160#11164#0" expanded="true" />
-                <element signature="e#11181#11185#0" expanded="true" />
-                <element signature="e#11189#11193#0" expanded="true" />
-                <element signature="e#11203#11207#0" expanded="true" />
-                <element signature="e#11208#11212#0" expanded="true" />
-                <element signature="e#11226#11230#0" expanded="true" />
-                <element signature="e#11762#11766#0" expanded="true" />
-                <element signature="e#11772#11776#0" expanded="true" />
-                <element signature="e#11969#11973#0" expanded="true" />
-                <element signature="e#11979#11983#0" expanded="true" />
-                <element signature="e#14971#14975#0" expanded="true" />
-                <element signature="e#14981#14985#0" expanded="true" />
-                <element signature="e#15071#15075#0" expanded="true" />
-                <element signature="e#15081#15085#0" expanded="true" />
-                <element signature="e#15108#15112#0" expanded="true" />
-                <element signature="e#15118#15122#0" expanded="true" />
-                <element signature="e#16077#16081#0" expanded="true" />
-                <element signature="e#16081#16085#0" expanded="true" />
-                <element signature="e#16085#16089#0" expanded="true" />
-                <element signature="e#16106#16110#0" expanded="true" />
-                <element signature="e#16790#16794#0" expanded="true" />
-                <element signature="e#16895#16899#0" expanded="true" />
-                <element signature="e#16899#16903#0" expanded="true" />
-                <element signature="e#16903#16907#0" expanded="true" />
-                <element signature="e#16939#16943#0" expanded="true" />
-                <element signature="e#17062#17066#0" expanded="true" />
-                <element signature="e#17066#17070#0" expanded="true" />
-                <element signature="e#17070#17074#0" expanded="true" />
-                <element signature="e#17106#17110#0" expanded="true" />
-                <element signature="e#17313#17317#0" expanded="true" />
-                <element signature="e#17522#17526#0" expanded="true" />
-                <element signature="e#24641#24645#0" expanded="true" />
-                <element signature="e#24758#24762#0" expanded="true" />
-                <element signature="e#24766#24770#0" expanded="true" />
-                <element signature="e#24785#24789#0" expanded="true" />
-                <element signature="e#24793#24797#0" expanded="true" />
-                <element signature="e#24809#24813#0" expanded="true" />
-                <element signature="e#24820#24824#0" expanded="true" />
-                <element signature="e#24833#24837#0" expanded="true" />
-                <element signature="e#24847#24851#0" expanded="true" />
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="e#24864#24868#0" expanded="true" />
-                <element signature="e#24916#24920#0" expanded="true" />
-                <element signature="e#24934#24938#0" expanded="true" />
-                <element signature="e#24948#24952#0" expanded="true" />
-                <element signature="e#24970#24974#0" expanded="true" />
-                <element signature="e#25002#25006#0" expanded="true" />
-                <element signature="e#25025#25029#0" expanded="true" />
-                <element signature="e#25039#25043#0" expanded="true" />
-                <element signature="e#25061#25065#0" expanded="true" />
-                <element signature="e#25109#25113#0" expanded="true" />
-                <element signature="e#25132#25136#0" expanded="true" />
-                <element signature="e#25143#25147#0" expanded="true" />
-                <element signature="e#25157#25161#0" expanded="true" />
-                <element signature="e#25165#25169#0" expanded="true" />
-                <element signature="e#25182#25186#0" expanded="true" />
-                <element signature="e#25187#25191#0" expanded="true" />
-                <element signature="e#25208#25212#0" expanded="true" />
-                <element signature="e#25737#25741#0" expanded="true" />
-                <element signature="e#25747#25751#0" expanded="true" />
-                <element signature="e#25853#25857#0" expanded="true" />
-                <element signature="e#25863#25867#0" expanded="true" />
-                <element signature="e#27626#27630#0" expanded="true" />
-                <element signature="e#27698#27702#0" expanded="true" />
-                <element signature="e#27706#27710#0" expanded="true" />
-                <element signature="e#27719#27723#0" expanded="true" />
-                <element signature="e#27730#27734#0" expanded="true" />
-                <element signature="e#27782#27786#0" expanded="true" />
-                <element signature="e#27796#27800#0" expanded="true" />
-                <element signature="e#27806#27810#0" expanded="true" />
-                <element signature="e#27838#27842#0" expanded="true" />
-                <element signature="e#27849#27853#0" expanded="true" />
-                <element signature="e#27863#27867#0" expanded="true" />
-                <element signature="e#27873#27877#0" expanded="true" />
-                <element signature="e#27881#27885#0" expanded="true" />
-                <element signature="e#27892#27896#0" expanded="true" />
-                <element signature="e#27906#27910#0" expanded="true" />
-                <element signature="e#27916#27920#0" expanded="true" />
-                <element signature="e#27968#27972#0" expanded="true" />
-                <element signature="e#27979#27983#0" expanded="true" />
-                <element signature="e#27990#27994#0" expanded="true" />
-                <element signature="e#28008#28012#0" expanded="true" />
-                <element signature="e#28016#28020#0" expanded="true" />
-                <element signature="e#28030#28034#0" expanded="true" />
-                <element signature="e#28035#28039#0" expanded="true" />
-                <element signature="e#28053#28057#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -202,25 +125,13 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="22" column="78" selection-start-line="22" selection-start-column="78" selection-end-line="22" selection-end-column="78" />
+            <state relative-caret-position="289">
+              <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
               <folding>
-                <element signature="e#7503#7507#0" expanded="true" />
-                <element signature="e#7586#7590#0" expanded="true" />
-                <element signature="e#7751#7755#0" expanded="true" />
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#p#1;n#section#2;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="n#section#3;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
-                <element signature="e#20358#20362#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="5" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -228,8 +139,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/aboutMe.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="20" column="68" selection-start-line="20" selection-start-column="68" selection-end-line="20" selection-end-column="68" />
+            <state relative-caret-position="306">
+              <caret line="18" selection-start-line="18" selection-end-line="18" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -237,8 +151,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/header.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="5" column="48" lean-forward="true" selection-start-line="5" selection-start-column="48" selection-end-line="5" selection-end-column="48" />
+            <state relative-caret-position="272">
+              <caret line="16" column="36" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#header#0;n#template#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -246,8 +163,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="11" column="123" lean-forward="true" selection-start-line="11" selection-start-column="123" selection-end-line="11" selection-end-column="123" />
+            <state relative-caret-position="289">
+              <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -255,19 +175,30 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NotFound.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="731">
-              <caret line="56" column="37" lean-forward="true" selection-start-line="56" selection-start-column="37" selection-end-line="56" selection-end-column="37" />
+            <state relative-caret-position="289">
+              <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/thoughts.html">
+        <entry file="file://$PROJECT_DIR$/developing/developing.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="117">
-              <caret line="8" column="54" selection-start-line="8" selection-start-column="54" selection-end-line="8" selection-end-column="54" />
+            <state relative-caret-position="289">
+              <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+              <folding>
+                <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ReadMe.txt">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -313,17 +244,17 @@
         <option value="$PROJECT_DIR$/_config.yml" />
         <option value="$PROJECT_DIR$/Gemfile" />
         <option value="$PROJECT_DIR$/assets/js/main.js" />
-        <option value="$PROJECT_DIR$/developing/developing.html" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/thoughts.html" />
         <option value="$PROJECT_DIR$/NotFound.html" />
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/header.html" />
-        <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/developing/sbb/sbb_dev.html" />
         <option value="$PROJECT_DIR$/aboutMe.html" />
-        <option value="$PROJECT_DIR$/thoughts.html" />
-        <option value="$PROJECT_DIR$/developing/java/generateWSDL2Java.html" />
-        <option value="$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html" />
+        <option value="$PROJECT_DIR$/developing/developing.html" />
+        <option value="$PROJECT_DIR$/developing/sbb/sbb_dev.html" />
         <option value="$PROJECT_DIR$/developing/sbb/sbb_authLoginPassword.html" />
+        <option value="$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html" />
+        <option value="$PROJECT_DIR$/developing/java/generateWSDL2Java.html" />
       </list>
     </option>
   </component>
@@ -340,7 +271,7 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-7" />
+    <option name="x" value="953" />
     <option name="y" value="40" />
     <option name="width" value="974" />
     <option name="height" value="1047" />
@@ -354,7 +285,6 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -365,13 +295,12 @@
             <path>
               <item name="VladKudr.github.io" type="b2602c69:ProjectViewProjectNode" />
               <item name="VladKudr.github.io" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="VladKudr.github.io" type="b2602c69:ProjectViewProjectNode" />
               <item name="VladKudr.github.io" type="462c0819:PsiDirectoryNode" />
               <item name="assets" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="VladKudr.github.io" type="b2602c69:ProjectViewProjectNode" />
@@ -390,6 +319,32 @@
               <item name="developing" type="462c0819:PsiDirectoryNode" />
               <item name="sbb" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="VladKudr.github.io" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
+          <expand>
+            <path>
+              <item name="VladKudr.github.io" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="VladKudr" type="2674bda8:ScopeViewTreeModel$GroupNode" />
+            </path>
+            <path>
+              <item name="VladKudr.github.io" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="VladKudr" type="2674bda8:ScopeViewTreeModel$GroupNode" />
+              <item name="github" type="2674bda8:ScopeViewTreeModel$GroupNode" />
+            </path>
+            <path>
+              <item name="VladKudr.github.io" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="VladKudr" type="2674bda8:ScopeViewTreeModel$GroupNode" />
+              <item name="github" type="2674bda8:ScopeViewTreeModel$GroupNode" />
+              <item name="io" type="2674bda8:ScopeViewTreeModel$GroupNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -400,14 +355,15 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1548789859681" />
-    <property name="last_opened_file_path" value="D:/test/DSSServletsService" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554815594633" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../sbbol-release-33.000.00@2f7fc3841f8" />
     <property name="list.type.of.created.stylesheet" value="CSS" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="http.certificates" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -452,7 +408,10 @@
       <workItem from="1548004017637" duration="1667000" />
       <workItem from="1548139149983" duration="2205000" />
       <workItem from="1548313201594" duration="1208000" />
-      <workItem from="1548788982216" duration="872000" />
+      <workItem from="1548788982216" duration="1539000" />
+      <workItem from="1550554592859" duration="1705000" />
+      <workItem from="1554815537290" duration="58000" />
+      <workItem from="1557902663163" duration="113000" />
     </task>
     <task id="LOCAL-00001" summary="Complete index page and insert mock url to href">
       <created>1546508502433</created>
@@ -566,17 +525,24 @@
       <option name="project" value="LOCAL" />
       <updated>1548789471868</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="change descriptions">
+      <created>1548789890211</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1548789890211</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="87841000" />
+    <option name="totallyTimeSpent" value="90384000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="32" width="1936" height="1056" extended-state="6" />
+    <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24840085" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2596472" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -591,7 +557,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" visible="true" weight="0.329718" />
+      <window_info anchor="bottom" id="Terminal" order="8" visible="true" weight="0.32952183" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="10" weight="0.329718" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -656,14 +622,15 @@
     <MESSAGE value="add page about authorize per certificate, only in part of Bicrypt implementation.&#10;and check errors on other pages." />
     <MESSAGE value="add page about generating java soap client from wsdl" />
     <MESSAGE value="check url for auth project and correct information about job position" />
-    <option name="LAST_COMMIT_MESSAGE" value="check url for auth project and correct information about job position" />
+    <MESSAGE value="change descriptions" />
+    <option name="LAST_COMMIT_MESSAGE" value="change descriptions" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/developing/sbb/sbb_authLoginPassword.html</url>
-          <line>6</line>
+          <line>21</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
@@ -764,20 +731,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/developing/developing.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="97" column="39" lean-forward="true" selection-start-line="81" selection-start-column="19" selection-end-line="97" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_dev.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1955">
-          <caret line="115" column="48" selection-start-line="115" selection-start-column="48" selection-end-line="115" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -785,162 +738,109 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/aboutMe.html">
+    <entry file="file://$PROJECT_DIR$/thoughts.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="20" column="68" selection-start-line="20" selection-start-column="68" selection-end-line="20" selection-end-column="68" />
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/header.html">
+    <entry file="file://$PROJECT_DIR$/ReadMe.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NotFound.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="48" lean-forward="true" selection-start-line="5" selection-start-column="48" selection-end-line="5" selection-end-column="48" />
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="123" lean-forward="true" selection-start-line="11" selection-start-column="123" selection-end-line="11" selection-end-column="123" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NotFound.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="56" column="37" lean-forward="true" selection-start-line="56" selection-start-column="37" selection-end-line="56" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/thoughts.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="117">
-          <caret line="8" column="54" selection-start-line="8" selection-start-column="54" selection-end-line="8" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/developing/java/generateWSDL2Java.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="68" selection-start-line="22" selection-start-column="68" selection-end-line="22" selection-end-column="68" />
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
           <folding>
-            <element signature="n#section#1;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html">
+    <entry file="file://$PROJECT_DIR$/header.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="78" selection-start-line="22" selection-start-column="78" selection-end-line="22" selection-end-column="78" />
+        <state relative-caret-position="272">
+          <caret line="16" column="36" selection-start-line="16" selection-start-column="36" selection-end-line="16" selection-end-column="36" />
           <folding>
-            <element signature="e#7503#7507#0" expanded="true" />
-            <element signature="e#7586#7590#0" expanded="true" />
-            <element signature="e#7751#7755#0" expanded="true" />
-            <element signature="n#p#1;n#section#2;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
-            <element signature="n#section#3;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
-            <element signature="e#20358#20362#0" expanded="true" />
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#header#0;n#template#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/aboutMe.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="18" selection-start-line="18" selection-end-line="18" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/developing/developing.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_dev.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="18" selection-start-line="18" selection-end-line="18" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_authLoginPassword.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="84" selection-start-line="22" selection-start-column="84" selection-end-line="22" selection-end-column="84" />
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
           <folding>
-            <element signature="e#11095#11099#0" expanded="true" />
-            <element signature="e#11106#11110#0" expanded="true" />
-            <element signature="e#11120#11124#0" expanded="true" />
-            <element signature="e#11130#11134#0" expanded="true" />
-            <element signature="e#11138#11142#0" expanded="true" />
-            <element signature="e#11149#11153#0" expanded="true" />
-            <element signature="e#11160#11164#0" expanded="true" />
-            <element signature="e#11181#11185#0" expanded="true" />
-            <element signature="e#11189#11193#0" expanded="true" />
-            <element signature="e#11203#11207#0" expanded="true" />
-            <element signature="e#11208#11212#0" expanded="true" />
-            <element signature="e#11226#11230#0" expanded="true" />
-            <element signature="e#11762#11766#0" expanded="true" />
-            <element signature="e#11772#11776#0" expanded="true" />
-            <element signature="e#11969#11973#0" expanded="true" />
-            <element signature="e#11979#11983#0" expanded="true" />
-            <element signature="e#14971#14975#0" expanded="true" />
-            <element signature="e#14981#14985#0" expanded="true" />
-            <element signature="e#15071#15075#0" expanded="true" />
-            <element signature="e#15081#15085#0" expanded="true" />
-            <element signature="e#15108#15112#0" expanded="true" />
-            <element signature="e#15118#15122#0" expanded="true" />
-            <element signature="e#16077#16081#0" expanded="true" />
-            <element signature="e#16081#16085#0" expanded="true" />
-            <element signature="e#16085#16089#0" expanded="true" />
-            <element signature="e#16106#16110#0" expanded="true" />
-            <element signature="e#16790#16794#0" expanded="true" />
-            <element signature="e#16895#16899#0" expanded="true" />
-            <element signature="e#16899#16903#0" expanded="true" />
-            <element signature="e#16903#16907#0" expanded="true" />
-            <element signature="e#16939#16943#0" expanded="true" />
-            <element signature="e#17062#17066#0" expanded="true" />
-            <element signature="e#17066#17070#0" expanded="true" />
-            <element signature="e#17070#17074#0" expanded="true" />
-            <element signature="e#17106#17110#0" expanded="true" />
-            <element signature="e#17313#17317#0" expanded="true" />
-            <element signature="e#17522#17526#0" expanded="true" />
-            <element signature="e#24641#24645#0" expanded="true" />
-            <element signature="e#24758#24762#0" expanded="true" />
-            <element signature="e#24766#24770#0" expanded="true" />
-            <element signature="e#24785#24789#0" expanded="true" />
-            <element signature="e#24793#24797#0" expanded="true" />
-            <element signature="e#24809#24813#0" expanded="true" />
-            <element signature="e#24820#24824#0" expanded="true" />
-            <element signature="e#24833#24837#0" expanded="true" />
-            <element signature="e#24847#24851#0" expanded="true" />
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
             <element signature="e#24864#24868#0" expanded="true" />
-            <element signature="e#24916#24920#0" expanded="true" />
-            <element signature="e#24934#24938#0" expanded="true" />
-            <element signature="e#24948#24952#0" expanded="true" />
-            <element signature="e#24970#24974#0" expanded="true" />
-            <element signature="e#25002#25006#0" expanded="true" />
-            <element signature="e#25025#25029#0" expanded="true" />
-            <element signature="e#25039#25043#0" expanded="true" />
-            <element signature="e#25061#25065#0" expanded="true" />
-            <element signature="e#25109#25113#0" expanded="true" />
-            <element signature="e#25132#25136#0" expanded="true" />
-            <element signature="e#25143#25147#0" expanded="true" />
-            <element signature="e#25157#25161#0" expanded="true" />
-            <element signature="e#25165#25169#0" expanded="true" />
-            <element signature="e#25182#25186#0" expanded="true" />
-            <element signature="e#25187#25191#0" expanded="true" />
-            <element signature="e#25208#25212#0" expanded="true" />
-            <element signature="e#25737#25741#0" expanded="true" />
-            <element signature="e#25747#25751#0" expanded="true" />
-            <element signature="e#25853#25857#0" expanded="true" />
-            <element signature="e#25863#25867#0" expanded="true" />
-            <element signature="e#27626#27630#0" expanded="true" />
-            <element signature="e#27698#27702#0" expanded="true" />
-            <element signature="e#27706#27710#0" expanded="true" />
-            <element signature="e#27719#27723#0" expanded="true" />
-            <element signature="e#27730#27734#0" expanded="true" />
-            <element signature="e#27782#27786#0" expanded="true" />
-            <element signature="e#27796#27800#0" expanded="true" />
-            <element signature="e#27806#27810#0" expanded="true" />
-            <element signature="e#27838#27842#0" expanded="true" />
-            <element signature="e#27849#27853#0" expanded="true" />
-            <element signature="e#27863#27867#0" expanded="true" />
-            <element signature="e#27873#27877#0" expanded="true" />
-            <element signature="e#27881#27885#0" expanded="true" />
-            <element signature="e#27892#27896#0" expanded="true" />
-            <element signature="e#27906#27910#0" expanded="true" />
-            <element signature="e#27916#27920#0" expanded="true" />
-            <element signature="e#27968#27972#0" expanded="true" />
-            <element signature="e#27979#27983#0" expanded="true" />
-            <element signature="e#27990#27994#0" expanded="true" />
-            <element signature="e#28008#28012#0" expanded="true" />
-            <element signature="e#28016#28020#0" expanded="true" />
-            <element signature="e#28030#28034#0" expanded="true" />
-            <element signature="e#28035#28039#0" expanded="true" />
-            <element signature="e#28053#28057#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/developing/sbb/sbb_authCertificate.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#p#1;n#section#2;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+            <element signature="n#section#3;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/developing/java/generateWSDL2Java.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding>
+            <element signature="n#style#0;n#img#0;n#div#0;n#noscript#0;n#head#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#section#1;n#div#0;n#div#0;n#div#0;n#div#0;n#section#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" />
           </folding>
         </state>
       </provider>
@@ -1003,6 +903,7 @@
             <option name="proportions">
               <list>
                 <option value="0.2" />
+                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>
