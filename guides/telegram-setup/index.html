@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Подключаем OpenClaw к Telegram — создаём бота через BotFather и настраиваем за 10 минут">
+<title>OpenClaw + Telegram · Гайды</title>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+  m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+  (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+  ym(53657566, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/53657566" style="position:absolute;left:-9999px;" alt=""/></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+    --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+    --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+    --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+    --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+    --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+
+    --space-1:.25rem; --space-2:.5rem;  --space-3:.75rem; --space-4:1rem;
+    --space-5:1.25rem;--space-6:1.5rem; --space-8:2rem;   --space-10:2.5rem;
+    --space-12:3rem;  --space-16:4rem;
+
+    --font-display:'Cabinet Grotesk',system-ui,sans-serif;
+    --font-body:'Satoshi',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono','Fira Code',monospace;
+    --radius-sm:4px;--radius-md:8px;--radius-lg:12px;
+  }
+
+  [data-theme="dark"] {
+    --color-bg:#191919; --color-surface:#202020; --color-surface-2:#282828;
+    --color-border:#2f2f2f; --color-text:#e8e8e5; --color-text-muted:#9b9b97;
+    --color-text-faint:#5a5a57; --color-accent:#2383e2;
+    --color-accent-soft:rgba(35,131,226,.12);
+    --color-green:#22c55e; --color-green-soft:rgba(34,197,94,.12);
+    --color-orange:#f59e0b; --color-orange-soft:rgba(245,158,11,.12);
+    --color-code-bg:#1a1a1a; --color-code-border:#2a2a2a;
+    --color-step-num:rgba(35,131,226,.15);
+    --tg-bubble-in:#2b5278; --tg-bubble-out:#182533;
+    --tg-bg:#0e1621; --tg-header:#17212b; --tg-text:#fff;
+    --tg-text-muted:#7d8b99; --tg-blue:#2b83d0;
+    --term-bg:#1a1a1a; --term-header:#2a2a2a; --term-text:#d4d4d4;
+    --term-green:#4ec9b0; --term-yellow:#dcdcaa; --term-blue:#9cdcfe;
+    --term-gray:#808080; --term-white:#ffffff;
+  }
+  [data-theme="light"] {
+    --color-bg:#ffffff; --color-surface:#f7f7f5; --color-surface-2:#f1f0ee;
+    --color-border:#e9e9e7; --color-text:#1a1a18; --color-text-muted:#737370;
+    --color-text-faint:#b3b3af; --color-accent:#2383e2;
+    --color-accent-soft:rgba(35,131,226,.08);
+    --color-green:#16a34a; --color-green-soft:rgba(22,163,74,.1);
+    --color-orange:#d97706; --color-orange-soft:rgba(217,119,6,.1);
+    --color-code-bg:#f3f3f1; --color-code-border:#e4e4e0;
+    --color-step-num:rgba(35,131,226,.08);
+    --tg-bubble-in:#effdde; --tg-bubble-out:#ffffff;
+    --tg-bg:#eae9e3; --tg-header:#527da3; --tg-text:#fff;
+    --tg-text-muted:#999; --tg-blue:#2b83d0;
+    --term-bg:#1e1e1e; --term-header:#323233; --term-text:#d4d4d4;
+    --term-green:#4ec9b0; --term-yellow:#dcdcaa; --term-blue:#9cdcfe;
+    --term-gray:#808080; --term-white:#ffffff;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--font-body);font-size:var(--text-base);
+    color:var(--color-text);background:var(--color-bg);
+    line-height:1.65;transition:background .2s,color .2s;
+  }
+  .page-wrapper{max-width:760px;margin:0 auto;padding:var(--space-8) var(--space-6);}
+
+  /* TOPBAR */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-12);}
+  .breadcrumb{font-size:var(--text-sm);color:var(--color-text-muted);display:flex;align-items:center;gap:var(--space-2);}
+  .breadcrumb a{color:var(--color-text-muted);text-decoration:none;transition:color .15s;}
+  .breadcrumb a:hover{color:var(--color-text);}
+  .breadcrumb-sep{color:var(--color-text-faint);}
+  .theme-toggle{background:none;border:none;cursor:pointer;padding:var(--space-2);border-radius:var(--radius-sm);color:var(--color-text-muted);display:flex;align-items:center;transition:color .15s,background .15s;}
+  .theme-toggle:hover{color:var(--color-text);background:var(--color-surface-2);}
+  .icon-sun,.icon-moon{display:none;width:18px;height:18px;}
+  [data-theme="dark"]  .icon-moon{display:block;}
+  [data-theme="light"] .icon-sun {display:block;}
+
+  /* HEADER */
+  .article-header{margin-bottom:var(--space-10);}
+  .article-meta{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-5);flex-wrap:wrap;}
+  .meta-tag{font-size:var(--text-xs);font-weight:600;padding:3px var(--space-3);border-radius:var(--radius-sm);background:var(--color-accent-soft);color:var(--color-accent);text-transform:uppercase;letter-spacing:.06em;}
+  .meta-date{font-size:var(--text-xs);color:var(--color-text-faint);}
+  .article-header h1{font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;letter-spacing:-.02em;line-height:1.15;color:var(--color-text);margin-bottom:var(--space-4);}
+  .article-lead{font-size:var(--text-lg);color:var(--color-text-muted);line-height:1.6;}
+  .info-row{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-5);}
+  .info-badge{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border);color:var(--color-text-muted);background:var(--color-surface);}
+  .info-badge svg{width:14px;height:14px;flex-shrink:0;}
+
+  /* TOC */
+  .toc{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);margin-bottom:var(--space-10);}
+  .toc-title{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:var(--space-4);}
+  .toc ol{list-style:none;counter-reset:toc;display:flex;flex-direction:column;gap:var(--space-2);}
+  .toc ol li{counter-increment:toc;display:flex;align-items:baseline;gap:var(--space-3);}
+  .toc ol li::before{content:counter(toc);font-size:var(--text-xs);color:var(--color-text-faint);min-width:1.2em;}
+  .toc ol li a{font-size:var(--text-sm);color:var(--color-text-muted);text-decoration:none;transition:color .15s;}
+  .toc ol li a:hover{color:var(--color-accent);}
+
+  /* DIVIDER */
+  .divider{height:1px;background:var(--color-border);margin:var(--space-10) 0;}
+
+  /* SECTION */
+  .guide-section{margin-bottom:var(--space-12);}
+  .section-step{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-6);}
+  .step-num{width:32px;height:32px;border-radius:50%;background:var(--color-step-num);border:1px solid var(--color-accent-soft);color:var(--color-accent);font-size:var(--text-sm);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-display);}
+  .section-step h2{font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;color:var(--color-text);letter-spacing:-.01em;}
+  .guide-section p{font-size:var(--text-base);color:var(--color-text-muted);margin-bottom:var(--space-4);line-height:1.7;}
+  .guide-section p:last-child{margin-bottom:0;}
+  .guide-section strong{color:var(--color-text);font-weight:600;}
+
+  /* SUBSTEPS */
+  .substeps{display:flex;flex-direction:column;gap:var(--space-6);margin-bottom:var(--space-6);}
+  .substep{display:flex;gap:var(--space-4);}
+  .substep-num{width:24px;height:24px;border-radius:50%;border:1px solid var(--color-border);color:var(--color-text-faint);font-size:var(--text-xs);font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .substep-body{flex:1;}
+  .substep-body h3{font-size:var(--text-base);font-weight:600;color:var(--color-text);margin-bottom:var(--space-2);}
+  .substep-body p{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-3);line-height:1.6;}
+  .substep-body p:last-child{margin-bottom:0;}
+
+  /* CODE */
+  .code-block{background:var(--color-code-bg);border:1px solid var(--color-code-border);border-radius:var(--radius-md);padding:var(--space-4) var(--space-5);margin:var(--space-3) 0;position:relative;}
+  .code-block pre{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);overflow-x:auto;white-space:pre;line-height:1.7;}
+  .code-block .code-label{font-size:var(--text-xs);color:var(--color-text-faint);font-family:var(--font-mono);margin-bottom:var(--space-2);text-transform:uppercase;letter-spacing:.06em;display:block;}
+  .copy-btn{position:absolute;top:var(--space-3);right:var(--space-3);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:3px var(--space-3);font-size:var(--text-xs);color:var(--color-text-faint);cursor:pointer;transition:all .15s;font-family:var(--font-body);}
+  .copy-btn:hover{color:var(--color-text);border-color:var(--color-text-faint);}
+  .copy-btn.copied{color:var(--color-green);border-color:var(--color-green);}
+  code{font-family:var(--font-mono);font-size:.9em;padding:1px 5px;background:var(--color-code-bg);border:1px solid var(--color-code-border);border-radius:var(--radius-sm);color:var(--color-text);}
+
+  /* CALLOUTS */
+  .callout{display:flex;gap:var(--space-3);padding:var(--space-4) var(--space-5);border-radius:var(--radius-md);margin:var(--space-4) 0;border-left:3px solid;}
+  .callout-tip {background:var(--color-green-soft); border-color:var(--color-green);}
+  .callout-warn{background:var(--color-orange-soft);border-color:var(--color-orange);}
+  .callout-info{background:var(--color-accent-soft);border-color:var(--color-accent);}
+  .callout-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+  .callout-body{flex:1;}
+  .callout-body strong{font-size:var(--text-sm);font-weight:600;display:block;margin-bottom:var(--space-1);}
+  .callout-body p{font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6;margin:0;}
+
+  /* ── TELEGRAM MOCKUP ── */
+  .mockup-wrap{margin:var(--space-6) 0;}
+  .mockup-label{font-size:var(--text-xs);color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);}
+  .mockup-label::before{content:'';display:block;width:8px;height:8px;border-radius:50%;background:var(--color-text-faint);}
+
+  .tg-window{background:var(--tg-bg);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--color-border);font-family:var(--font-body);max-width:400px;}
+  .tg-header{background:var(--tg-header);padding:var(--space-3) var(--space-4);display:flex;align-items:center;gap:var(--space-3);}
+  .tg-avatar{width:36px;height:36px;border-radius:50%;background:#229ed9;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+  .tg-header-info{flex:1;}
+  .tg-header-name{font-size:var(--text-sm);font-weight:600;color:#fff;line-height:1.2;}
+  .tg-header-status{font-size:var(--text-xs);color:rgba(255,255,255,.5);}
+  .tg-verified{color:#229ed9;margin-left:4px;font-size:.85em;}
+  .tg-messages{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-3);min-height:180px;}
+  .tg-msg{max-width:85%;border-radius:12px;padding:var(--space-2) var(--space-3);font-size:var(--text-sm);line-height:1.5;}
+  .tg-msg-in{background:var(--tg-bubble-in);align-self:flex-start;border-bottom-left-radius:4px;}
+  .tg-msg-out{background:var(--tg-bubble-out);align-self:flex-end;border-bottom-right-radius:4px;border:1px solid var(--color-border);}
+  .tg-msg-text-in{color:#fff;}
+  .tg-msg-text-out{color:var(--color-text);}
+  .tg-msg-time{font-size:10px;opacity:.55;text-align:right;margin-top:var(--space-1);}
+  .tg-msg-time-in{color:#fff;}
+  .tg-msg-time-out{color:var(--color-text-faint);}
+  .tg-command{color:#5bb8f5;font-weight:500;}
+  .tg-token{font-family:var(--font-mono);font-size:.8em;word-break:break-all;background:rgba(255,255,255,.06);padding:2px 4px;border-radius:3px;}
+  .tg-divider{text-align:center;font-size:10px;color:var(--tg-text-muted);padding:var(--space-2) 0;}
+  .tg-input-area{background:var(--tg-header);padding:var(--space-2) var(--space-3);display:flex;align-items:center;gap:var(--space-2);border-top:1px solid rgba(255,255,255,.05);}
+  .tg-input-box{flex:1;background:rgba(255,255,255,.08);border-radius:20px;padding:var(--space-2) var(--space-3);font-size:var(--text-xs);color:rgba(255,255,255,.35);}
+
+  /* ── TERMINAL MOCKUP ── */
+  .term-window{background:var(--term-bg);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--color-border);}
+  .term-header{background:var(--term-header);padding:var(--space-2) var(--space-4);display:flex;align-items:center;gap:var(--space-2);}
+  .term-dot{width:12px;height:12px;border-radius:50%;}
+  .term-dot-red{background:#ff5f57;}
+  .term-dot-yellow{background:#febc2e;}
+  .term-dot-green{background:#28c840;}
+  .term-title{flex:1;text-align:center;font-size:var(--text-xs);color:rgba(255,255,255,.35);font-family:var(--font-mono);}
+  .term-body{padding:var(--space-4) var(--space-5);font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.8;color:var(--term-text);}
+  .term-line{display:block;}
+  .term-prompt{color:var(--term-green);}
+  .term-cmd{color:var(--term-white);}
+  .term-out{color:var(--term-gray);}
+  .term-success{color:var(--term-green);}
+  .term-key{color:var(--term-yellow);}
+  .term-val{color:var(--term-blue);}
+  .term-comment{color:#5a5a57;font-style:italic;}
+  .term-cursor{display:inline-block;width:8px;height:14px;background:var(--term-text);vertical-align:text-bottom;animation:blink 1s step-end infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* FOOTER */
+  footer{display:flex;align-items:center;justify-content:space-between;padding-top:var(--space-6);border-top:1px solid var(--color-border);flex-wrap:wrap;gap:var(--space-4);}
+  footer a{font-size:var(--text-xs);color:var(--color-text-faint);text-decoration:none;transition:color .15s;}
+  footer a:hover{color:var(--color-text-muted);}
+  .footer-links{display:flex;gap:var(--space-5);}
+
+  @media(max-width:600px){
+    .page-wrapper{padding:var(--space-6) var(--space-4);}
+    .section-step h2{font-size:var(--text-lg);}
+    .tg-window{max-width:100%;}
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .fade-in{animation:fadeUp .3s ease both;}
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- TOPBAR -->
+  <div class="topbar fade-in">
+    <nav class="breadcrumb">
+      <a href="https://vladkudr.github.io">vladkudr.github.io</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="../">guides</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>telegram-setup</span>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="article-header fade-in">
+    <div class="article-meta">
+      <span class="meta-tag">AI и инструменты</span>
+      <span class="meta-date">Март 2026</span>
+    </div>
+    <h1>OpenClaw + Telegram</h1>
+    <p class="article-lead">
+      Создаём Telegram-бота с нуля и подключаем его к OpenClaw.
+      Никаких специальных знаний не нужно — только Telegram и 10 минут.
+    </p>
+    <div class="info-row">
+      <div class="info-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        ~10 минут
+      </div>
+      <div class="info-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Telegram + VPS
+      </div>
+      <div class="info-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Для начинающих
+      </div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc fade-in">
+    <div class="toc-title">Содержание</div>
+    <ol>
+      <li><a href="#step-1">Что такое бот и зачем это нужно</a></li>
+      <li><a href="#step-2">Создаём бота через @BotFather</a></li>
+      <li><a href="#step-3">Добавляем токен в OpenClaw</a></li>
+      <li><a href="#step-4">Сопрягаем бота с собой (pairing)</a></li>
+      <li><a href="#step-5">Проверяем — пишем первое сообщение</a></li>
+      <li><a href="#step-6">Добавить бота в групповой чат</a></li>
+    </ol>
+  </div>
+
+  <!-- ──────────────────── STEP 1 ──────────────────── -->
+  <div class="guide-section fade-in" id="step-1">
+    <div class="section-step">
+      <div class="step-num">1</div>
+      <h2>Что такое бот и зачем это нужно</h2>
+    </div>
+
+    <p>В Telegram можно создать собственного бота — это аккаунт-автоответчик, которым управляет программа на сервере. Ты создаёшь «оболочку» бота в Telegram (это займёт 2 минуты), а OpenClaw становится его мозгом.</p>
+
+    <p>После настройки ты сможешь писать своему агенту прямо из Telegram — с телефона, планшета, любого устройства. Сервер работает круглосуточно, агент всегда онлайн.</p>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">
+        <strong>Перед началом</strong>
+        <p>Этот гайд продолжает <a href="../openclaw-setup/" style="color:var(--color-accent)">«Самостоятельную установку OpenClaw»</a>. Убедись, что OpenClaw уже установлен на сервере и Gateway запущен.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ──────────────────── STEP 2 ──────────────────── -->
+  <div class="guide-section fade-in" id="step-2">
+    <div class="section-step">
+      <div class="step-num">2</div>
+      <h2>Создаём бота через @BotFather</h2>
+    </div>
+
+    <p><strong>@BotFather</strong> — это официальный сервис Telegram для создания ботов. Всё делается прямо в мессенджере, ничего скачивать не нужно.</p>
+
+    <div class="substeps">
+      <div class="substep">
+        <div class="substep-num">1</div>
+        <div class="substep-body">
+          <h3>Найди @BotFather в Telegram</h3>
+          <p>Открой Telegram, в строке поиска введи <strong>@BotFather</strong>. Убедись, что рядом с именем стоит синяя галочка — это официальный аккаунт Telegram, а не копия.</p>
+        </div>
+      </div>
+      <div class="substep">
+        <div class="substep-num">2</div>
+        <div class="substep-body">
+          <h3>Отправь команду /newbot</h3>
+          <p>Напиши в чат с BotFather:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Скопировать</button>
+            <pre>/newbot</pre>
+          </div>
+
+          <!-- TELEGRAM MOCKUP: создание бота -->
+          <div class="mockup-wrap">
+            <div class="mockup-label">Telegram — диалог с @BotFather</div>
+            <div class="tg-window">
+              <div class="tg-header">
+                <div class="tg-avatar">🤖</div>
+                <div class="tg-header-info">
+                  <div class="tg-header-name">BotFather <span class="tg-verified">✓</span></div>
+                  <div class="tg-header-status">бот</div>
+                </div>
+              </div>
+              <div class="tg-messages">
+                <div class="tg-msg tg-msg-out">
+                  <div class="tg-msg-text-out"><span class="tg-command">/newbot</span></div>
+                  <div class="tg-msg-time tg-msg-time-out">21:34</div>
+                </div>
+                <div class="tg-msg tg-msg-in">
+                  <div class="tg-msg-text-in">Alright, a new bot. How are we going to call it? Please choose a name for your bot.</div>
+                  <div class="tg-msg-time tg-msg-time-in">21:34</div>
+                </div>
+                <div class="tg-msg tg-msg-out">
+                  <div class="tg-msg-text-out">Мой ассистент</div>
+                  <div class="tg-msg-time tg-msg-time-out">21:35</div>
+                </div>
+                <div class="tg-msg tg-msg-in">
+                  <div class="tg-msg-text-in">Good. Now let's choose a username for your bot. It must end in <code style="background:rgba(255,255,255,.1);padding:1px 4px;border-radius:3px;border:none;color:#fff;">bot</code>. Like this, for example: TetrisBot or tetris_bot.</div>
+                  <div class="tg-msg-time tg-msg-time-in">21:35</div>
+                </div>
+              </div>
+              <div class="tg-input-area">
+                <div class="tg-input-box">Написать...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-num">3</div>
+        <div class="substep-body">
+          <h3>Придумай имя и username бота</h3>
+          <p><strong>Имя</strong> — как будет называться бот в чатах. Например: <code>Мой ассистент</code>. Можно по-русски, любое.</p>
+          <p><strong>Username</strong> — уникальный адрес, только латиницей, обязательно заканчивается на <code>bot</code>. Например: <code>my_assistant_vlad_bot</code></p>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-num">4</div>
+        <div class="substep-body">
+          <h3>Сохрани токен — это главное</h3>
+          <p>После создания BotFather пришлёт токен — длинную строку. Это единственный «ключ» от твоего бота.</p>
+
+          <!-- TELEGRAM MOCKUP: получение токена -->
+          <div class="mockup-wrap">
+            <div class="mockup-label">Telegram — BotFather выдаёт токен</div>
+            <div class="tg-window">
+              <div class="tg-header">
+                <div class="tg-avatar">🤖</div>
+                <div class="tg-header-info">
+                  <div class="tg-header-name">BotFather <span class="tg-verified">✓</span></div>
+                  <div class="tg-header-status">бот</div>
+                </div>
+              </div>
+              <div class="tg-messages">
+                <div class="tg-msg tg-msg-out">
+                  <div class="tg-msg-text-out">my_assistant_vlad_bot</div>
+                  <div class="tg-msg-time tg-msg-time-out">21:36</div>
+                </div>
+                <div class="tg-msg tg-msg-in" style="max-width:95%;">
+                  <div class="tg-msg-text-in">
+                    Done! Congratulations on your new bot. You will find it at <span style="color:#5bb8f5">t.me/my_assistant_vlad_bot</span>.<br><br>
+                    Use this token to access the HTTP API:<br>
+                    <span class="tg-token">7412365890:AAFzQ8k3NjhPmXvR2wYsLdK9oE1cT5gBiUu</span><br><br>
+                    Keep your token secure and store it safely.
+                  </div>
+                  <div class="tg-msg-time tg-msg-time-in">21:36</div>
+                </div>
+              </div>
+              <div class="tg-input-area">
+                <div class="tg-input-box">Написать...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-warn" style="margin-top:var(--space-4)">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body">
+              <strong>Скопируй токен прямо сейчас</strong>
+              <p>Токен выглядит так: <code>1234567890:AAFzQ8k3NjhPm...</code>. Сохрани его в заметки — он понадобится на следующем шаге.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ──────────────────── STEP 3 ──────────────────── -->
+  <div class="guide-section fade-in" id="step-3">
+    <div class="section-step">
+      <div class="step-num">3</div>
+      <h2>Добавляем токен в OpenClaw</h2>
+    </div>
+
+    <p>Теперь переходим на сервер. Подключись по SSH так же, как делал при установке.</p>
+
+    <div class="substeps">
+      <div class="substep">
+        <div class="substep-num">1</div>
+        <div class="substep-body">
+          <h3>Открой файл настроек OpenClaw</h3>
+          <div class="code-block">
+            <span class="code-label">terminal — ssh на сервер</span>
+            <button class="copy-btn" onclick="copyCode(this)">Скопировать</button>
+            <pre>nano ~/.openclaw/openclaw.json</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-num">2</div>
+        <div class="substep-body">
+          <h3>Добавь блок для Telegram</h3>
+          <p>Найди в файле закрывающую скобку <code>}</code> и добавь секцию <code>channels</code>. Итоговый файл должен выглядеть так:</p>
+          <div class="code-block">
+            <span class="code-label">~/.openclaw/openclaw.json</span>
+            <button class="copy-btn" onclick="copyCode(this)">Скопировать</button>
+            <pre>{
+  "model": {
+    "provider": "moonshot",
+    "name": "kimi-k2.5",
+    "apiKey": "ТУТ_ТВОЙ_KIMI_КЛЮЧ"
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "ТУТ_ТОКЕН_ОТ_BOTFATHER",
+      "dmPolicy": "pairing"
+    }
+  }
+}</pre>
+          </div>
+          <p>Замени <code>ТУТ_ТОКЕН_ОТ_BOTFATHER</code> на токен из шага 2. Остальное не трогай.</p>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-num">3</div>
+        <div class="substep-body">
+          <h3>Сохрани файл и перезапусти Gateway</h3>
+          <p>В редакторе nano: <strong>Ctrl+O</strong> → Enter → <strong>Ctrl+X</strong>. Затем:</p>
+          <div class="code-block">
+            <span class="code-label">terminal — ssh на сервер</span>
+            <button class="copy-btn" onclick="copyCode(this)">Скопировать</button>
+            <pre>openclaw gateway restart</pre>
+          </div>
+
+          <!-- TERMINAL MOCKUP: перезапуск -->
+          <div class="mockup-wrap">
+            <div class="mockup-label">Терминал — сервер</div>
+            <div class="term-window">
+              <div class="term-header">
+                <div class="term-dot term-dot-red"></div>
+                <div class="term-dot term-dot-yellow"></div>
+                <div class="term-dot term-dot-green"></div>
+                <div class="term-title">root@vps-openclaw — ssh</div>
+              </div>
+              <div class="term-body">
+                <span class="term-line"><span class="term-prompt">root@vps:~#</span> <span class="term-cmd">openclaw gateway restart</span></span>
+                <span class="term-line"><span class="term-out">  Stopping gateway...</span></span>
+                <span class="term-line"><span class="term-out">  Starting gateway...</span></span>
+                <span class="term-line"><span class="term-success">  ✓ Gateway started (pid 4821)</span></span>
+                <span class="term-line"><span class="term-success">  ✓ Telegram channel connected</span></span>
+                <span class="term-line"><span class="term-out">  Listening on 127.0.0.1:18789</span></span>
+                <span class="term-line">&nbsp;</span>
+                <span class="term-line"><span class="term-prompt">root@vps:~#</span> <span class="term-cursor"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ──────────────────── STEP 4 ──────────────────── -->
+  <div class="guide-section fade-in" id="step-4">
+    <div class="section-step">
+      <div class="step-num">4</div>
+      <h2>Сопрягаем бота с собой</h2>
+    </div>
+
+    <p>OpenClaw использует систему сопряжения (pairing): первый раз нужно «представиться» боту, чтобы он понял, что ты — его хозяин, и отвечал только тебе.</p>
+
+    <div class="substeps">
+      <div class="substep">
+        <div class="substep-num">1</div>
+        <div class="substep-body">
+          <h3>Открой бота в Telegram и нажми Start</h3>
+          <p>Найди своего бота в Telegram по username, который задавал в шаге 2 (например <code>@my_assistant_vlad_bot</code>). Открой диалог и нажми кнопку <strong>Start</strong> или отправь <code>/start</code>.</p>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-num">2</div>
+        <div class="substep-body">
+          <h3>Получи код сопряжения</h3>
+          <p>Бот пришлёт твой Telegram ID и <strong>код сопряжения</strong> — несколько букв и цифр.</p>
+
+          <!-- TELEGRAM MOCKUP: pairing -->
+          <div class="mockup-wrap">
+            <div class="mockup-label">Telegram — первое сообщение от бота</div>
+            <div class="tg-window">
+              <div class="tg-header">
+                <div class="tg-avatar" style="background:#4a9eda;">🧠</div>
+                <div class="tg-header-info">
+                  <div class="tg-header-name">Мой ассистент</div>
+                  <div class="tg-header-status">бот</div>
+                </div>
+              </div>
+              <div class="tg-messages">
+                <div class="tg-msg tg-msg-out">
+                  <div class="tg-msg-text-out"><span class="tg-command">/start</span></div>
+                  <div class="tg-msg-time tg-msg-time-out">21:38</div>
+                </div>
+                <div class="tg-msg tg-msg-in" style="max-width:95%">
+                  <div class="tg-msg-text-in">
+                    👋 OpenClaw is running!<br><br>
+                    Your Telegram ID: <strong>381927465</strong><br><br>
+                    Pairing code:<br>
+                    <span style="font-family:monospace;font-size:1.2em;letter-spacing:2px;background:rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px;">X4K-892</span><br><br>
+                    <span style="opacity:.7;font-size:.9em;">Run on your server:<br>openclaw pairing approve telegram X4K-892</span>
+                  </div>
+                  <div class="tg-msg-time tg-msg-time-in">21:38</div>
+                </div>
+              </div>
+              <div class="tg-input-area">
+                <div class="tg-input-box">Написать...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-num">3</div>
+        <div class="substep-body">
+          <h3>Подтверди на сервере</h3>
+          <p>Вернись в терминал (SSH на сервер) и введи команду с кодом из Telegram:</p>
+          <div class="code-block">
+            <span class="code-label">terminal — ssh на сервер</span>
+            <button class="copy-btn" onclick="copyCode(this)">Скопировать</button>
+            <pre>openclaw pairing approve telegram X4K-892</pre>
+          </div>
+          <p>Замени <code>X4K-892</code> на реальный код из сообщения бота.</p>
+
+          <!-- TERMINAL MOCKUP: approve -->
+          <div class="mockup-wrap">
+            <div class="mockup-label">Терминал — подтверждение сопряжения</div>
+            <div class="term-window">
+              <div class="term-header">
+                <div class="term-dot term-dot-red"></div>
+                <div class="term-dot term-dot-yellow"></div>
+                <div class="term-dot term-dot-green"></div>
+                <div class="term-title">root@vps-openclaw — ssh</div>
+              </div>
+              <div class="term-body">
+                <span class="term-line"><span class="term-prompt">root@vps:~#</span> <span class="term-cmd">openclaw pairing approve telegram X4K-892</span></span>
+                <span class="term-line"><span class="term-out">  Looking up pairing request...</span></span>
+                <span class="term-line"><span class="term-key">  User:</span> <span class="term-val">381927465</span></span>
+                <span class="term-line"><span class="term-success">  ✓ Pairing approved. User added to allowlist.</span></span>
+                <span class="term-line">&nbsp;</span>
+                <span class="term-line"><span class="term-prompt">root@vps:~#</span> <span class="term-cursor"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Код живёт 1 час</strong>
+        <p>Если не успел подтвердить — просто отправь боту <code>/start</code> ещё раз, он пришлёт новый код.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ──────────────────── STEP 5 ──────────────────── -->
+  <div class="guide-section fade-in" id="step-5">
+    <div class="section-step">
+      <div class="step-num">5</div>
+      <h2>Проверяем — пишем первое сообщение</h2>
+    </div>
+
+    <p>Всё готово. Напиши боту любое сообщение в Telegram и агент ответит через несколько секунд.</p>
+
+    <!-- TELEGRAM MOCKUP: первый диалог с агентом -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Telegram — первый диалог с агентом</div>
+      <div class="tg-window">
+        <div class="tg-header">
+          <div class="tg-avatar" style="background:#4a9eda;">🧠</div>
+          <div class="tg-header-info">
+            <div class="tg-header-name">Мой ассистент</div>
+            <div class="tg-header-status">бот</div>
+          </div>
+        </div>
+        <div class="tg-messages">
+          <div class="tg-msg tg-msg-out">
+            <div class="tg-msg-text-out">Привет! Кто ты?</div>
+            <div class="tg-msg-time tg-msg-time-out">21:42</div>
+          </div>
+          <div class="tg-msg tg-msg-in" style="max-width:95%">
+            <div class="tg-msg-text-in">Привет! Я OpenClaw — AI-агент, работающий на модели Kimi K2.5. Я запущен на твоём сервере и всегда на связи. Чем могу помочь?</div>
+            <div class="tg-msg-time tg-msg-time-in">21:42</div>
+          </div>
+          <div class="tg-msg tg-msg-out">
+            <div class="tg-msg-text-out">Напиши короткий план на неделю</div>
+            <div class="tg-msg-time tg-msg-time-out">21:43</div>
+          </div>
+          <div class="tg-msg tg-msg-in" style="max-width:95%">
+            <div class="tg-msg-text-in">Конечно! Вот простой план на неделю:<br><br>• Пн — разобрать задачи, расставить приоритеты<br>• Вт-Ср — фокус на ключевых задачах<br>• Чт — встречи и коммуникации<br>• Пт — завершение дел, ретро<br>• Сб-Вс — отдых и восстановление<br><br>Уточнить под конкретные задачи?</div>
+            <div class="tg-msg-time tg-msg-time-in">21:43</div>
+          </div>
+        </div>
+        <div class="tg-input-area">
+          <div class="tg-input-box">Написать...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <strong>Работает!</strong>
+        <p>Если агент не отвечает — проверь логи на сервере: <code>openclaw logs --follow</code>. Там увидишь причину в реальном времени.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ──────────────────── STEP 6 ──────────────────── -->
+  <div class="guide-section fade-in" id="step-6">
+    <div class="section-step">
+      <div class="step-num">6</div>
+      <h2>Добавить бота в групповой чат</h2>
+    </div>
+
+    <p>Хочешь, чтобы бот работал в общем чате с коллегами или друзьями? Три простых действия.</p>
+
+    <div class="substeps">
+      <div class="substep">
+        <div class="substep-num">1</div>
+        <div class="substep-body">
+          <h3>Добавь бота в группу</h3>
+          <p>Открой групповой чат в Telegram → Участники → Добавить участника → найди своего бота по username.</p>
+        </div>
+      </div>
+      <div class="substep">
+        <div class="substep-num">2</div>
+        <div class="substep-body">
+          <h3>Разреши боту читать все сообщения</h3>
+          <p>По умолчанию Telegram разрешает боту видеть только сообщения, начинающиеся с <code>/</code>. Чтобы он отвечал на любые обращения — открой диалог с <strong>@BotFather</strong> и отправь:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Скопировать</button>
+            <pre>/setprivacy</pre>
+          </div>
+          <p>Выбери своего бота → выбери <strong>Disable</strong>. Это разрешит боту видеть все сообщения в группе.</p>
+        </div>
+      </div>
+      <div class="substep">
+        <div class="substep-num">3</div>
+        <div class="substep-body">
+          <h3>Переподключи бота к группе</h3>
+          <p>После изменения настроек приватности нужно удалить бота из группы и добавить снова — только тогда Telegram применит новые права.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>В группе бот отвечает по упоминанию</strong>
+        <p>По умолчанию в групповом чате бот реагирует только когда его упоминают: <code>@my_assistant_vlad_bot расскажи про...</code>. Это удобно — он не мешает обычным разговорам.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <footer>
+    <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+    <div class="footer-links">
+      <a href="../">← Все гайды</a>
+      <a href="../openclaw-setup/">Установка OpenClaw</a>
+      <a href="https://docs.openclaw.ai/channels/telegram" target="_blank" rel="noopener noreferrer">Документация</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const toggle = document.getElementById('themeToggle');
+  const html = document.documentElement;
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (!html.getAttribute('data-theme')) {
+    html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+  }
+  toggle.addEventListener('click', () => {
+    html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText((pre.innerText || pre.textContent).trim()).then(() => {
+      btn.textContent = 'Скопировано!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Скопировать'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
