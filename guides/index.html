@@ -288,12 +288,6 @@
     transform: translateY(-1px);
   }
 
-  .card-coming-soon {
-    opacity: 0.45;
-    cursor: default;
-    pointer-events: none;
-  }
-
   .card-icon {
     font-size: 1.5rem;
     margin-bottom: var(--space-3);
@@ -343,20 +337,6 @@
   .card:hover .card-arrow {
     color: var(--color-text-muted);
     transform: translateX(3px);
-  }
-
-  /* ── COMING SOON BADGE ── */
-  .badge-soon {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    font-size: var(--text-xs);
-    padding: 2px var(--space-2);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface-2);
-    color: var(--color-text-faint);
-    font-weight: 500;
-    border: 1px solid var(--color-border);
   }
 
   /* ── DIVIDER ── */
@@ -482,7 +462,6 @@
     </div>
     <div class="cards-grid">
 
-      <!-- CARD 1 — first real guide (placeholder, will be filled) -->
       <a class="card fade-in" href="./ai-agents/index.html">
         <div class="card-icon">🤖</div>
         <div class="card-title">AI-агенты: с чего начать</div>
@@ -492,88 +471,6 @@
           <span class="card-arrow">→</span>
         </div>
       </a>
-
-      <!-- CARD: Coming soon -->
-      <div class="card card-coming-soon fade-in">
-        <span class="badge-soon">Скоро</span>
-        <div class="card-icon">⚡</div>
-        <div class="card-title">Prompt Engineering</div>
-        <div class="card-desc">Как писать промпты, которые работают. Практика без теории ради теории</div>
-        <div class="card-footer">
-          <span class="card-tag">Скоро</span>
-        </div>
-      </div>
-
-      <!-- CARD: Coming soon -->
-      <div class="card card-coming-soon fade-in">
-        <span class="badge-soon">Скоро</span>
-        <div class="card-icon">🔗</div>
-        <div class="card-title">MCP и интеграции</div>
-        <div class="card-desc">Model Context Protocol — подключаем внешние сервисы к AI-инструментам</div>
-        <div class="card-footer">
-          <span class="card-tag">Скоро</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SECTION: PRODUCT -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">Продукт и процессы</span>
-    </div>
-    <div class="cards-grid">
-
-      <div class="card card-coming-soon fade-in">
-        <span class="badge-soon">Скоро</span>
-        <div class="card-icon">🗺️</div>
-        <div class="card-title">Роадмап без Excel</div>
-        <div class="card-desc">Как строить продуктовый роадмап, который понимают и разработчики, и бизнес</div>
-        <div class="card-footer">
-          <span class="card-tag">Скоро</span>
-        </div>
-      </div>
-
-      <div class="card card-coming-soon fade-in">
-        <span class="badge-soon">Скоро</span>
-        <div class="card-icon">📊</div>
-        <div class="card-title">Метрики, которые важны</div>
-        <div class="card-desc">Как не утонуть в дашбордах и отслеживать только то, что двигает продукт</div>
-        <div class="card-footer">
-          <span class="card-tag">Скоро</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SECTION: INFRA -->
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">Инфраструктура и серверы</span>
-    </div>
-    <div class="cards-grid">
-
-      <div class="card card-coming-soon fade-in">
-        <span class="badge-soon">Скоро</span>
-        <div class="card-icon">🖥️</div>
-        <div class="card-title">VPS с нуля</div>
-        <div class="card-desc">Поднять сервер на RU-VDS, настроить окружение и не выстрелить себе в ногу</div>
-        <div class="card-footer">
-          <span class="card-tag">Скоро</span>
-        </div>
-      </div>
-
-      <div class="card card-coming-soon fade-in">
-        <span class="badge-soon">Скоро</span>
-        <div class="card-icon">🐳</div>
-        <div class="card-title">Docker для продуктовиков</div>
-        <div class="card-desc">Минимально необходимый Docker, чтобы говорить с командой на одном языке</div>
-        <div class="card-footer">
-          <span class="card-tag">Скоро</span>
-        </div>
-      </div>
 
     </div>
   </div>
