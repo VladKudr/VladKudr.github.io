@@ -95,7 +95,7 @@
     <span class="badge acc">Спецификация 2026-07-28</span>
     <span class="badge">JSON-RPC 2.0</span>
     <span class="badge">OAuth 2.1</span>
-    <span class="badge">14 глав · ~30 минут</span>
+    <span class="badge">15 глав · ~35 минут</span>
   </div>
   <button class="cta" data-go-next>Открыть первую главу →</button>
   <div class="howto">
@@ -997,9 +997,190 @@ grant_type=authorization_code
 }</pre>
 </article>
 
-<!-- ═════════════════════════ 14. ЭКОСИСТЕМА ═════════════════════════ -->
-<article class="page" id="ecosystem" data-ch="eco" data-show="@eco" data-rotate data-cam="0,7,15.5,0,1.8,0" data-legend="host,server,req">
+<!-- ═════════════════════════ 14. ЦЕПОЧКА API ═════════════════════════ -->
+<article class="page" id="api-chain" data-ch="chain" data-show="@chain" data-cam="-1,14.5,13.5,-1.4,1.2,0" data-legend="llm,client,server,ext,req,res">
   <div class="kicker">Глава 14</div>
+  <h2>Три API → один результат: оборачивать или перепроектировать?</h2>
+  <p class="lead">Частый случай: есть три утилитарных API, и бизнес-результат получается только их последовательным вызовом, когда выход первого становится входом второго. Нужно ли переделывать API под MCP?</p>
+  <div class="callout ok"><b>Короткий ответ.</b> Сами API трогать не нужно: MCP-сервер — это адаптер поверх них. Перепроектировать стоит <strong>набор инструментов</strong>, то есть то, что видит модель. Если цепочка A → B → C всегда одинакова и нужна ради одного бизнес-результата, оберните её в <strong>один инструмент уровня задачи</strong>. Вызовы API и передача параметров между ними остаются в коде сервера.</div>
+  <p>Пример: пользователь спрашивает «сколько нам должна ООО «Ромашка»?». Для ответа нужно найти клиента по ИНН (API 1), получить его договоры (API 2) и посчитать задолженность по ним (API 3).</p>
+
+  <div class="steps-h"><h3>Вариант А: три инструмента 1:1 к API</h3><small>модель сама ведёт цепочку</small></div>
+  <ol class="steps">
+    <li data-do="thin" data-at="ch_thin" data-kind="note" data-label="3 инструмента = 3 эндпоинта" data-dur="2">Сервер механически публикует каждый эндпоинт как отдельный инструмент. Порядок вызовов приходится объяснять в описаниях.
+<pre class="payload" data-title="tools/list (фрагмент)">{
+  "tools": [
+    {
+      "name": "find_customer",
+      "description": "Ищет клиента по ИНН. Возвращает customer_id — передайте его в list_contracts.",
+      "inputSchema": { "type": "object", "properties": { "inn": { "type": "string" } }, "required": ["inn"] }
+    },
+    {
+      "name": "list_contracts",
+      "description": "Договоры клиента по customer_id из find_customer. Возвращает contract_ids для calc_debt.",
+      "inputSchema": { "type": "object", "properties": { "customer_id": { "type": "string" } }, "required": ["customer_id"] }
+    },
+    {
+      "name": "calc_debt",
+      "description": "Считает задолженность по contract_ids из list_contracts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "contract_ids": { "type": "array", "items": { "type": "string" } } },
+        "required": ["contract_ids"]
+      }
+    }
+  ]
+}</pre></li>
+    <li data-path="ch_llm,ch_cl,ch_srv" data-kind="req" data-label="find_customer(inn)">Первый вызов: модель передаёт ИНН.</li>
+    <li data-path="ch_srv,ch_api1,ch_srv" data-kind="req" data-label="GET /customers" data-dur="1.8">Сервер ходит в API 1.</li>
+    <li data-path="ch_srv,ch_cl,ch_llm" data-kind="res" data-label="customer_id">Промежуточный результат <strong>возвращается в контекст модели</strong>.
+<pre class="payload" data-title="Результат find_customer">{
+  "resultType": "complete",
+  "content": [{ "type": "text", "text": "{\"customer_id\":\"cst_4417\",\"name\":\"ООО «Ромашка»\"}" }],
+  "structuredContent": { "customer_id": "cst_4417", "name": "ООО «Ромашка»" }
+}</pre></li>
+    <li data-at="ch_llm" data-kind="think" data-label="Модель переносит id в следующий вызов">Модель должна правильно понять, что делать дальше, и без ошибок скопировать идентификатор. Это дополнительный шаг рассуждения, токены и риск ошибки.</li>
+    <li data-path="ch_llm,ch_cl,ch_srv" data-kind="req" data-label="list_contracts(cst_4417)">Второй вызов с параметром из первого.
+<pre class="payload" data-title="Client → Server · второй вызов">{
+  "jsonrpc": "2.0",
+  "id": 42,
+  "method": "tools/call",
+  "params": {
+    "name": "list_contracts",
+    "arguments": { "customer_id": "cst_4417" },  // скопировано моделью из прошлого ответа
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</pre></li>
+    <li data-path="ch_srv,ch_api2,ch_srv" data-kind="req" data-label="GET /contracts" data-dur="1.8">API 2.</li>
+    <li data-path="ch_srv,ch_cl,ch_llm" data-kind="res" data-label="contract_ids[]">Снова в контекст модели, и список договоров может оказаться длинным.</li>
+    <li data-path="ch_llm,ch_cl,ch_srv" data-kind="req" data-label="calc_debt([…])">Третий вызов.</li>
+    <li data-path="ch_srv,ch_api3,ch_srv" data-kind="req" data-label="POST /debt/calculate" data-dur="1.8">API 3.</li>
+    <li data-path="ch_srv,ch_cl,ch_llm" data-kind="res" data-label="итог">Итог готов после трёх обращений модели к серверу.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+
+  <div class="steps-h"><h3>Вариант Б: один инструмент уровня задачи</h3><small>цепочку ведёт код сервера</small></div>
+  <ol class="steps">
+    <li data-do="fat" data-at="ch_fat" data-kind="note" data-label="1 инструмент = 1 бизнес-результат" data-dur="2">Сервер публикует инструмент на языке пользователя: на вход ИНН, на выход задолженность.
+<pre class="payload" data-title="Tool: get_customer_debt">{
+  "name": "get_customer_debt",
+  "title": "Задолженность клиента",
+  "description": "Считает текущую задолженность клиента по ИНН по всем действующим договорам. Используйте, когда спрашивают о долге, просрочке или сверке с клиентом.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "inn": { "type": "string", "pattern": "^\\d{10}(\\d{2})?$", "description": "ИНН: 10 или 12 цифр" },
+      "as_of": { "type": "string", "format": "date", "description": "Дата расчёта, по умолчанию сегодня" }
+    },
+    "required": ["inn"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "customer": { "type": "string" },
+      "total_debt": { "type": "number" },
+      "overdue": { "type": "number" },
+      "contracts": { "type": "array" }
+    }
+  },
+  "annotations": { "readOnlyHint": true, "idempotentHint": true, "openWorldHint": false }
+}</pre></li>
+    <li data-path="ch_llm,ch_cl,ch_srv" data-kind="req" data-label="get_customer_debt(inn)">Модель делает <strong>один</strong> вызов.
+<pre class="payload" data-title="Client → Server · единственный вызов">{
+  "jsonrpc": "2.0",
+  "id": 51,
+  "method": "tools/call",
+  "params": {
+    "name": "get_customer_debt",
+    "arguments": { "inn": "7700000001" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</pre></li>
+    <li data-path="ch_srv,ch_api1,ch_srv" data-kind="req" data-label="API 1" data-dur="1.2">Внутри сервера: API 1.</li>
+    <li data-path="ch_srv,ch_api2,ch_srv" data-kind="req" data-label="API 2" data-dur="1.2">API 2 с customer_id из ответа API 1. Параметр передаёт код, не модель.</li>
+    <li data-path="ch_srv,ch_api3,ch_srv" data-kind="req" data-label="API 3" data-dur="1.2">API 3 с contract_ids из ответа API 2.</li>
+    <li data-path="ch_srv,ch_cl,ch_llm" data-kind="res" data-label="итог + детали">В контекст модели попадает только итог: сжатый текст плюс структура.
+<pre class="payload" data-title="Результат get_customer_debt">{
+  "resultType": "complete",
+  "content": [{
+    "type": "text",
+    "text": "ООО «Ромашка»: долг 1 240 500 ₽, из них просрочено 310 000 ₽ (договор Д-17, 12 дней)."
+  }],
+  "structuredContent": {
+    "customer": "ООО «Ромашка»",
+    "total_debt": 1240500,
+    "overdue": 310000,
+    "contracts": [
+      { "id": "Д-12", "debt": 930500, "overdue": 0 },
+      { "id": "Д-17", "debt": 310000, "overdue": 310000, "days_overdue": 12 }
+    ]
+  },
+  "isError": false
+}</pre></li>
+    <li data-at="ch_llm" data-kind="think" data-label="Сразу отвечает пользователю">Модель сразу формулирует ответ.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+
+  <h3>Сравнение</h3>
+  <table class="tbl">
+    <tr><th></th><th>А: 3 обёртки</th><th>Б: 1 инструмент</th></tr>
+    <tr><td>Вызовов модели</td><td>3, каждый с рассуждением</td><td>1</td></tr>
+    <tr><td>Контекст</td><td>Все промежуточные ответы</td><td>Только итог</td></tr>
+    <tr><td>Надёжность</td><td>Модель может перепутать id, порядок или пропустить шаг</td><td>Детерминированный код</td></tr>
+    <tr><td>Ошибки и откат</td><td>Разбросаны по шагам</td><td>В одном месте: ретраи, таймауты, компенсация</td></tr>
+    <tr><td>Гибкость</td><td>Шаги можно комбинировать иначе</td><td>Один сценарий</td></tr>
+  </table>
+  <p>Так советуют и авторы Claude в статье <a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank" rel="noopener">Writing effective tools for agents</a>. Частая ошибка там названа прямо: инструменты, которые «просто оборачивают» существующие эндпоинты. Вместо <code>get_customer_by_id</code>, <code>list_transactions</code> и <code>list_notes</code> лучше сделать один <code>get_customer_context</code>.</p>
+
+  <h3>Как решить для своей цепочки</h3>
+  <table class="tbl">
+    <tr><th>Ситуация</th><th>Решение</th></tr>
+    <tr><td style="white-space:normal">Порядок фиксирован, между шагами ничего не решается</td><td><strong>Один инструмент (Б).</strong> Это самый частый случай.</td></tr>
+    <tr><td style="white-space:normal">Между шагами нужно рассуждение модели: выбрать вариант, решить, идти ли дальше</td><td><strong>Отдельные инструменты (А)</strong>, но с <code>outputSchema</code> и <code>structuredContent</code>. В описании указано, откуда брать каждый параметр.</td></tr>
+    <tr><td style="white-space:normal">Между шагами нужно решение человека: подтвердить, выбрать договор</td><td><strong>Б + elicitation через MRTR</strong> (глава 7). Сервер отвечает <code>input_required</code>, а промежуточный результат кладёт в подписанный <code>requestState</code>.</td></tr>
+    <tr><td style="white-space:normal">Цепочка идёт минуты</td><td><strong>Б + Tasks</strong> (глава 12): сразу <code>taskId</code>, затем опрос статуса.</td></tr>
+    <tr><td style="white-space:normal">Промежуточные данные большие или чувствительные</td><td><strong>Б</strong>, либо А с <strong>handle</strong>: сервер возвращает короткий идентификатор результата, а не тысячи строк.</td></tr>
+    <tr><td style="white-space:normal">Шаги нужны и по отдельности</td><td><strong>Гибрид:</strong> композитный инструмент для главного сценария и низкоуровневые для редких случаев. Без лишних, потому что каждый инструмент занимает контекст модели.</td></tr>
+  </table>
+  <p>Есть и третий путь, на стороне агента. Если host умеет выполнять код, модель пишет скрипт, который сам вызывает инструменты по очереди, и промежуточные данные не проходят через её контекст. Anthropic описывает этот подход в статье <a href="https://www.anthropic.com/engineering/code-execution-with-mcp" target="_blank" rel="noopener">Code execution with MCP</a>. Но это возможность конкретного host-а, а не гарантия протокола, поэтому основной сценарий надёжнее закрыть инструментом на сервере.</p>
+
+  <h3>Как это выглядит в коде сервера</h3>
+<pre class="code">// псевдокод обработчика: старые API не меняются
+async function getCustomerDebt({ inn, as_of }, ctx) {
+  const customer = await api1.findCustomer(inn, ctx.upstreamToken);   // API 1
+  if (!customer) {
+    return toolError(`Клиент с ИНН ${inn} не найден. Проверьте ИНН ` +
+                     `(10 цифр для юрлица) или найдите клиента через search_customers.`);
+  }
+  const contracts = await api2.listContracts(customer.id, ctx.upstreamToken); // API 2
+  const debt = await api3.calculateDebt(contracts.map(c => c.id), as_of, ctx.upstreamToken); // API 3
+  return {
+    structuredContent: { customer: customer.name, ...debt },
+    content: [{ type: 'text', text: summarize(customer, debt) }],
+  };
+}
+// ctx.upstreamToken — собственные права сервера к API (или обмен токена),
+// а не проброс токена MCP-клиента</pre>
+
+  <h3>Когда всё-таки трогать сами API</h3>
+  <ul class="bul">
+    <li><strong>N+1 запросов.</strong> API 3 считает долг только по одному договору, а договоров сотни. Нужен пакетный метод. Это оптимизация, MCP её не требует.</li>
+    <li><strong>Состояние между вызовами живёт в сессии API.</strong> MCP теперь без сессий, поэтому состояние хранится в самой системе и передаётся явным handle.</li>
+    <li><strong>Нет идемпотентности у записи.</strong> Серверу нужны ретраи, а без ключа идемпотентности повтор создаст дубль.</li>
+    <li><strong>Нет прав от имени пользователя.</strong> API принимает только сервисную учётную запись, а отвечать нужно в рамках прав конкретного человека. Нужна делегация или обмен токена. Пробрасывать токен клиента запрещено.</li>
+  </ul>
+  <div class="callout"><b>Итог.</b> API остаются как есть. Инструменты проектируются от бизнес-задач: вход на языке пользователя (ИНН, а не customer_id), выход — готовый результат. Модели оставляют только те развилки, где действительно нужно её суждение.</div>
+</article>
+
+<!-- ═════════════════════════ 15. ЭКОСИСТЕМА ═════════════════════════ -->
+<article class="page" id="ecosystem" data-ch="eco" data-show="@eco" data-rotate data-cam="0,7,15.5,0,1.8,0" data-legend="host,server,req">
+  <div class="kicker">Глава 15</div>
   <h2>Экосистема и куда смотреть дальше</h2>
   <p class="lead">Вокруг спецификации сложилась экосистема: официальные SDK с уровнями зрелости, реестр серверов, инструменты отладки и открытый процесс развития стандарта.</p>
   <ol class="steps">
@@ -1035,7 +1216,7 @@ grant_type=authorization_code
       </div>
       <nav class="pager" aria-label="Страницы">
         <button id="prev" aria-label="Предыдущая глава">← Назад</button>
-        <span id="pageNo">1 / 15</span>
+        <span id="pageNo">1 / 16</span>
         <button id="next" aria-label="Следующая глава">Далее →</button>
       </nav>
     </aside>

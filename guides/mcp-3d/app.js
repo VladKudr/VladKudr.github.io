@@ -514,6 +514,7 @@ function buildWorld() {
   buildWhy();
   buildLayers();
   buildLife();
+  buildChain();
   buildDesign();
   buildEco();
 }
@@ -592,6 +593,52 @@ function buildLayers() {
   ent('lay_Rn', place(new THREE.Object3D(), 3.6, 3.4, 0), { label: 'MCP Server', color: COL.server, labelCenter: [0.5, 1] });
   pipe('lay_wire', 'lay_L1', 'lay_R1', COL.transport, { lift: 0.0, r: 0.07, label: 'байты: строки stdio или HTTP-запросы' });
   LIFT['lay_L1|lay_L2'] = 0; LIFT['lay_L2|lay_L3'] = 0; LIFT['lay_R1|lay_R2'] = 0; LIFT['lay_R2|lay_R3'] = 0;
+}
+
+// ── Станция «Цепочка API»: три тонкие обёртки против одного инструмента уровня задачи
+function tiles(names, color, w, y) {
+  const g = new THREE.Group();
+  const lbls = [];
+  names.forEach((n, i) => {
+    const t = box(w, 0.5, 0.12, color, { fill: 0.7, emissive: 0.45 });
+    t.position.set((i - (names.length - 1) / 2) * (w + 0.55), y, 0);
+    const l = makeLabel(n, '', color, 'small');
+    l.position.set(0, i % 2 ? 0.85 : 0.32, 0);
+    l.center.set(0.5, 1);
+    t.add(l);
+    lbls.push(l);
+    g.add(t);
+  });
+  g.userData.bob = 1;
+  return { g, lbls };
+}
+function buildChain() {
+  ent('ch_host', place(hostShell(4, 2.8, 3.6), -8.5, 1.4, 0), { label: 'Host', sub: 'агент / чат', color: COL.host, labelPos: [0, 1.75, -1.8] });
+  ent('ch_llm', place(brain(0.7), -9.5, 1.5, 0), { label: 'LLM', color: COL.llm, labelPos: [0, 0.85, 0] });
+  ent('ch_cl', place(box(0.8, 0.8, 0.8, COL.client, { fill: 0.45 }), -7.1, 1.4, 0), { label: 'Client', color: COL.client, labelPos: [0, 0.55, 0] });
+  ent('ch_srv', place(tower(COL.server, 3, 1.6), -0.8, 0, 0), {
+    label: 'MCP Server', sub: 'адаптер поверх API', color: COL.server, anchor: [-0.8, 1.3, 0], labelPos: [0, -0.35, 1.6], labelCenter: [0.5, 0],
+  });
+  const thin = tiles(['find_customer', 'list_contracts', 'calc_debt'], COL.tools, 1.3, 3.2);
+  place(thin.g, -0.8, 0, 0);
+  const et = ent('ch_thin', thin.g, { name: 'инструменты' });
+  et.labels.push(...thin.lbls);
+  const fat = tiles(['get_customer_debt'], COL.tools, 2.6, 3.2);
+  place(fat.g, -0.8, 0, 0);
+  const ef = ent('ch_fat', fat.g, { name: 'инструмент' });
+  ef.labels.push(...fat.lbls);
+  const apis = [
+    ['API 1 · клиенты', 'GET /customers?inn=…'],
+    ['API 2 · договоры', 'GET /contracts?customer_id=…'],
+    ['API 3 · расчёты', 'POST /debt/calculate'],
+  ];
+  apis.forEach(([n, sub], i) => {
+    const z = -3.4 + i * 3.4;
+    ent(`ch_api${i + 1}`, place(tower(COL.ext, 2, 1.3), 6.2, 0, z), { label: n, sub, color: COL.ext, anchor: [6.2, 0.9, z] });
+    pipe(`ch_x${i + 1}`, 'ch_srv', `ch_api${i + 1}`, COL.ext, { r: 0.035, fill: 0.35, lift: 0.4 });
+  });
+  pipe('ch_p', 'ch_cl', 'ch_srv', COL.client, { lift: 0.5 });
+  LIFT['ch_cl|ch_llm'] = 0.4;
 }
 
 // ── Станция «Проектирование»: сервер в разобранном виде
@@ -788,7 +835,7 @@ function tickPulses(dt) {
 /* ─────────────────────────── Шаги-анимации глав ─────────────────────────── */
 
 const runner = {
-  steps: [], i: -1, t: 0, phase: 'idle', paused: false, page: null, msg: null,
+  steps: [], i: -1, t: 0, phase: 'idle', paused: false, page: null,
   load(page) {
     this.page = page;
     this.steps = $$('ol.steps > li', page).map(li => ({
@@ -800,8 +847,8 @@ const runner = {
       count: +(li.dataset.count || 1),
       dur: +(li.dataset.dur || (li.dataset.at || li.dataset.do ? 1.8 : 1.5)),
       payload: $('.payload', li),
+      msg: listMsg(li.parentElement) || $('.msg', page),
     }));
-    this.msg = $('.msg', page);
     this.reset();
     this.phase = this.steps.length ? 'wait' : 'idle';
     this.t = -0.9;
@@ -809,7 +856,7 @@ const runner = {
   reset() {
     this.i = -1;
     this.steps.forEach(s => s.el.classList.remove('active', 'done'));
-    if (this.msg) this.msg.classList.remove('has');
+    if (this.page) $$('.msg', this.page).forEach(m => m.classList.remove('has'));
   },
   begin(i) {
     const s = this.steps[i];
@@ -827,7 +874,7 @@ const runner = {
         sendPacket({ from: s.from, to: s.to, path: s.path, kind: s.kind, label: n === 0 ? s.label : '', dur: s.dur, delay: n * Math.min(0.45, s.dur / s.count) });
       }
     }
-    if (s.payload && this.msg) showMessage(this.msg, s);
+    if (s.payload && s.msg) showMessage(s.msg, s);
     followStep(s.el);
   },
   jump(i) {
@@ -867,6 +914,11 @@ const runner = {
     }
   },
 };
+
+function listMsg(ol) {
+  const n = ol.nextElementSibling;
+  return n && n.classList.contains('msg') ? n : null;
+}
 
 function showMessage(box, s) {
   const code = $('code', box);
@@ -939,6 +991,14 @@ const hooks = {
     action(a) {
       setT('why_custom', a === 'nxm' ? 1 : 0);
       setT('why_mcp', a === 'mcp' ? 1 : 0);
+    },
+  },
+  chain: {
+    enter() { setT('ch_thin', 1); setT('ch_fat', 0); },
+    reset() { this.enter(); },
+    action(a) {
+      setT('ch_thin', a === 'thin' ? 1 : 0);
+      setT('ch_fat', a === 'fat' ? 1 : 0);
     },
   },
   design: {
@@ -1087,6 +1147,7 @@ const GROUPS = {
   core: ['host', 'llm', 'c1', 'c2', 'c3', 's1', 's2', 's3', 'p1', 'p2', 'p3', 'e1', 'e2', 'e3', 'x1', 'x2', 'x3'],
   why: ['why_a0', 'why_a1', 'why_a2', 'why_s0', 'why_s1', 'why_s2', 'why_s3'],
   layers: ['lay_L1', 'lay_L2', 'lay_L3', 'lay_R1', 'lay_R2', 'lay_R3', 'lay_Ln', 'lay_Rn', 'lay_wire'],
+  chain: ['ch_host', 'ch_llm', 'ch_cl', 'ch_srv', 'ch_p', 'ch_api1', 'ch_api2', 'ch_api3', 'ch_x1', 'ch_x2', 'ch_x3'],
   life: ['life_c', 'life_lb', 'life_r1', 'life_r2', 'life_r3', 'life_p0', 'life_p1', 'life_p2', 'life_p3'],
   design: ['d1', 'd2', 'd3', 'd4', 'd5', 'd_obs', 'd_client', 'd_ext'],
   eco: ['eco_spec', 'eco_sdks', 'eco_registry', 'eco_inspector', 'eco_hosts', 'eco_servers'],
