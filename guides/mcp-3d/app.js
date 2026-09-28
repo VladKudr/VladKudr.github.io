@@ -327,6 +327,7 @@ const ents = new Map();
 function makeLabel(text, sub, color, cls = '') {
   const el = document.createElement('div');
   el.className = 'lbl ' + cls;
+  el._t = [text, sub || ''];
   el.style.setProperty('--c', hex(color));
   const b = document.createElement('b');
   b.textContent = text;
@@ -363,6 +364,7 @@ function ent(id, obj, o = {}) {
     if (o.labelPos) l.position.set(...o.labelPos);
     else l.position.set(0, (b.isEmpty() ? 0 : b.max.y - obj.position.y) + 0.35, 0);
     l.center.set(...(o.labelCenter || [0.5, 1]));
+    l.element.dataset.key = id;
     obj.add(l);
     e.labels.push(l);
   }
@@ -405,6 +407,7 @@ function pipe(id, a, b, color, o = {}) {
   const e = ent(id, mesh, { name: o.name });
   if (o.label) {
     const l = makeLabel(o.label, o.sub, color, 'pipe');
+    l.element.dataset.key = id;
     l.position.copy(curve.getPoint(0.5)).add(new THREE.Vector3(0, 0.25, 0));
     l.center.set(0.5, 1);
     mesh.add(l);
@@ -621,10 +624,12 @@ function buildChain() {
   });
   const thin = tiles(['find_customer', 'list_contracts', 'calc_debt'], COL.tools, 1.3, 3.2);
   place(thin.g, -0.8, 0, 0);
-  const et = ent('ch_thin', thin.g, { name: 'инструменты' });
-  et.labels.push(...thin.lbls);
   const fat = tiles(['get_customer_debt'], COL.tools, 2.6, 3.2);
   place(fat.g, -0.8, 0, 0);
+  thin.lbls.forEach((l, i) => { l.element.dataset.key = `ch_thin#${i}`; });
+  fat.lbls.forEach((l, i) => { l.element.dataset.key = `ch_fat#${i}`; });
+  const et = ent('ch_thin', thin.g, { name: 'инструменты' });
+  et.labels.push(...thin.lbls);
   const ef = ent('ch_fat', fat.g, { name: 'инструмент' });
   ef.labels.push(...fat.lbls);
   const apis = [
@@ -1186,12 +1191,17 @@ const LEGEND = {
   ext: ['Внешняя система', COL.ext], user: ['Пользователь', COL.user], auth: ['OAuth', COL.auth], threat: ['Угроза', COL.threat],
   req: ['запрос', KIND.req], res: ['ответ', KIND.res], note: ['уведомление', KIND.note], err: ['ошибка', KIND.err], task: ['задача', KIND.task],
 };
+const LEGEND_BIZ = {
+  host: 'ИИ-приложение', client: 'Подключение', server: 'Коннектор', llm: 'Модель ИИ', ext: 'Ваша система',
+  user: 'Сотрудник', auth: 'Доступ', threat: 'Риск', req: 'запрос', res: 'ответ', note: 'сигнал', err: 'отказ', task: 'операция',
+};
 function renderLegend(list) {
   const el = $('#legend');
   el.innerHTML = '';
   for (const k of (list || 'req,res,note').split(',').map(s => s.trim())) {
     if (!LEGEND[k]) continue;
-    const [n, c] = LEGEND[k];
+    const [tn, c] = LEGEND[k];
+    const n = mode === 'biz' ? (LEGEND_BIZ[k] || tn) : tn;
     const i = document.createElement('span');
     i.style.setProperty('--c', hex(c));
     i.textContent = n;
@@ -1199,13 +1209,93 @@ function renderLegend(list) {
   }
 }
 
-const pages = $$('article.page');
+// Подписи сцены для версии «для бизнеса»: [заголовок, подзаголовок]
+const BIZ = {
+  host: ['ИИ-приложение', 'чат, ассистент, агент'], llm: ['Модель ИИ', 'рассуждает и выбирает действие'],
+  c1: ['Подключение 1'], c2: ['Подключение 2'], c3: ['Подключение 3'],
+  s1: ['Коннектор · документы', 'на компьютере сотрудника'], s2: ['Коннектор · учётная система', 'внутри периметра'],
+  s3: ['Коннектор · облачный сервис', 'у поставщика SaaS'],
+  e1: ['Документы', 'файлы'], e2: ['Учётная система', 'БД, ERP'], e3: ['Облачный сервис', 'API поставщика'],
+  user: ['Сотрудник'], zoneLocal: ['Периметр компании', 'внутренние системы'], zoneRemote: ['Облако', 'внешние сервисы'],
+  as: ['Корпоративный вход', 'SSO: выдаёт доступ'], prm: ['Паспорт коннектора', 'где получать доступ'],
+  asmeta: ['Правила входа', 'адреса и требования'], token: ['Пропуск', 'только к этому коннектору'],
+  prim_tools: ['Действия', 'решает модель'], prim_res: ['Данные', 'подбирает приложение'], prim_prompts: ['Сценарии', 'выбирает сотрудник'],
+  t_poison: ['Непроверенный коннектор', 'скрытые инструкции'], t_inject: ['Вредные данные', 'текст выдаёт себя за команду'],
+  t_pass: ['Пропуск уходит дальше', 'нарушены границы доступа'], t_deputy: ['Посредник без согласия', 'действует от чужого имени'],
+  t_ssrf: ['Подмена адресов', 'путь во внутреннюю сеть'], t_local: ['Установка без проверки', 'запуск чужой программы'],
+  t_session: ['Чужой номер операции', 'нет проверки владельца'], shield: ['Политика согласий', 'что разрешено ассистенту'],
+  task: ['Долгая операция', 'в работе'], uiapp: ['Интерактивный отчёт', 'прямо в чате'], skill: ['Методичка', 'инструкция для агента'],
+  life_c: ['Подключение', 'каждый запрос самодостаточен'], life_lb: ['Балансировщик', 'распределяет нагрузку'],
+  life_r1: ['Копия коннектора A'], life_r2: ['Копия коннектора B'], life_r3: ['Копия коннектора C'],
+  ch_host: ['ИИ-приложение'], ch_llm: ['Модель ИИ'], ch_cl: ['Подключение'], ch_srv: ['Коннектор', 'надстройка над системами'],
+  ch_api1: ['Система 1 · клиенты', 'поиск по ИНН'], ch_api2: ['Система 2 · договоры', 'договоры клиента'],
+  ch_api3: ['Система 3 · расчёты', 'расчёт задолженности'],
+  'ch_thin#0': ['найти клиента'], 'ch_thin#1': ['договоры'], 'ch_thin#2': ['расчёт долга'], 'ch_fat#0': ['задолженность клиента'],
+  d1: ['Приём запросов', 'канал связи и шифрование'], d2: ['Проверка доступа', 'кто спрашивает и что ему можно'],
+  d3: ['Стандарт MCP', 'общий язык с ИИ-приложениями'], d4: ['Каталог операций', 'действия, данные, сценарии'],
+  d5: ['Бизнес-логика', 'правила и связь с системами'], d_obs: ['Контроль и аудит', 'журнал: кто, что, когда'],
+  d_client: ['ИИ-приложение'], d_ext: ['Учётные системы', 'существующие'],
+  eco_spec: ['Открытый стандарт MCP', 'Linux Foundation'], eco_registry: ['Каталог коннекторов', 'официальный реестр'],
+  eco_inspector: ['Инструменты проверки', 'тестирование коннекторов'], eco_hosts: ['ИИ-приложения', 'разных поставщиков'],
+  eco_servers: ['Коннекторы', 'тысячи готовых'],
+  why_custom: ['3 × 4 = 12 отдельных интеграций', 'каждая — свой проект'],
+  why_mcp: ['3 + 4 = 7 компонентов', 'один стандарт для всех'],
+};
+function applyLabels() {
+  for (const e of ents.values()) {
+    for (const l of e.labels) {
+      const el = l.element;
+      const t = (mode === 'biz' && BIZ[el.dataset.key]) || el._t;
+      if (!t) continue;
+      el.querySelector('b').textContent = t[0];
+      let sp = el.querySelector('span');
+      if (t[1]) {
+        if (!sp) { sp = document.createElement('span'); el.appendChild(sp); }
+        sp.textContent = t[1];
+        sp.hidden = false;
+      } else if (sp) sp.hidden = true;
+    }
+  }
+}
+
+const pagesAll = $$('article.page');
+const pageMode = p => p.dataset.mode || 'tech';
+let pages = [];
+let mode = 'tech';
 const book = $('#book');
 let cur = -1;
 
+function setMode(m, target = null) {
+  mode = m;
+  document.documentElement.dataset.mode = m;
+  try { localStorage.setItem('mcp3d-mode', m); } catch (e) { /* приватный режим */ }
+  pagesAll.forEach(p => { p.hidden = true; p.classList.remove('flip-out', 'flip-out-back', 'flip-in', 'flip-in-back'); });
+  pages = pagesAll.filter(p => pageMode(p) === m);
+  $$('.mode-switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  buildTOC();
+  applyLabels();
+  cur = -1;
+  go(Math.max(0, pages.indexOf(target)), true);
+}
+// при переключении стараемся открыть соответствующую главу другой версии
+function switchMode(m) {
+  if (m === mode) return;
+  const here = pages[cur];
+  let target = null;
+  if (here && m === 'biz') {
+    target = pagesAll.find(p => pageMode(p) === 'biz' && (p.dataset.pair || '').split(',').includes(here.id)) || null;
+  } else if (here) {
+    const id = (here.dataset.pair || '').split(',')[0];
+    target = id ? document.getElementById(id) : null;
+  }
+  setMode(m, target);
+}
+
 function buildTOC() {
   const list = $('#tocList');
-  const coverList = $('#coverToc');
+  const coverList = $('.cover-toc', pages[0]);
+  list.innerHTML = '';
+  if (coverList) coverList.innerHTML = '';
   pages.forEach((p, i) => {
     const kicker = $('.kicker', p)?.textContent || '';
     const title = $('h1, h2', p)?.textContent || '';
@@ -1267,6 +1357,8 @@ function setupUI() {
   $('#prev').addEventListener('click', () => go(cur - 1));
   $('#next').addEventListener('click', () => go(cur + 1));
   $$('[data-go-next]').forEach(b => b.addEventListener('click', () => go(cur + 1)));
+  $$('[data-set-mode]').forEach(b => b.addEventListener('click', () => switchMode(b.dataset.setMode)));
+  $$('.mode-switch button').forEach(b => b.addEventListener('click', () => switchMode(b.dataset.mode)));
   $('#tocBtn').addEventListener('click', openTOC);
   $('#tocClose').addEventListener('click', closeTOC);
   $('#toc').addEventListener('click', e => { if (e.target.id === 'toc') closeTOC(); });
@@ -1299,14 +1391,15 @@ function setupUI() {
     if (HAS3D) applyTheme();
   });
   window.addEventListener('hashchange', () => {
-    const i = pages.findIndex(p => '#' + p.id === location.hash);
-    if (i >= 0) go(i);
+    const p = pagesAll.find(x => '#' + x.id === location.hash);
+    if (!p) return;
+    if (pageMode(p) !== mode) setMode(pageMode(p), p);
+    else go(pages.indexOf(p));
   });
 }
 
 // ── старт
-pages.forEach(p => { p.hidden = true; });
-buildTOC();
+pagesAll.forEach(p => { p.hidden = true; });
 setupUI();
 if (HAS3D) {
   applyTheme();
@@ -1315,7 +1408,9 @@ if (HAS3D) {
   resize();
   frame();
 }
-const start = Math.max(0, pages.findIndex(p => '#' + p.id === location.hash));
-go(start, true);
+const hashPage = pagesAll.find(p => '#' + p.id === location.hash) || null;
+let savedMode = null;
+try { savedMode = localStorage.getItem('mcp3d-mode'); } catch (e) { /* приватный режим */ }
+setMode(hashPage ? pageMode(hashPage) : (savedMode === 'biz' ? 'biz' : 'tech'), hashPage);
 if (HAS3D && camPreset) flyTo(camPreset, true);
 document.documentElement.classList.add('ready');

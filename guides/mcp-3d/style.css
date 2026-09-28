@@ -131,6 +131,7 @@ button { font: inherit; color: inherit; }
   transition: opacity .2s;
 }
 .lbl span { display: block; font-weight: 500; font-size: 10.5px; color: var(--muted); }
+.lbl span[hidden] { display: none; }
 .lbl.pkt {
   font: 600 11px/1.2 var(--font-mono); color: var(--c); border: 1px solid var(--c); border-left-width: 1px;
   padding: 2px 6px; border-radius: 999px;
@@ -256,7 +257,19 @@ pre.code { border: 1px solid var(--border); border-radius: var(--radius); backgr
 .toc-list li a.cur { background: var(--accent-soft); }
 .toc-k { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
 .toc-n { font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
-#coverToc { border-top: 1px solid var(--border); padding-top: 8px; }
+.cover-toc { border-top: 1px solid var(--border); padding-top: 8px; margin-bottom: 18px; }
+
+/* переключатель версии */
+.mode-switch { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); margin-right: 6px; }
+.mode-switch button {
+  border: 0; background: none; color: var(--muted); font-size: 13px; font-weight: 600; padding: 5px 11px; border-radius: 7px; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.mode-switch button:hover { color: var(--text); }
+.mode-switch button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.mode-switch .short { display: none; }
+.linklike { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-size: inherit; }
+.mode-invite { --c: #10b981; }
 
 .toc {
   position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, .45); opacity: 0; pointer-events: none; transition: opacity .2s;
@@ -302,6 +315,13 @@ pre.code { border: 1px solid var(--border); border-radius: var(--radius); backgr
   .legend span { font-size: 11px; }
   .crumbs .hide-sm { display: none; }
   .tbl td:first-child { white-space: normal; }
+}
+@media (max-width: 640px) {
+  .mode-switch .full { display: none; }
+  .mode-switch .short { display: inline; }
+  .top-actions .lbl-txt { display: none; }
+  .crumbs .here { display: none; }
+  .crumbs .sep-here { display: none; }
 }
 @media (max-width: 480px) {
   .top-actions .lbl-txt { display: none; }
