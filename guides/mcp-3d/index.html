@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MCP в 3D — путеводитель · Влад Кудрявцев</title>
+<meta name="description" content="Интерактивный 3D-путеводитель по Model Context Protocol: как устроены MCP-сервисы, из чего состоят, как работают и как их проектировать. По спецификации 2026-07-28.">
+<meta property="og:title" content="MCP в 3D — путеводитель по Model Context Protocol">
+<meta property="og:description" content="Архитектура, протокол, транспорты, авторизация, безопасность и проектирование MCP-серверов — в живой 3D-модели.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://vladkudr.github.io/guides/mcp-3d/">
+<link rel="shortcut icon" href="../../favicon.ico">
+<script>
+  try { const t = localStorage.getItem('mcp3d-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+  m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+  (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+  ym(53657566, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/53657566" style="position:absolute; left:-9999px;" alt=""/></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <nav class="crumbs" aria-label="Навигация">
+      <a href="https://vladkudr.github.io" class="hide-sm">vladkudr.github.io</a>
+      <span class="sep hide-sm">/</span>
+      <a href="../">guides</a>
+      <span class="sep">/</span>
+      <span class="here">MCP в 3D</span>
+    </nav>
+    <div class="top-actions">
+      <button class="icon-btn" id="tocBtn" aria-label="Оглавление">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <span class="lbl-txt">Оглавление</span>
+      </button>
+      <button class="icon-btn" id="themeToggle" aria-label="Переключить тему">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      </button>
+    </div>
+    <div class="progress" id="progress"></div>
+  </header>
+
+  <main class="app">
+    <section id="stage" aria-label="3D-модель">
+      <div class="chip" id="chapterChip"></div>
+      <div class="stage-tools">
+        <button class="icon-btn" id="btnPlay" data-state="playing" aria-label="Пауза" title="Пауза / продолжить">
+          <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+        </button>
+        <button class="icon-btn" id="btnReplay" aria-label="Проиграть главу заново" title="Сначала">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button class="icon-btn" id="btnView" aria-label="Вернуть ракурс" title="Вернуть ракурс">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V4h5M21 9V4h-5M3 15v5h5M21 15v5h-5"/></svg>
+        </button>
+        <button class="icon-btn" id="btnRotate" aria-label="Автовращение" title="Автовращение">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="4"/><path d="M12 2v4M12 18v4"/></svg>
+        </button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="hint">тяните — вращать · колесо — масштаб · правая кнопка — сдвиг</div>
+    </section>
+
+    <aside class="panel">
+      <div id="book">
+
+<!-- ═════════════════════════ 0. ОБЛОЖКА ═════════════════════════ -->
+<article class="page" id="cover" data-ch="cover" data-show="@core,user" data-rotate data-cam="3,17,19,-1.5,0.5,1.5" data-legend="host,client,server,ext,req,res">
+  <div class="kicker">Путеводитель</div>
+  <h1>MCP в 3D</h1>
+  <p class="lead">Как устроены сервисы на <strong>Model Context Protocol</strong>: из каких частей они состоят, как передают сообщения и как их проектировать. Рядом с текстом — живая 3D-модель: главы листаются как страницы книги, а схемы на каждой странице анимированы.</p>
+  <div class="cover-badges">
+    <span class="badge acc">Спецификация 2026-07-28</span>
+    <span class="badge">JSON-RPC 2.0</span>
+    <span class="badge">OAuth 2.1</span>
+    <span class="badge">14 глав · ~30 минут</span>
+  </div>
+  <button class="cta" data-go-next>Открыть первую главу →</button>
+  <div class="howto">
+    <div><span class="ic">🖱</span><span>Модель можно вращать мышью или пальцем, колесо меняет масштаб. Кнопка ⤢ возвращает ракурс главы.</span></div>
+    <div><span class="ic">▶</span><span>В каждой главе есть анимированные шаги. <strong>Нажмите на шаг</strong>, чтобы остановить анимацию на нём и прочитать настоящее JSON-сообщение.</span></div>
+    <div><span class="ic">⌨</span><span><kbd>←</kbd> <kbd>→</kbd> листают страницы. Оглавление открывается кнопкой вверху.</span></div>
+  </div>
+  <h3>Содержание</h3>
+  <ol class="toc-list" id="coverToc"></ol>
+  <p class="foot">Материал сверен с официальной спецификацией на modelcontextprotocol.io (версия <code>2026-07-28</code>, <code>LATEST_PROTOCOL_VERSION</code> в <code>schema.ts</code>). Там, где изменения свежие, в тексте есть пометки «было / стало».</p>
+</article>
+
+<!-- ═════════════════════════ 1. ЗАЧЕМ ═════════════════════════ -->
+<article class="page" id="why" data-ch="why" data-show="@why" data-cam="0,10,16,0,0.6,0" data-legend="host,ext,client,server">
+  <div class="kicker">Глава 1</div>
+  <h2>Зачем нужен MCP</h2>
+  <p class="lead">До MCP каждое AI-приложение подключало каждый сервис по-своему. Если есть M приложений и N сервисов, то нужно M×N интеграций, и каждую надо написать, протестировать и чинить при каждом изменении API.</p>
+  <p>MCP — это открытый стандарт «разъёма» между AI-приложением и внешним миром. Приложение один раз реализует <strong>клиент</strong>, сервис один раз реализует <strong>сервер</strong>, и после этого любой клиент работает с любым сервером. Похожую задачу для редакторов кода когда-то решил Language Server Protocol, и авторы MCP прямо ссылаются на него как на образец.</p>
+  <div class="steps-h"><h3>Смотрите на модель</h3><small>анимация по шагам</small></div>
+  <ol class="steps">
+    <li data-do="nxm" data-dur="4.5">Без стандарта: 3 приложения × 4 сервиса = <strong>12 уникальных адаптеров</strong>. У каждого своя авторизация, свои форматы и ошибки.</li>
+    <li data-do="mcp" data-dur="4.5">С MCP: <strong>3 клиента + 4 сервера</strong>. Все говорят на одном протоколе, и новое приложение сразу получает доступ ко всем серверам.</li>
+  </ol>
+  <h3>Что именно стандартизирует MCP</h3>
+  <ul class="bul">
+    <li><strong>Формат сообщений:</strong> JSON-RPC 2.0 с обязательными метаданными (<code>_meta</code>).</li>
+    <li><strong>Возможности сервера:</strong> инструменты (tools), данные (resources) и шаблоны промптов (prompts).</li>
+    <li><strong>Как сервер может спросить клиента</strong> о недостающем: например, попросить пользователя заполнить форму.</li>
+    <li><strong>Транспорты</strong> (stdio и Streamable HTTP) и <strong>авторизацию</strong> на базе OAuth 2.1.</li>
+  </ul>
+  <div class="callout"><b>Чего MCP не решает.</b> Какую модель использовать, как host строит промпт и интерфейс, как именно модель выбирает инструмент. Это остаётся на стороне приложения.</div>
+</article>
+
+<!-- ═════════════════════════ 2. АРХИТЕКТУРА ═════════════════════════ -->
+<article class="page" id="architecture" data-ch="arch" data-show="@core,user,zoneLocal,zoneRemote" data-cam="0,19,19,-1.5,0.5,2" data-legend="host,client,server,llm,ext,user">
+  <div class="kicker">Глава 2</div>
+  <h2>Архитектура: Host, Client, Server</h2>
+  <p class="lead">В MCP три роли. Их легко спутать, поэтому посмотрите на модель: синяя «коробка» — это host, бирюзовые кубики внутри неё — клиенты, фиолетовые стойки — серверы.</p>
+  <table class="tbl">
+    <tr><th>Роль</th><th>Что делает</th></tr>
+    <tr><td><span class="dot" style="--c:#3b82f6"></span>Host</td><td>AI-приложение, с которым работает человек: чат-ассистент, IDE, агент. Создаёт клиентов, управляет моделью, собирает контекст и <strong>спрашивает согласие пользователя</strong>.</td></tr>
+    <tr><td><span class="dot" style="--c:#06b6d4"></span>Client</td><td>Компонент внутри host. Каждый клиент связан <strong>ровно с одним</strong> сервером (1:1) и прикладывает версию протокола и свои возможности к каждому запросу.</td></tr>
+    <tr><td><span class="dot" style="--c:#8b5cf6"></span>Server</td><td>Программа, которая даёт контекст и возможности: инструменты, данные, промпты. Бывает локальным процессом (stdio) или удалённым сервисом (Streamable HTTP).</td></tr>
+  </table>
+  <div class="steps-h"><h3>Пройдёмся по модели</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-at="host" data-label="Host: управляет клиентами, моделью и согласием">Host координирует всё: запускает клиентов и решает, что показать модели и что разрешить.</li>
+    <li data-at="c1" data-label="1 клиент = 1 сервер">У каждого сервера свой клиент. Три сервера — три клиента.</li>
+    <li data-at="s1" data-label="Локальный: процесс на вашей машине">Локальный сервер запускается host-ом как дочерний процесс и общается через stdin/stdout.</li>
+    <li data-at="s3" data-label="Удалённый: HTTPS + OAuth">Удалённый сервер — это обычный веб-сервис с одним MCP-эндпоинтом и авторизацией OAuth.</li>
+    <li data-at="e2" data-label="Сервер — адаптер к реальной системе">За сервером стоит реальная система: файлы, база данных, API. Сервер переводит её на язык MCP.</li>
+    <li data-at="llm" data-kind="think" data-label="Модель видит только то, что покажет host">Модель не подключается к серверам напрямую. Host решает, какие инструменты и данные попадут в её контекст.</li>
+  </ol>
+  <div class="callout"><b>Изоляция как принцип.</b> Спецификация требует, чтобы сервер не видел весь разговор и не мог «заглянуть» в другие серверы. Контекст между ними переносит только host, и только с согласия пользователя.</div>
+  <h3>Принципы, заложенные в дизайн</h3>
+  <ul class="bul">
+    <li><strong>Серверы должны быть простыми.</strong> Оркестрацию, UI и работу с моделью берёт на себя host.</li>
+    <li><strong>Серверы должны легко комбинироваться:</strong> каждый делает своё, и их можно подключать пачками.</li>
+    <li><strong>Возможности наращиваются постепенно.</strong> Стороны сообщают друг другу, что умеют (capabilities), а необязательные функции подключаются через расширения.</li>
+  </ul>
+</article>
+
+<!-- ═════════════════════════ 3. ДВА СЛОЯ ═════════════════════════ -->
+<article class="page" id="layers" data-ch="layers" data-show="@layers" data-cam="0,6.5,16.5,0,1.6,0" data-legend="req,res,note,err">
+  <div class="kicker">Глава 3</div>
+  <h2>Два слоя: данные и транспорт</h2>
+  <p class="lead">MCP разделён на два слоя. <strong>Data layer</strong> отвечает за то, что говорим: сообщения JSON-RPC 2.0, методы и примитивы. <strong>Transport layer</strong> отвечает за то, как доставляем: канал, фрейминг, заголовки, авторизацию. Сообщения одинаковы на любом транспорте.</p>
+  <div class="steps-h"><h3>Путь сообщения через стек</h3><small>нажмите на шаг, чтобы увидеть JSON</small></div>
+  <ol class="steps">
+    <li data-path="lay_L3,lay_L2,lay_L1,lay_R1,lay_R2,lay_R3" data-kind="req" data-label="tools/call" data-dur="2.6"><strong>Запрос</strong> содержит <code>id</code>, <code>method</code> и <code>params</code>. На него обязательно придёт ответ.
+<pre class="payload" data-title="Запрос (Request)">{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": { "city": "Казань" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {},
+      "io.modelcontextprotocol/clientInfo": { "name": "my-agent", "version": "1.0.0" }
+    }
+  }
+}</pre></li>
+    <li data-path="lay_R3,lay_R2,lay_R1,lay_L1,lay_L2,lay_L3" data-kind="res" data-label="result" data-dur="2.6"><strong>Ответ</strong> несёт тот же <code>id</code> и либо <code>result</code>, либо <code>error</code>. В версии 2026-07-28 у каждого result есть поле <code>resultType</code>.
+<pre class="payload" data-title="Ответ (Response)">{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "resultType": "complete",
+    "content": [{ "type": "text", "text": "Казань: +14°C, облачно" }],
+    "isError": false,
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": { "name": "weather", "version": "2.0.1" }
+    }
+  }
+}</pre></li>
+    <li data-path="lay_L3,lay_L2,lay_L1,lay_R1,lay_R2,lay_R3" data-kind="note" data-label="notifications/cancelled" data-dur="2.4"><strong>Уведомление</strong> приходит без <code>id</code>, и отвечать на него не нужно. Например, клиент сообщает, что запрос больше не нужен.
+<pre class="payload" data-title="Уведомление (Notification)">{
+  "jsonrpc": "2.0",
+  "method": "notifications/cancelled",
+  "params": {
+    "requestId": 3,
+    "reason": "Пользователь нажал «Стоп»"
+  }
+}</pre></li>
+    <li data-path="lay_R3,lay_R2,lay_R1,lay_L1,lay_L2,lay_L3" data-kind="err" data-label="error -32602" data-dur="2.4"><strong>Ошибка протокола</strong> — это ответ с <code>error</code> вместо <code>result</code>, например на вызов несуществующего инструмента.
+<pre class="payload" data-title="Ошибка (Error)">{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "error": {
+    "code": -32602,
+    "message": "Unknown tool: get_wether"
+  }
+}</pre></li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <div class="callout"><b>Важно: запросы отправляет только клиент.</b> В версии 2026-07-28 сервер больше не шлёт клиенту запросов, только ответы и уведомления. Если серверу что-то нужно от клиента, он говорит об этом в ответе (глава 7).</div>
+  <h3>Коды ошибок</h3>
+  <table class="tbl">
+    <tr><th>Код</th><th>Значение</th></tr>
+    <tr><td>-32700 … -32603</td><td>Стандартные коды JSON-RPC: parse error, invalid request, method not found, invalid params, internal error.</td></tr>
+    <tr><td>-32602</td><td>Invalid params. С этой версии так же отвечают на «ресурс не найден» (раньше был -32002).</td></tr>
+    <tr><td>-32020</td><td>HeaderMismatch: HTTP-заголовок не совпадает с телом.</td></tr>
+    <tr><td>-32021</td><td>MissingRequiredClientCapability: запросу нужна возможность клиента, которую тот не заявил.</td></tr>
+    <tr><td>-32022</td><td>UnsupportedProtocolVersion: сервер не знает версию клиента.</td></tr>
+  </table>
+  <p>Диапазон <code>-32000…-32019</code> отдан реализациям, а <code>-32020…-32099</code> зарезервирован за спецификацией MCP.</p>
+</article>
+
+<!-- ═════════════════════════ 4. БЕЗ РУКОПОЖАТИЯ ═════════════════════════ -->
+<article class="page" id="lifecycle" data-ch="life" data-show="@life" data-cam="-0.5,14,12.5,-0.5,0.4,0" data-legend="client,server,req,res,err">
+  <div class="kicker">Глава 4</div>
+  <h2>Жизненный цикл: протокол без сессий</h2>
+  <p class="lead">Главное изменение версии 2026-07-28: <strong>MCP стал stateless</strong>. Рукопожатия <code>initialize</code> больше нет, и серверу не нужно помнить соединение, потому что каждый запрос самодостаточен.</p>
+  <p>Версия протокола и возможности клиента передаются в <code>_meta</code> <strong>каждого</strong> запроса. Поэтому любой запрос может попасть на любую реплику сервера за балансировщиком, как обычный REST-вызов, и «липкие» сессии не нужны.</p>
+  <div class="steps-h"><h3>Смотрите на модель</h3><small>каждый запрос уходит на свою реплику</small></div>
+  <ol class="steps">
+    <li data-path="life_c,life_lb,life_r1" data-kind="req" data-label="server/discover" data-dur="2">Клиент <strong>может</strong> заранее спросить сервер, какие версии и возможности тот поддерживает. Отвечать на <code>server/discover</code> сервер <strong>обязан</strong>.
+<pre class="payload" data-title="Client → Server · server/discover">{
+  "jsonrpc": "2.0",
+  "id": "discover-1",
+  "method": "server/discover",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientInfo": { "name": "ExampleClient", "version": "1.0.0" },
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</pre></li>
+    <li data-path="life_r1,life_lb,life_c" data-kind="res" data-label="versions + capabilities" data-dur="2">Сервер возвращает поддерживаемые версии, capabilities, инструкции для модели и время, на которое ответ можно закэшировать.
+<pre class="payload" data-title="Server → Client · результат discover">{
+  "jsonrpc": "2.0",
+  "id": "discover-1",
+  "result": {
+    "resultType": "complete",
+    "supportedVersions": ["2026-07-28"],
+    "capabilities": { "tools": {}, "resources": {} },
+    "instructions": "Сервер погоды: прогнозы и история наблюдений.",
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": { "name": "ExampleServer", "version": "1.0.0" }
+    },
+    "ttlMs": 3600000,
+    "cacheScope": "public"
+  }
+}</pre></li>
+    <li data-path="life_c,life_lb,life_r3" data-kind="req" data-label="tools/list" data-dur="2">Следующий запрос уходит на <strong>другую реплику</strong>. Это нормально: всё нужное есть в самом запросе.
+<pre class="payload" data-title="Client → Реплика C · tools/list">{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/list",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": { "elicitation": { "form": {} } }
+    }
+  }
+}</pre></li>
+    <li data-path="life_r3,life_lb,life_c" data-kind="res" data-label="tools[] · ttlMs" data-dur="2">Список инструментов не зависит от соединения. Сервер отдаёт его в стабильном порядке и с подсказкой для кэша.</li>
+    <li data-path="life_c,life_lb,life_r2" data-kind="req" data-label="tools/call" data-dur="2">Вызов инструмента попадает на третью реплику. Если у инструмента есть состояние (например, «корзина»), он возвращает <strong>handle</strong>, и клиент передаёт его в следующие вызовы как обычный аргумент.</li>
+    <li data-path="life_r2,life_lb,life_c" data-kind="res" data-label="resultType: complete" data-dur="2">Ответ готов. Серверу не пришлось ничего помнить между запросами.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <h3>Было → стало</h3>
+  <table class="tbl">
+    <tr><th>До 2026-07-28</th><th>Сейчас</th></tr>
+    <tr><td style="white-space:normal;font-weight:500"><code>initialize</code> → ответ → <code>notifications/initialized</code></td><td>Рукопожатия нет, версия и capabilities едут в <code>_meta</code> каждого запроса</td></tr>
+    <tr><td style="white-space:normal;font-weight:500">Заголовок <code>Mcp-Session-Id</code>, сессия на сервере</td><td>Сессий нет, состояние передаётся явными handle в аргументах</td></tr>
+    <tr><td style="white-space:normal;font-weight:500"><code>ping</code> для проверки связи</td><td>Удалён</td></tr>
+    <tr><td style="white-space:normal;font-weight:500">Серверные запросы к клиенту</td><td>Multi Round-Trip Requests (глава 7)</td></tr>
+  </table>
+  <p>Если сервер не знает версию клиента, он отвечает ошибкой <code>-32022</code> со списком поддерживаемых версий, и клиент повторяет запрос с подходящей:</p>
+<pre class="code">{ "code": -32022, "message": "Unsupported protocol version",
+  "data": { "supported": ["2026-07-28"], "requested": "&lt;версия клиента&gt;" } }</pre>
+  <div class="callout"><b>Совместимость со старыми серверами.</b> Клиент, который умеет обе «эпохи», сначала пробует современный запрос (на stdio это <code>server/discover</code>). Если в ответ приходит не современная ошибка, он откатывается на старый <code>initialize</code>.</div>
+  <p><strong>Завершение работы.</strong> На stdio клиент закрывает stdin сервера, ждёт и при необходимости отправляет SIGTERM, а затем SIGKILL. На HTTP завершать нечего, поэтому метод DELETE больше не используется.</p>
+</article>
+
+<!-- ═════════════════════════ 5. ТРАНСПОРТЫ ═════════════════════════ -->
+<article class="page" id="transports" data-ch="transport" data-show="@core,user,zoneLocal,zoneRemote" data-cam="0,19,18,-0.5,0.5,2.5" data-legend="client,server,req,res,note">
+  <div class="kicker">Глава 5</div>
+  <h2>Транспорты: stdio и Streamable HTTP</h2>
+  <p class="lead">Спецификация определяет два стандартных транспорта. <strong>stdio</strong> подходит для локальных серверов, <strong>Streamable HTTP</strong> — для удалённых. Кроме них допускаются собственные транспорты, если они сохраняют формат и правила JSON-RPC.</p>
+  <div class="steps-h"><h3>Смотрите на модель</h3><small>слева локальный, справа облачный</small></div>
+  <ol class="steps">
+    <li data-from="c1" data-to="s1" data-kind="req" data-label="stdin ⏎">stdio: host запускает сервер как дочерний процесс и пишет в его stdin <strong>по одному JSON-сообщению на строку</strong>, без переводов строк внутри.
+<pre class="payload" data-title="stdin сервера (одна строка)">{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"file:///work/report.md","_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}</pre></li>
+    <li data-from="s1" data-to="c1" data-kind="res" data-label="stdout ⏎">Сервер отвечает строкой в stdout. В stdout нельзя писать <strong>ничего, кроме MCP-сообщений</strong>: одна случайная отладочная строка ломает поток.
+<pre class="payload" data-title="stdout сервера (одна строка)">{"jsonrpc":"2.0","id":1,"result":{"resultType":"complete","contents":[{"uri":"file:///work/report.md","mimeType":"text/markdown","text":"# Отчёт за квартал…"}],"ttlMs":0,"cacheScope":"private"}}</pre></li>
+    <li data-at="s1" data-label="логи → stderr">Логи пишутся в stderr: host может их показать или сохранить, и в протокол они не попадают.</li>
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="POST /mcp">Streamable HTTP: у сервера <strong>один эндпоинт</strong>, и каждое сообщение отправляется отдельным POST. Метод и имя инструмента дублируются в заголовках, чтобы прокси и шлюзы могли маршрутизировать запрос, не разбирая тело.
+<pre class="payload" data-title="HTTP-запрос">POST /mcp HTTP/1.1
+Host: mcp.example.com
+Content-Type: application/json
+Accept: application/json, text/event-stream
+MCP-Protocol-Version: 2026-07-28
+Mcp-Method: tools/call
+Mcp-Name: search_issues
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs…
+
+{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"search_issues","arguments":{"repo":"acme/web"},"_meta":{…}}}</pre></li>
+    <li data-from="s3" data-to="c3" data-kind="note" data-count="3" data-label="SSE: progress" data-dur="2">Сервер может ответить сразу JSON-ом или открыть <strong>SSE-поток, привязанный к этому запросу</strong>: сначала прогресс и логи, в конце сам ответ.
+<pre class="payload" data-title="HTTP-ответ: text/event-stream">HTTP/1.1 200 OK
+Content-Type: text/event-stream
+X-Accel-Buffering: no
+
+data: {"jsonrpc":"2.0","method":"notifications/progress","params":{"progressToken":"t-7","progress":1,"total":3}}
+
+data: {"jsonrpc":"2.0","method":"notifications/progress","params":{"progressToken":"t-7","progress":2,"total":3}}
+
+data: {"jsonrpc":"2.0","id":7,"result":{"resultType":"complete","content":[…]}}</pre></li>
+    <li data-from="s3" data-to="c3" data-kind="res" data-label="SSE: result">Последнее событие потока — это ответ на запрос, после него поток закрывается. Если связь оборвалась раньше, запрос потерян, и клиент отправляет его заново с новым <code>id</code>.</li>
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="subscriptions/listen">Чтобы получать уведомления об изменениях, клиент открывает <strong>один долгий POST</strong> <code>subscriptions/listen</code> и сам выбирает, на что подписаться.
+<pre class="payload" data-title="Client → Server · подписка">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "subscriptions/listen",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    },
+    "notifications": {
+      "toolsListChanged": true,
+      "resourceSubscriptions": ["file:///project/config.json"]
+    }
+  }
+}</pre></li>
+    <li data-from="s3" data-to="c3" data-kind="note" data-label="…/acknowledged">Первым сообщением сервер подтверждает подписку и перечисляет, что согласился присылать.
+<pre class="payload" data-title="Server → Client · подтверждение">{
+  "jsonrpc": "2.0",
+  "method": "notifications/subscriptions/acknowledged",
+  "params": {
+    "_meta": { "io.modelcontextprotocol/subscriptionId": 1 },
+    "notifications": {
+      "toolsListChanged": true,
+      "resourceSubscriptions": ["file:///project/config.json"]
+    }
+  }
+}</pre></li>
+    <li data-from="s3" data-to="c3" data-kind="note" data-label="tools/list_changed">Когда набор инструментов меняется, по этому потоку приходит уведомление, и клиент заново запрашивает <code>tools/list</code>.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <h3>Правила Streamable HTTP</h3>
+  <table class="tbl">
+    <tr><th>Что</th><th>Правило</th></tr>
+    <tr><td>Accept</td><td>Клиент обязан принимать и <code>application/json</code>, и <code>text/event-stream</code>.</td></tr>
+    <tr><td>Уведомления</td><td>Сервер отвечает <code>202 Accepted</code> без тела.</td></tr>
+    <tr><td>Заголовки</td><td><code>MCP-Protocol-Version</code> и <code>Mcp-Method</code> нужны во всех запросах, <code>Mcp-Name</code> — в <code>tools/call</code>, <code>resources/read</code> и <code>prompts/get</code>. Если заголовок расходится с телом, сервер отвечает 400 и кодом -32020.</td></tr>
+    <tr><td>GET / DELETE</td><td>Возвращают 405: отдельного GET-потока и завершения сессии больше нет.</td></tr>
+    <tr><td>Отмена</td><td>Закрытие SSE-потока равносильно отмене запроса.</td></tr>
+    <tr><td>Безопасность</td><td>Сервер обязан проверять <code>Origin</code> (иначе 403). Локальный сервер должен слушать 127.0.0.1, а не 0.0.0.0.</td></tr>
+  </table>
+  <div class="callout"><b>Устарело.</b> Транспорт HTTP+SSE из версии 2024-11-05 (отдельные эндпоинты для POST и SSE) объявлен deprecated. Новым серверам нужен только Streamable HTTP.</div>
+</article>
+
+<!-- ═════════════════════════ 6. ПРИМИТИВЫ СЕРВЕРА ═════════════════════════ -->
+<article class="page" id="server-primitives" data-ch="server" data-show="host,llm,user,s2,prim_tools,prim_res,prim_prompts,pp1,pp2,pp3" data-cam="-4.5,14,16,-4.6,1,0.4" data-legend="llm,host,user,server">
+  <div class="kicker">Глава 6</div>
+  <h2>Что даёт сервер: Tools, Resources, Prompts</h2>
+  <p class="lead">Сервер предоставляет три вида примитивов. Они различаются прежде всего тем, <strong>кто решает</strong> их использовать.</p>
+  <table class="tbl">
+    <tr><th>Примитив</th><th>Что это · кто управляет · методы</th></tr>
+    <tr><td><span class="dot" style="--c:#f97316"></span>Tools</td><td>Действия и вычисления: «создать задачу», «выполнить запрос». Использовать их решает <strong>модель</strong>. <code>tools/list</code>, <code>tools/call</code></td></tr>
+    <tr><td><span class="dot" style="--c:#10b981"></span>Resources</td><td>Данные для контекста, у каждого ресурса есть URI: файл, запись, схема БД. Подмешивает их <strong>приложение</strong>. <code>resources/list</code>, <code>resources/read</code>, <code>resources/templates/list</code></td></tr>
+    <tr><td><span class="dot" style="--c:#ec4899"></span>Prompts</td><td>Готовые сценарии и шаблоны сообщений, например слэш-команды. Выбирает их <strong>пользователь</strong>. <code>prompts/list</code>, <code>prompts/get</code></td></tr>
+  </table>
+  <div class="steps-h"><h3>Кто что вызывает</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-from="llm" data-to="prim_tools" data-kind="think" data-label="tools/call">Модель видит описания инструментов и сама решает, когда вызвать какой. Так выглядит описание инструмента в <code>tools/list</code>:
+<pre class="payload" data-title="Tool — описание в tools/list">{
+  "name": "run_query",
+  "title": "SQL-запрос (только чтение)",
+  "description": "Выполняет SELECT в аналитической БД. Не более 1000 строк.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "sql": { "type": "string", "description": "Один SELECT-запрос" },
+      "limit": { "type": "integer", "minimum": 1, "maximum": 1000 }
+    },
+    "required": ["sql"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": { "rows": { "type": "array" }, "rowCount": { "type": "integer" } }
+  },
+  "annotations": { "readOnlyHint": true, "openWorldHint": false }
+}</pre></li>
+    <li data-from="host" data-to="prim_res" data-kind="req" data-label="resources/read">Приложение само решает, какие данные подмешать: схему БД, открытый файл, выбранную пользователем запись.
+<pre class="payload" data-title="Server → Client · resources/read">{
+  "jsonrpc": "2.0",
+  "id": 11,
+  "result": {
+    "resultType": "complete",
+    "contents": [{
+      "uri": "postgres://analytics/schema/orders",
+      "mimeType": "application/json",
+      "text": "{\"columns\":[\"id\",\"customer_id\",\"total\",\"created_at\"]}"
+    }],
+    "ttlMs": 600000,
+    "cacheScope": "private"
+  }
+}</pre></li>
+    <li data-from="user" data-to="prim_prompts" data-kind="user" data-label="prompts/get">Пользователь выбирает готовый сценарий, например «/отчёт-по-продажам». Сервер возвращает заготовленные сообщения с подставленными аргументами.
+<pre class="payload" data-title="Server → Client · prompts/get">{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "result": {
+    "resultType": "complete",
+    "description": "Отчёт по продажам за период",
+    "messages": [{
+      "role": "user",
+      "content": {
+        "type": "text",
+        "text": "Построй отчёт по продажам за 2026-Q3: выручка, топ-10 клиентов, динамика к Q2."
+      }
+    }]
+  }
+}</pre></li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <h3>Детали, которые важно знать</h3>
+  <ul class="bul">
+    <li><strong>Аннотации инструментов</strong> — это подсказки host-у: <code>readOnlyHint</code>, <code>destructiveHint</code>, <code>idempotentHint</code>, <code>openWorldHint</code>. Если сервер не доверенный, аннотациям верить нельзя.</li>
+    <li><strong>Результат инструмента</strong> — это <code>content[]</code> (text, image, audio, resource_link, embedded resource) плюс <code>structuredContent</code>, который должен соответствовать <code>outputSchema</code>. Для совместимости JSON стоит продублировать текстовым блоком.</li>
+    <li><strong>Шаблоны ресурсов</strong> (RFC 6570) позволяют описать целое семейство URI: <code>postgres://analytics/table/{name}</code>.</li>
+    <li><strong>Автодополнение</strong> <code>completion/complete</code> подсказывает значения аргументов промптов и шаблонов прямо в интерфейсе.</li>
+    <li>Каждая группа примитивов объявляется в capabilities: <code>tools</code>, <code>resources</code>, <code>prompts</code>, <code>completions</code>.</li>
+  </ul>
+</article>
+
+<!-- ═════════════════════════ 7. MRTR ═════════════════════════ -->
+<article class="page" id="client-features" data-ch="mrtr" data-show="host,llm,user,c2,p2,s2,e2,x2" data-cam="-4.5,13,17,-4.6,1.2,0.8" data-legend="client,server,user,req,res">
+  <div class="kicker">Глава 7</div>
+  <h2>Когда серверу нужен человек: Multi Round-Trip</h2>
+  <p class="lead">Иногда серверу не хватает данных: нужно подтверждение пользователя, выбор варианта, вход во внешний сервис. Раньше сервер отправлял клиенту собственный запрос. Теперь он <strong>отвечает, что ему нужен ввод</strong>, а клиент повторяет исходный запрос уже с ответами. Этот паттерн называется <strong>Multi Round-Trip Requests (MRTR)</strong>.</p>
+  <div class="steps-h"><h3>Подтверждение опасной операции</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tools/call">Модель просит применить миграцию к базе.
+<pre class="payload" data-title="Client → Server · запрос №1">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "apply_migration",
+    "arguments": { "migration": "2026_09_drop_legacy_orders" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": { "elicitation": { "form": {} } }
+    }
+  }
+}</pre></li>
+    <li data-from="s2" data-to="c2" data-kind="res" data-label="input_required">Сервер не выполняет операцию, а возвращает <code>resultType: "input_required"</code> со списком вопросов и защищённым состоянием.
+<pre class="payload" data-title="Server → Client · InputRequiredResult">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "input_required",
+    "inputRequests": {
+      "confirm": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Миграция удалит таблицу legacy_orders (1,2 млн строк). Продолжить?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "approve": { "type": "boolean", "title": "Да, применить" },
+              "env": { "type": "string", "enum": ["staging", "production"] }
+            },
+            "required": ["approve", "env"]
+          }
+        }
+      }
+    },
+    "requestState": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0…"
+  }
+}</pre></li>
+    <li data-from="c2" data-to="user" data-kind="user" data-label="форма">Host показывает пользователю форму по присланной схеме. Модель в этом не участвует.</li>
+    <li data-from="user" data-to="c2" data-kind="user" data-label="accept">Пользователь соглашается и выбирает окружение. Он также может отказаться (<code>decline</code>) или закрыть форму (<code>cancel</code>).</li>
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tools/call + inputResponses">Клиент <strong>повторяет исходный запрос с новым id</strong>, прикладывает ответы и возвращает <code>requestState</code> без изменений.
+<pre class="payload" data-title="Client → Server · запрос №2 (повтор)">{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "apply_migration",
+    "arguments": { "migration": "2026_09_drop_legacy_orders" },
+    "inputResponses": {
+      "confirm": { "action": "accept", "content": { "approve": true, "env": "staging" } }
+    },
+    "requestState": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0…",
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": { "elicitation": { "form": {} } }
+    }
+  }
+}</pre></li>
+    <li data-from="s2" data-to="e2" data-kind="req" data-label="DROP TABLE …">Сервер проверяет подпись <code>requestState</code> и выполняет операцию.</li>
+    <li data-from="e2" data-to="s2" data-kind="res" data-label="OK">База подтверждает выполнение.</li>
+    <li data-from="s2" data-to="c2" data-kind="res" data-label="resultType: complete">Клиент получает обычный результат.
+<pre class="payload" data-title="Server → Client · финальный результат">{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "complete",
+    "content": [{ "type": "text", "text": "Миграция применена к staging за 4,2 с." }],
+    "isError": false
+  }
+}</pre></li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <h3>Какие вопросы сервер может задать</h3>
+  <table class="tbl">
+    <tr><th>Запрос</th><th>Статус и назначение</th></tr>
+    <tr><td>Elicitation</td><td><strong>Активно.</strong> <code>form</code>: плоская форма из строк, чисел, булевых значений и списков. <code>url</code>: пользователь уходит на страницу сервиса. Это нужно для паролей, платежей и OAuth во внешних системах.</td></tr>
+    <tr><td>Sampling</td><td><strong>Deprecated.</strong> Сервер просил модель host-а сгенерировать текст. Теперь рекомендуют напрямую вызывать API провайдера модели.</td></tr>
+    <tr><td>Roots</td><td><strong>Deprecated.</strong> Раньше клиент так сообщал серверу границы файловой системы. Теперь пути передают в аргументах инструментов, через URI ресурсов или в конфигурации сервера.</td></tr>
+  </table>
+  <div class="callout warn"><b>Безопасность MRTR.</b> <code>requestState</code> проходит через клиент, поэтому сервер обязан считать его данными от атакующего. Состояние нужно защищать HMAC или AEAD и привязывать к пользователю, сроку жизни и исходному запросу. Через формы <strong>нельзя</strong> запрашивать пароли, API-ключи и платёжные данные: для этого есть режим <code>url</code>.</div>
+  <p>InputRequiredResult разрешён только в ответах на <code>tools/call</code>, <code>resources/read</code> и <code>prompts/get</code>. Sampling и Roots останутся в спецификации минимум на 12 месяцев: такой срок устаревания гарантирует политика жизненного цикла функций.</p>
+</article>
+
+<!-- ═════════════════════════ 8. ВЫЗОВ ИНСТРУМЕНТА ═════════════════════════ -->
+<article class="page" id="tool-call" data-ch="toolcall" data-show="host,llm,user,c3,p3,s3,e3,x3,zoneRemote" data-cam="-0.5,15,24,-0.8,1,3.5" data-legend="user,llm,client,server,ext,req,res">
+  <div class="kicker">Глава 8</div>
+  <h2>Один вызов инструмента от начала до конца</h2>
+  <p class="lead">Соберём всё вместе. Пользователь спрашивает: «Какие открытые баги в репозитории acme/web?» Проследим каждое сообщение от вопроса до ответа.</p>
+  <div class="steps-h"><h3>Полный цикл</h3><small>12 шагов · нажмите, чтобы остановиться</small></div>
+  <ol class="steps">
+    <li data-from="user" data-to="llm" data-kind="user" data-label="«Какие открытые баги?»">Пользователь задаёт вопрос в интерфейсе host-а.</li>
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="tools/list">Host заранее (или по <code>ttlMs</code> из кэша) получает список инструментов сервера.</li>
+    <li data-from="s3" data-to="c3" data-kind="res" data-label="tools[]">Сервер описывает инструмент: имя, назначение, JSON Schema аргументов и результата, аннотации.
+<pre class="payload" data-title="Server → Client · tools/list">{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "result": {
+    "resultType": "complete",
+    "tools": [{
+      "name": "search_issues",
+      "title": "Поиск issues",
+      "description": "Ищет issues в репозитории по статусу и метке. Возвращает номер, заголовок и ссылку.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "repo":  { "type": "string", "description": "owner/name" },
+          "state": { "type": "string", "enum": ["open", "closed", "all"] },
+          "label": { "type": "string" }
+        },
+        "required": ["repo"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": { "total": { "type": "integer" }, "items": { "type": "array" } }
+      },
+      "annotations": { "readOnlyHint": true, "openWorldHint": true }
+    }],
+    "ttlMs": 300000,
+    "cacheScope": "private"
+  }
+}</pre></li>
+    <li data-at="llm" data-kind="think" data-label="Модель выбирает search_issues">Host передаёт модели вопрос и описания инструментов. Модель решает вызвать <code>search_issues</code> и формирует аргументы.</li>
+    <li data-from="llm" data-to="c3" data-kind="think" data-label="tool_use">Модель возвращает host-у намерение вызвать инструмент. Для действий с побочными эффектами host здесь спрашивает подтверждение пользователя.</li>
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="tools/call">Клиент отправляет <code>tools/call</code>. По HTTP это POST с заголовками <code>Mcp-Method: tools/call</code> и <code>Mcp-Name: search_issues</code>.
+<pre class="payload" data-title="Client → Server · tools/call">{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "search_issues",
+    "arguments": { "repo": "acme/web", "state": "open", "label": "bug" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {},
+      "io.modelcontextprotocol/clientInfo": { "name": "my-agent", "version": "1.4.0" },
+      "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
+    }
+  }
+}</pre></li>
+    <li data-from="s3" data-to="e3" data-kind="req" data-label="GET /repos/acme/web/issues">Сервер проверяет аргументы по схеме и обращается к API GitHub <strong>со своим токеном</strong>. Токен клиента дальше не передаётся.</li>
+    <li data-from="e3" data-to="s3" data-kind="res" data-label="200 OK">API возвращает данные.</li>
+    <li data-from="s3" data-to="c3" data-kind="res" data-label="result">Сервер возвращает результат двумя способами: текстом для модели и структурой по <code>outputSchema</code>.
+<pre class="payload" data-title="Server → Client · результат">{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "resultType": "complete",
+    "content": [{
+      "type": "text",
+      "text": "{\"total\":2,\"items\":[{\"number\":812,\"title\":\"Падает логин в Safari\"},{\"number\":797,\"title\":\"Дубли в корзине\"}]}"
+    }],
+    "structuredContent": {
+      "total": 2,
+      "items": [
+        { "number": 812, "title": "Падает логин в Safari", "url": "https://github.com/acme/web/issues/812" },
+        { "number": 797, "title": "Дубли в корзине", "url": "https://github.com/acme/web/issues/797" }
+      ]
+    },
+    "isError": false,
+    "_meta": { "io.modelcontextprotocol/serverInfo": { "name": "github-mcp", "version": "2.1.0" } }
+  }
+}</pre></li>
+    <li data-from="c3" data-to="llm" data-kind="res" data-label="результат → контекст">Host добавляет результат в контекст модели. Для модели это <strong>недоверенные данные</strong>, а не инструкции.</li>
+    <li data-at="llm" data-kind="think" data-label="Модель формулирует ответ">Модель пишет ответ на основе полученных данных.</li>
+    <li data-from="llm" data-to="user" data-kind="res" data-label="«Два бага: #812 и #797»">Пользователь видит ответ со ссылками на issues.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <h3>Два вида ошибок</h3>
+  <table class="tbl">
+    <tr><th>Тип</th><th>Когда и как</th></tr>
+    <tr><td>Протокольная</td><td>Неизвестный инструмент или битый запрос. JSON-RPC <code>error</code>, например -32602. Модель её обычно не видит.</td></tr>
+    <tr><td>Ошибка выполнения</td><td>API недоступно, не прошла валидация аргументов, нарушено бизнес-правило. Обычный <code>result</code> с <code>isError: true</code> и понятным текстом, <strong>чтобы модель могла исправиться</strong> и повторить вызов.</td></tr>
+  </table>
+</article>
+
+<!-- ═════════════════════════ 9. УТИЛИТЫ ═════════════════════════ -->
+<article class="page" id="utilities" data-ch="util" data-show="host,llm,c2,p2,s2,e2,x2" data-cam="0,11,17,-0.3,1,0.3" data-legend="client,server,req,res,note">
+  <div class="kicker">Глава 9</div>
+  <h2>Служебные механизмы</h2>
+  <p class="lead">Вокруг основных примитивов есть набор утилит: прогресс, отмена, постраничная выдача, автодополнение, кэширование и трассировка. Все они тоже работают без сессий.</p>
+  <div class="steps-h"><h3>Долгий запрос</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tools/call + progressToken">Клиент хочет получать прогресс и передаёт <code>progressToken</code> в <code>_meta</code>.
+<pre class="payload" data-title="Client → Server · запрос с прогрессом">{
+  "jsonrpc": "2.0",
+  "id": 31,
+  "method": "tools/call",
+  "params": {
+    "name": "export_orders",
+    "arguments": { "year": 2026 },
+    "_meta": {
+      "progressToken": "exp-31",
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</pre></li>
+    <li data-from="s2" data-to="e2" data-kind="req" data-label="SELECT … (батчами)">Сервер выгружает данные частями.</li>
+    <li data-from="s2" data-to="c2" data-kind="note" data-count="3" data-label="notifications/progress" data-dur="2.2">Прогресс идёт по потоку ответа на этот запрос. Значение <code>progress</code> обязано расти.
+<pre class="payload" data-title="Server → Client · прогресс">{
+  "jsonrpc": "2.0",
+  "method": "notifications/progress",
+  "params": {
+    "progressToken": "exp-31",
+    "progress": 40000,
+    "total": 120000,
+    "message": "Выгружено 40 000 из 120 000 строк"
+  }
+}</pre></li>
+    <li data-from="c2" data-to="s2" data-kind="note" data-label="notifications/cancelled">Пользователь передумал. На stdio клиент отправляет уведомление об отмене, а на HTTP просто закрывает SSE-поток.
+<pre class="payload" data-title="Client → Server · отмена (stdio)">{
+  "jsonrpc": "2.0",
+  "method": "notifications/cancelled",
+  "params": { "requestId": 31, "reason": "Отменено пользователем" }
+}</pre></li>
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tools/list (cursor)">Длинные списки отдаются страницами. Курсор непрозрачен: клиент не пытается его разобрать.
+<pre class="payload" data-title="Client → Server · следующая страница">{
+  "jsonrpc": "2.0",
+  "id": 32,
+  "method": "resources/list",
+  "params": {
+    "cursor": "eyJwYWdlIjoyfQ",
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</pre></li>
+    <li data-from="s2" data-to="c2" data-kind="res" data-label="nextCursor · ttlMs">В ответе приходят данные, <code>nextCursor</code> и подсказки для кэша.
+<pre class="payload" data-title="Server → Client · страница + кэш">{
+  "jsonrpc": "2.0",
+  "id": 32,
+  "result": {
+    "resultType": "complete",
+    "resources": [
+      { "uri": "postgres://analytics/table/orders", "name": "orders", "mimeType": "application/json" }
+    ],
+    "nextCursor": "eyJwYWdlIjozfQ",
+    "ttlMs": 60000,
+    "cacheScope": "private"
+  }
+}</pre></li>
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="completion/complete">Пока пользователь заполняет аргумент промпта, host запрашивает варианты.
+<pre class="payload" data-title="Client → Server · автодополнение">{
+  "jsonrpc": "2.0",
+  "id": 33,
+  "method": "completion/complete",
+  "params": {
+    "ref": { "type": "ref/prompt", "name": "sales_report" },
+    "argument": { "name": "region", "value": "Пов" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}</pre></li>
+    <li data-from="s2" data-to="c2" data-kind="res" data-label="values[]">Сервер отвечает вариантами, не больше 100 за раз.
+<pre class="payload" data-title="Server → Client · варианты">{
+  "jsonrpc": "2.0",
+  "id": 33,
+  "result": {
+    "resultType": "complete",
+    "completion": { "values": ["Поволжье"], "total": 1, "hasMore": false }
+  }
+}</pre></li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <table class="tbl">
+    <tr><th>Механизм</th><th>Статус в 2026-07-28</th></tr>
+    <tr><td>Progress</td><td>Активен: <code>_meta.progressToken</code> и <code>notifications/progress</code></td></tr>
+    <tr><td>Cancellation</td><td>Активна: на stdio уведомление, на HTTP закрытие потока</td></tr>
+    <tr><td>Pagination</td><td>Активна: <code>cursor</code> / <code>nextCursor</code> во всех list-методах</td></tr>
+    <tr><td>Caching</td><td><strong>Новое:</strong> обязательные <code>ttlMs</code> и <code>cacheScope</code> в ответах list-методов, <code>resources/read</code> и <code>server/discover</code></td></tr>
+    <tr><td>Subscriptions</td><td><strong>Новое:</strong> <code>subscriptions/listen</code> вместо GET-потока и <code>resources/subscribe</code></td></tr>
+    <tr><td>Tracing</td><td><strong>Новое:</strong> ключи OpenTelemetry <code>traceparent</code>, <code>tracestate</code> и <code>baggage</code> в <code>_meta</code></td></tr>
+    <tr><td>Logging</td><td><strong>Deprecated:</strong> уровень задаётся в <code>_meta</code> каждого запроса. Рекомендуется stderr или OpenTelemetry</td></tr>
+    <tr><td>Ping</td><td><strong>Удалён</strong></td></tr>
+  </table>
+</article>
+
+<!-- ═════════════════════════ 10. АВТОРИЗАЦИЯ ═════════════════════════ -->
+<article class="page" id="authorization" data-ch="auth" data-show="host,c3,p3,s3,as,prm,asmeta,user,zoneRemote" data-cam="-3,16,21,-3.5,1,4.5" data-legend="client,server,auth,user,req,res,err">
+  <div class="kicker">Глава 10</div>
+  <h2>Авторизация: OAuth 2.1</h2>
+  <p class="lead">Для удалённых серверов MCP опирается на OAuth 2.1. MCP-сервер играет роль <strong>resource server</strong>: он проверяет токены, но не выдаёт их. Токены выдаёт отдельный <strong>authorization server</strong>, например корпоративный IdP.</p>
+  <p>Авторизация в MCP необязательна и касается только HTTP. Локальный stdio-сервер берёт учётные данные из окружения.</p>
+  <div class="steps-h"><h3>Первое подключение</h3><small>14 шагов</small></div>
+  <ol class="steps">
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="POST /mcp (без токена)">Клиент обращается к серверу, ещё не имея токена.</li>
+    <li data-from="s3" data-to="c3" data-kind="err" data-label="401 + WWW-Authenticate">Сервер отвечает 401 и указывает, где лежат его метаданные и какие scope нужны.
+<pre class="payload" data-title="Server → Client · 401">HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer resource_metadata="https://mcp.example.com/.well-known/oauth-protected-resource/mcp",
+                  scope="repo:read"</pre></li>
+    <li data-from="c3" data-to="prm" data-kind="req" data-label="GET protected-resource">Клиент читает Protected Resource Metadata (RFC 9728).</li>
+    <li data-from="prm" data-to="c3" data-kind="res" data-label="authorization_servers">В метаданных указано, какой сервер авторизации выдаёт токены для этого ресурса.
+<pre class="payload" data-title="Protected Resource Metadata">{
+  "resource": "https://mcp.example.com/mcp",
+  "authorization_servers": ["https://auth.example.com"],
+  "scopes_supported": ["repo:read", "repo:write"],
+  "bearer_methods_supported": ["header"]
+}</pre></li>
+    <li data-from="c3" data-to="asmeta" data-kind="req" data-label="GET AS metadata">Клиент читает метаданные сервера авторизации (RFC 8414 или OpenID Discovery).</li>
+    <li data-from="asmeta" data-to="c3" data-kind="res" data-label="endpoints, S256, CIMD">Поле <code>issuer</code> должно точно совпадать с адресом. Если в метаданных нет PKCE <code>S256</code>, клиент <strong>обязан</strong> остановиться.
+<pre class="payload" data-title="Authorization Server Metadata">{
+  "issuer": "https://auth.example.com",
+  "authorization_endpoint": "https://auth.example.com/authorize",
+  "token_endpoint": "https://auth.example.com/token",
+  "code_challenge_methods_supported": ["S256"],
+  "client_id_metadata_document_supported": true,
+  "authorization_response_iss_parameter_supported": true
+}</pre></li>
+    <li data-at="as" data-kind="note" data-label="Регистрация: заранее → CIMD → DCR">Как клиент регистрируется: заранее выданный client_id, иначе <strong>Client ID Metadata Document</strong> (client_id — это HTTPS-URL с описанием клиента), иначе устаревший Dynamic Client Registration.
+<pre class="payload" data-title="CIMD: https://agent.example.com/oauth/client.json">{
+  "client_id": "https://agent.example.com/oauth/client.json",
+  "client_name": "My Agent",
+  "redirect_uris": ["http://127.0.0.1:33418/callback"],
+  "grant_types": ["authorization_code"],
+  "token_endpoint_auth_method": "none"
+}</pre></li>
+    <li data-from="c3" data-to="user" data-kind="user" data-label="открыть браузер">Клиент открывает браузер со ссылкой авторизации, в которой есть PKCE и <code>resource</code> (RFC 8707).
+<pre class="payload" data-title="Ссылка авторизации">GET https://auth.example.com/authorize
+  ?response_type=code
+  &amp;client_id=https%3A%2F%2Fagent.example.com%2Foauth%2Fclient.json
+  &amp;redirect_uri=http%3A%2F%2F127.0.0.1%3A33418%2Fcallback
+  &amp;code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+  &amp;code_challenge_method=S256
+  &amp;resource=https%3A%2F%2Fmcp.example.com%2Fmcp
+  &amp;scope=repo%3Aread
+  &amp;state=af0ifjsldkj</pre></li>
+    <li data-from="user" data-to="as" data-kind="user" data-label="вход + согласие">Пользователь входит в систему и соглашается выдать доступ.</li>
+    <li data-from="as" data-to="c3" data-kind="res" data-label="code + iss">Сервер авторизации перенаправляет браузер обратно с кодом. Клиент <strong>обязан</strong> сверить <code>iss</code> с ожидаемым issuer (RFC 9207).</li>
+    <li data-from="c3" data-to="as" data-kind="req" data-label="POST /token + code_verifier">Клиент обменивает код на токен и доказывает PKCE-секретом, что код его.
+<pre class="payload" data-title="Запрос токена">POST https://auth.example.com/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&amp;code=SplxlOBeZQQYbYS6WxSbIA
+&amp;redirect_uri=http%3A%2F%2F127.0.0.1%3A33418%2Fcallback
+&amp;client_id=https%3A%2F%2Fagent.example.com%2Foauth%2Fclient.json
+&amp;code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+&amp;resource=https%3A%2F%2Fmcp.example.com%2Fmcp</pre></li>
+    <li data-from="as" data-to="c3" data-kind="res" data-label="access_token" data-do="token">Токен выпущен <strong>именно для этого MCP-сервера</strong>: его audience равен адресу ресурса.
+<pre class="payload" data-title="Ответ с токеном">{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6ImF0K2p3dCJ9…",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "8xLOxBtZp8…",
+  "scope": "repo:read"
+}
+// внутри JWT: "iss": "https://auth.example.com",
+//             "aud": "https://mcp.example.com/mcp"</pre></li>
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="Authorization: Bearer …">Токен уходит в заголовке <strong>каждого</strong> HTTP-запроса и никогда не передаётся в query string.</li>
+    <li data-from="s3" data-to="c3" data-kind="res" data-label="200 OK">Сервер проверяет подпись, срок, <code>iss</code>, <strong><code>aud</code></strong> и scope, после чего выполняет запрос.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <h3>Правила, которые чаще всего нарушают</h3>
+  <ul class="bul">
+    <li><strong>Проверка audience.</strong> Сервер принимает только токены, выпущенные для него самого.</li>
+    <li><strong>Никакого проброса токена.</strong> Для обращения к API за собой сервер получает отдельный токен.</li>
+    <li><strong>Повышение прав (step-up).</strong> Если scope не хватает, сервер отвечает <code>403</code> с <code>error="insufficient_scope"</code>. Клиент повторно авторизуется с объединением старых и новых scope и ограничивает число повторов.</li>
+    <li><strong>Учётные данные клиента привязаны к issuer.</strong> Если сменился сервер авторизации, клиент регистрируется заново.</li>
+    <li><strong>Минимальные scope на старте.</strong> Остальные права запрашиваются по мере необходимости.</li>
+  </ul>
+  <div class="callout"><b>Расширения авторизации.</b> Для межсервисных сценариев есть <code>io.modelcontextprotocol/oauth-client-credentials</code> (client credentials, рекомендуется JWT-assertion). Для компаний есть <code>enterprise-managed-authorization</code>: доступ выдаёт корпоративный IdP.</div>
+</article>
+
+<!-- ═════════════════════════ 11. БЕЗОПАСНОСТЬ ═════════════════════════ -->
+<article class="page" id="security" data-ch="security" data-show="@core,user,@threats,shield" data-cam="0.5,20,21,-0.5,1,2" data-legend="threat,host,server,ext">
+  <div class="kicker">Глава 11</div>
+  <h2>Модель угроз</h2>
+  <p class="lead">MCP даёт модели доступ к данным и к выполнению кода, поэтому у него широкая поверхность атаки. Спецификация прямо говорит, что протокол не может сам обеспечить безопасность: её обеспечивают host, клиент и сервер.</p>
+  <div class="steps-h"><h3>Где прячутся угрозы</h3><small>красные кристаллы на модели</small></div>
+  <ol class="steps">
+    <li data-at="t_poison" data-kind="err" data-label="Скрытые инструкции в описании инструмента"><strong>Отравленный инструмент.</strong> Описание и аннотации от недоверенного сервера — это текст, который читает модель, и в нём могут быть скрытые команды.</li>
+    <li data-at="t_inject" data-kind="err" data-label="Данные притворяются командами"><strong>Промпт-инъекция в данных.</strong> Текст issue, письма или веб-страницы попадает в контекст. Результаты инструментов — это недоверенный ввод, а не инструкции.</li>
+    <li data-at="t_pass" data-kind="err" data-label="Токен клиента уходит в чужой API"><strong>Проброс токена.</strong> Сервер не должен передавать полученный токен дальше: так ломаются аудит, лимиты и границы доверия.</li>
+    <li data-at="t_deputy" data-kind="err" data-label="Прокси действует от чужого имени"><strong>Confused deputy.</strong> MCP-прокси со статическим client_id у стороннего сервера авторизации обязан получать согласие пользователя <strong>для каждого клиента</strong>.</li>
+    <li data-at="t_ssrf" data-kind="err" data-label="Метаданные ведут во внутреннюю сеть"><strong>SSRF.</strong> Вредоносный сервер указывает в OAuth-метаданных внутренние адреса. Клиенту нужны только HTTPS и блокировка приватных и зарезервированных IP, в том числе при редиректах.</li>
+    <li data-at="t_local" data-kind="err" data-label="Команда запуска = произвольный код"><strong>Компрометация локального сервера.</strong> Установка в один клик означает запуск команды на вашей машине. Клиент обязан показать полную команду и получить явное согласие, а опасные команды (<code>sudo</code>, <code>rm -rf</code>) стоит подсвечивать и запускать в песочнице.</li>
+    <li data-at="t_session" data-kind="err" data-label="Handle — не пропуск"><strong>Угон state-handle.</strong> Handle (id корзины, задачи) не заменяет аутентификацию. Его надо делать случайным и привязывать к пользователю, например <code>&lt;user_id&gt;:&lt;handle&gt;</code>.</li>
+    <li data-at="shield" data-kind="res" data-label="Host: согласие, подтверждения, изоляция"><strong>Защита на стороне host:</strong> явное согласие на доступ к данным и вызовы, показ аргументов перед опасными действиями, изоляция серверов друг от друга.</li>
+  </ol>
+  <h3>Чек-лист защиты</h3>
+  <table class="tbl">
+    <tr><th>Кто</th><th>Обязанности</th></tr>
+    <tr><td>Host / клиент</td><td>Согласие пользователя на каждое действие с данными и каждый вызов инструмента. Показ аргументов. Подтверждение деструктивных операций. Результаты одного сервера — недоверенный ввод для другого. Проверка OAuth-URL: только http/https, без <code>javascript:</code> и <code>file:</code>.</td></tr>
+    <tr><td>Сервер</td><td>Валидация входа, контроль доступа, rate-limit, санитизация вывода. Защита от path traversal для <code>file://</code>. Проверка <code>aud</code>. Честные аннотации. Секреты не принимаются через формы.</td></tr>
+    <tr><td>Оператор</td><td>Минимальные scope. Локальные серверы слушают только 127.0.0.1, у HTTP-сервера проверяется Origin. Аудит вызовов.</td></tr>
+  </table>
+</article>
+
+<!-- ═════════════════════════ 12. РАСШИРЕНИЯ ═════════════════════════ -->
+<article class="page" id="extensions" data-ch="ext" data-show="host,llm,c1,p1,s1,c2,p2,s2,c3,p3,s3" data-cam="-1,12,22,-2,2.4,1.5" data-legend="client,server,req,res,task">
+  <div class="kicker">Глава 12</div>
+  <h2>Расширения: Tasks, Apps, Skills</h2>
+  <p class="lead">Ядро протокола стало компактнее, а необязательные функции ушли в <strong>расширения</strong>. Расширение включено, только если его поддерживают обе стороны: клиент перечисляет свои в <code>clientCapabilities.extensions</code> каждого запроса, сервер — в <code>capabilities.extensions</code> ответа на <code>server/discover</code>.</p>
+  <div class="steps-h"><h3>Три официальных расширения</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tools/call (+ tasks)">Клиент сообщает, что умеет работать с задачами, и вызывает долгий инструмент.
+<pre class="payload" data-title="Client → Server · поддержка Tasks">{
+  "jsonrpc": "2.0",
+  "id": 21,
+  "method": "tools/call",
+  "params": {
+    "name": "build_quarterly_report",
+    "arguments": { "quarter": "2026-Q3" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": { "io.modelcontextprotocol/tasks": {} }
+      }
+    }
+  }
+}</pre></li>
+    <li data-from="s2" data-to="c2" data-kind="task" data-label="resultType: task" data-do="task"><strong>Tasks.</strong> Сервер сразу возвращает задачу вместо результата: <code>taskId</code>, статус, срок жизни и рекомендуемый интервал опроса.
+<pre class="payload" data-title="CreateTaskResult (упрощённо)">{
+  "jsonrpc": "2.0",
+  "id": 21,
+  "result": {
+    "resultType": "task",
+    "taskId": "tsk_7f3a2c",
+    "status": "working",
+    "ttlMs": 86400000,
+    "pollIntervalMs": 2000
+  }
+}</pre></li>
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tasks/get">Клиент опрашивает статус. Если задаче понадобится ввод, статус станет <code>input_required</code>, и клиент ответит через <code>tasks/update</code>.</li>
+    <li data-from="s2" data-to="c2" data-kind="task" data-label="working…">Задача ещё выполняется. Возможные статусы: working, input_required, completed, failed, cancelled.</li>
+    <li data-from="c2" data-to="s2" data-kind="req" data-label="tasks/get" data-do="task-done">Следующий опрос.</li>
+    <li data-from="s2" data-to="c2" data-kind="res" data-label="completed + result">Задача завершена, результат вложен в ответ.
+<pre class="payload" data-title="tasks/get → completed (упрощённо)">{
+  "jsonrpc": "2.0",
+  "id": 24,
+  "result": {
+    "resultType": "complete",
+    "taskId": "tsk_7f3a2c",
+    "status": "completed",
+    "result": {
+      "resultType": "complete",
+      "content": [{ "type": "text", "text": "Отчёт готов: 48 страниц, 12 графиков." }]
+    }
+  }
+}</pre></li>
+    <li data-from="c3" data-to="s3" data-kind="req" data-label="tools/call → ui://">Инструмент ссылается на интерфейс через <code>_meta.ui.resourceUri</code>.
+<pre class="payload" data-title="Tool с интерфейсом (MCP Apps)">{
+  "name": "show_sales_dashboard",
+  "description": "Интерактивный дашборд продаж по кварталам",
+  "inputSchema": { "type": "object", "properties": { "quarter": { "type": "string" } } },
+  "_meta": { "ui": { "resourceUri": "ui://sales/dashboard" } }
+}
+// host читает resources/read ui://sales/dashboard
+// → mimeType "text/html;profile=mcp-app"</pre></li>
+    <li data-from="s3" data-to="c3" data-kind="res" data-label="HTML-приложение" data-do="app"><strong>MCP Apps.</strong> Host отрисовывает HTML в изолированном iframe прямо в чате. Интерфейс общается с host-ом по postMessage в формате JSON-RPC и может вызывать инструменты.</li>
+    <li data-at="uiapp" data-kind="note" data-label="Песочница: CSP и разрешения задаёт сервер, решает host">Сервер описывает в <code>_meta.ui.csp</code> и <code>permissions</code>, какие внешние источники и устройства нужны. Host решает, что из этого разрешить.</li>
+    <li data-from="c1" data-to="s1" data-kind="req" data-label="skills/list" data-do="skill"><strong>Skills over MCP.</strong> Сервер раздаёт навыки: инструкции <code>SKILL.md</code> с сопутствующими файлами для агентских сценариев.
+<pre class="payload" data-title="Server → Client · skills/list">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "complete",
+    "skills": [{
+      "uri": "skill://code-review/SKILL.md",
+      "frontmatter": {
+        "name": "code-review",
+        "description": "Review code using the team's checklist."
+      },
+      "resources": [{
+        "uri": "skill://code-review/SKILL.md",
+        "digest": "sha256:d2489d6c182e8df9c178563ff9f2eac7998a0c1bb1278c52a7fd5306e4259160",
+        "size": 149
+      }]
+    }]
+  }
+}</pre></li>
+    <li data-from="s1" data-to="c1" data-kind="res" data-label="resources/read skill://…">Файлы навыка читаются обычным <code>resources/read</code>, а целостность проверяется по дайджесту sha256.</li>
+  </ol>
+  <div class="msg"><div class="msg-head"></div><pre><code></code></pre></div>
+  <table class="tbl">
+    <tr><th>Расширение</th><th>Идентификатор и суть</th></tr>
+    <tr><td>Tasks</td><td><code>io.modelcontextprotocol/tasks</code>: долгие операции с опросом (<code>tasks/get</code>), вводом по ходу выполнения (<code>tasks/update</code>) и отменой (<code>tasks/cancel</code>)</td></tr>
+    <tr><td>MCP Apps</td><td><code>io.modelcontextprotocol/ui</code>: интерактивный HTML-интерфейс в песочнице, ресурсы <code>ui://</code></td></tr>
+    <tr><td>Skills</td><td><code>io.modelcontextprotocol/skills</code>: <code>skills/list</code> и <code>skills/get</code>, URI <code>skill://</code>, формат agentskills.io</td></tr>
+    <tr><td>Auth</td><td>client credentials и enterprise-managed authorization</td></tr>
+  </table>
+  <p>Имена расширений строятся по схеме <code>{vendor-prefix}/{name}</code>. Официальные расширения живут в репозиториях <code>ext-*</code>, экспериментальные — в <code>experimental-ext-*</code>, а новые принимаются через Extensions Track SEP.</p>
+</article>
+
+<!-- ═════════════════════════ 13. ПРОЕКТИРОВАНИЕ ═════════════════════════ -->
+<article class="page" id="design" data-ch="design" data-show="@design" data-cam="1.5,7.5,15,0.5,2.4,0" data-legend="client,server,auth,ext,req,res">
+  <div class="kicker">Глава 13</div>
+  <h2>Как спроектировать MCP-сервис</h2>
+  <p class="lead">Разберём сервер на слои и проведём через них запрос. Такой разрез удобно положить в основу архитектуры любого production-сервера.</p>
+  <div class="steps-h"><h3>Запрос сквозь слои</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-at="d3" data-do="explode" data-label="Разбираем сервер на слои" data-dur="2">Раздвигаем слои. Снизу вверх: транспорт → авторизация → протокол → каталог возможностей → доменная логика. Сбоку идёт сквозная наблюдаемость.</li>
+    <li data-from="d_client" data-to="d1" data-kind="req" data-label="POST /mcp">Транспорт принимает HTTP-запрос: TLS, проверка <code>Origin</code>, сверка заголовков <code>Mcp-Method</code> и <code>Mcp-Name</code> с телом.</li>
+    <li data-path="d1,d2" data-kind="req" data-label="Bearer: iss, aud, scope ✓">Авторизация проверяет подпись токена, срок, issuer, <strong>audience</strong> и scope. Ответы 401 и 403 формируются здесь.</li>
+    <li data-path="d2,d3" data-kind="req" data-label="JSON-RPC, _meta, версия ✓">Протокольный слой (обычно это SDK) разбирает JSON-RPC, проверяет версию и capabilities клиента и выбирает обработчик.</li>
+    <li data-path="d3,d4" data-kind="req" data-label="tools/call → handler, inputSchema ✓">Каталог находит инструмент и валидирует аргументы по <code>inputSchema</code>. Если что-то не так, возвращает понятную ошибку с <code>isError: true</code>.</li>
+    <li data-path="d4,d5" data-kind="req" data-label="бизнес-операция">Доменный слой выполняет операцию на языке предметной области, не на языке API.</li>
+    <li data-from="d5" data-to="d_ext" data-kind="req" data-label="SQL / REST (свой токен)">Адаптер ходит в реальную систему с собственными учётными данными.</li>
+    <li data-from="d_ext" data-to="d5" data-kind="res" data-label="данные">Система возвращает данные.</li>
+    <li data-path="d5,d4,d3,d2,d1,d_client" data-kind="res" data-label="content + structuredContent" data-dur="2.6">Результат поднимается обратно: структура по <code>outputSchema</code>, текст для модели, <code>serverInfo</code> в <code>_meta</code>.</li>
+    <li data-at="d_obs" data-kind="note" data-label="trace · метрики · аудит" data-do="collapse">Наблюдаемость пронизывает все слои: <code>traceparent</code> из <code>_meta</code>, метрики по инструментам и аудит, то есть кто, что и с какими аргументами вызвал.</li>
+  </ol>
+  <h3>Чек-лист проектирования</h3>
+  <table class="tbl">
+    <tr><th>Тема</th><th>Решение</th></tr>
+    <tr><td>Инструменты</td><td>Проектируйте от задач пользователя, а не от эндпоинтов API: «найти просроченные счета клиента» лучше, чем обёртка над <code>GET /invoices</code>. Меньше инструментов, но каждый понятнее.</td></tr>
+    <tr><td>Имена</td><td>1–128 символов, <code>A–Z a–z 0–9 _ - .</code>, без пробелов, уникальные в пределах сервера. Описание объясняет, <strong>когда</strong> вызывать инструмент и что он вернёт.</td></tr>
+    <tr><td>Схемы</td><td>У <code>inputSchema</code> всегда <code>type: "object"</code>. Инструмент без аргументов описывается как <code>{"type":"object","additionalProperties":false}</code>. Добавьте <code>outputSchema</code> и <code>structuredContent</code>. Не разыменовывайте сетевые <code>$ref</code>.</td></tr>
+    <tr><td>Ошибки</td><td>Протокольные ошибки возвращаются как JSON-RPC error. Ошибки выполнения и валидации — как <code>isError: true</code> с текстом, по которому модель поймёт, что исправить.</td></tr>
+    <tr><td>Состояние</td><td>Никакого состояния на соединение. Нужна «корзина» — создайте handle и передавайте его аргументом. Проверяйте права на handle при каждом вызове и опишите его срок жизни в description.</td></tr>
+    <tr><td>Кэш</td><td>Стабильный порядок в <code>tools/list</code>, осмысленные <code>ttlMs</code>, <code>cacheScope: "private"</code> для ответов, зависящих от пользователя.</td></tr>
+    <tr><td>Аннотации</td><td>Честные <code>readOnlyHint</code> и <code>destructiveHint</code>: по ним host решает, когда спрашивать подтверждение.</td></tr>
+    <tr><td>Ввод от человека</td><td>Для подтверждений используйте elicitation в режиме form, для секретов, платежей и OAuth во внешних системах — режим url.</td></tr>
+    <tr><td>Транспорт</td><td>Для локального сервера — stdio, в stdout только MCP, логи в stderr. Для удалённого — Streamable HTTP без sticky-сессий, чтобы его можно было масштабировать горизонтально.</td></tr>
+    <tr><td>Проверка</td><td>MCP Inspector для ручной отладки, conformance-тесты для совместимости, тесты на инъекции в данных.</td></tr>
+  </table>
+  <h3>Публикация: server.json для MCP Registry</h3>
+<pre class="code">{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.acme/analytics",
+  "description": "Аналитика продаж: SQL только на чтение, отчёты, дашборды",
+  "version": "1.3.0",
+  "packages": [{
+    "registryType": "npm",
+    "identifier": "@acme/analytics-mcp",
+    "version": "1.3.0",
+    "transport": { "type": "stdio" },
+    "environmentVariables": [
+      { "name": "ANALYTICS_DSN", "isSecret": true, "isRequired": true }
+    ]
+  }],
+  "remotes": [
+    { "type": "streamable-http", "url": "https://mcp.acme.example/mcp" }
+  ]
+}</pre>
+</article>
+
+<!-- ═════════════════════════ 14. ЭКОСИСТЕМА ═════════════════════════ -->
+<article class="page" id="ecosystem" data-ch="eco" data-show="@eco" data-rotate data-cam="0,7,15.5,0,1.8,0" data-legend="host,server,req">
+  <div class="kicker">Глава 14</div>
+  <h2>Экосистема и куда смотреть дальше</h2>
+  <p class="lead">Вокруг спецификации сложилась экосистема: официальные SDK с уровнями зрелости, реестр серверов, инструменты отладки и открытый процесс развития стандарта.</p>
+  <ol class="steps">
+    <li data-at="eco_spec" data-kind="note" data-label="schema.ts — источник истины">Первоисточник — <strong>спецификация</strong> и её TypeScript-схема <code>schema.ts</code>. Текущая версия <code>2026-07-28</code>. Предыдущие: 2025-11-25, 2025-06-18, 2025-03-26 и 2024-11-05.</li>
+    <li data-at="eco_sdks" data-kind="note" data-label="Tier 1 · 2 · 3">У <strong>SDK</strong> есть уровни. Tier 1 — TypeScript, Python, C#, Go, Rust. Tier 2 — Java и Ruby. Tier 3 — Swift, PHP и Kotlin.</li>
+    <li data-at="eco_registry" data-kind="note" data-label="Каталог метаданных, preview">В <strong>MCP Registry</strong> публикуются метаданные серверов (<code>server.json</code>), а пространства имён подтверждаются через GitHub или DNS. Реестр пока в preview и рассчитан в первую очередь на агрегаторы.</li>
+    <li data-at="eco_inspector" data-kind="note" data-label="npx @modelcontextprotocol/inspector">С помощью <strong>MCP Inspector</strong> можно подключиться к серверу и вручную вызывать инструменты. Есть режимы web, CLI и TUI и настройка «эпохи» протокола.</li>
+    <li data-at="eco_hosts" data-kind="note" data-label="Чаты, IDE, агенты">На стороне <strong>hosts</strong> MCP поддерживают чат-ассистенты, IDE и агентские платформы, в том числе интерфейсы MCP Apps.</li>
+  </ol>
+  <h3>Уровни SDK</h3>
+  <table class="tbl">
+    <tr><th></th><th>Tier 1</th><th>Tier 2</th></tr>
+    <tr><td>Conformance</td><td>100%</td><td>80%</td></tr>
+    <tr><td>Реакция на issue</td><td>2 рабочих дня</td><td>1 месяц</td></tr>
+    <tr><td>Фикс P0</td><td>7 дней</td><td>2 недели</td></tr>
+    <tr><td>Новые функции</td><td>до выхода версии</td><td>в течение 6 месяцев</td></tr>
+  </table>
+  <h3>Как развивается стандарт</h3>
+  <p>Изменения проходят через <strong>SEP</strong> (Specification Enhancement Proposal) со статусами Draft → In-Review → Accepted → Final. Для статуса Final нужны эталонная реализация и conformance-тесты. Работу ведут рабочие группы: транспорты, реестр, SDK, Skills, триггеры и события, агенты и другие. Устаревшая функция живёт в спецификации минимум 12 месяцев. Проект развивается под эгидой Linux Foundation: в декабре 2025 года MCP передан в Agentic AI Foundation.</p>
+  <div class="callout ok"><b>Итог в одном абзаце.</b> MCP-сервис — это адаптер между реальной системой и AI-приложением. Он описывает свои возможности как tools, resources и prompts, принимает самодостаточные JSON-RPC-запросы по stdio или HTTP, проверяет OAuth-токен, выданный именно ему, а когда ему нужен человек, отвечает через MRTR. Остальное — согласие пользователя, выбор инструментов и работу с моделью — берёт на себя host.</div>
+  <h3>Источники</h3>
+  <ul class="bul sources">
+    <li><a href="https://modelcontextprotocol.io/specification/2026-07-28" target="_blank" rel="noopener">Спецификация MCP 2026-07-28</a> и <a href="https://modelcontextprotocol.io/specification/2026-07-28/changelog" target="_blank" rel="noopener">список изменений</a></li>
+    <li><a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr" target="_blank" rel="noopener">Multi Round-Trip Requests</a> · <a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http" target="_blank" rel="noopener">Streamable HTTP</a> · <a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization" target="_blank" rel="noopener">Authorization</a></li>
+    <li><a href="https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices" target="_blank" rel="noopener">Security Best Practices</a></li>
+    <li><a href="https://modelcontextprotocol.io/extensions/overview" target="_blank" rel="noopener">Расширения: Tasks, Apps, Skills, Auth</a></li>
+    <li><a href="https://modelcontextprotocol.io/community/sdk-tiers" target="_blank" rel="noopener">Уровни SDK</a> · <a href="https://modelcontextprotocol.io/registry/about" target="_blank" rel="noopener">MCP Registry</a> · <a href="https://modelcontextprotocol.io/community/governance" target="_blank" rel="noopener">Governance</a></li>
+    <li><a href="https://github.com/modelcontextprotocol/modelcontextprotocol" target="_blank" rel="noopener">github.com/modelcontextprotocol</a>: schema.ts, SEP, обсуждения</li>
+  </ul>
+  <p class="foot">Путеводитель подготовлен в сентябре 2026 по актуальной на тот момент версии спецификации. Сцена сделана на <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>. <a href="../">← Все гайды</a></p>
+</article>
+
+      </div>
+      <nav class="pager" aria-label="Страницы">
+        <button id="prev" aria-label="Предыдущая глава">← Назад</button>
+        <span id="pageNo">1 / 15</span>
+        <button id="next" aria-label="Следующая глава">Далее →</button>
+      </nav>
+    </aside>
+  </main>
+</div>
+
+<div class="toc" id="toc" aria-hidden="true">
+  <div class="toc-sheet" role="dialog" aria-label="Оглавление">
+    <header><h2>Оглавление</h2><button class="icon-btn" id="tocClose" aria-label="Закрыть">✕</button></header>
+    <ol class="toc-list" id="tocList"></ol>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
