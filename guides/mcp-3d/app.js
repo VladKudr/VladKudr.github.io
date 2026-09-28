@@ -904,7 +904,8 @@ function followStep(li) {
   if (!pane || performance.now() - lastUserScroll < 5000) return;
   const r = li.getBoundingClientRect(), pr = pane.getBoundingClientRect();
   const lr = li.parentElement.getBoundingClientRect();
-  if (lr.top > pr.bottom - 40 || lr.bottom < pr.top + 40) return;
+  // следуем за шагами, только если читатель сам докрутил до списка
+  if (lr.top > pr.top + pr.height * 0.5 || lr.bottom < pr.top + 40) return;
   if (r.top < pr.top + 60 || r.bottom > pr.bottom - 20) {
     pane.scrollTo({ top: pane.scrollTop + (r.top - pr.top) - pr.height * 0.35, behavior: REDUCED ? 'auto' : 'smooth' });
   }
