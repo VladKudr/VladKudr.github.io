@@ -1280,6 +1280,7 @@ function setMode(m, target = null) {
   $$('.mode-switch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
   buildTOC();
   applyLabels();
+  trackMode(m);
   cur = -1;
   go(Math.max(0, pages.indexOf(target)), true);
 }
@@ -1338,7 +1339,7 @@ function go(i, instant = false) {
     if (prev) prev.hidden = true;
     showPage(next, 0);
   }
-  history.replaceState(null, '', '#' + next.id);
+  history.replaceState(null, '', location.pathname + '#' + next.id);
   $('#pageNo').textContent = `${i + 1} / ${pages.length}`;
   $('#progress').style.width = `${((i + 1) / pages.length) * 100}%`;
   $('#prev').disabled = i === 0;
@@ -1346,6 +1347,7 @@ function go(i, instant = false) {
   $('#tocList')?.querySelectorAll('a').forEach((a, j) => a.classList.toggle('cur', j === i));
   $('#chapterChip').textContent = ($('.kicker', next)?.textContent || '') + ' · ' + ($('h1, h2', next)?.textContent || '');
   enterChapter(next);
+  trackChapter(next, i);
 }
 function showPage(p, dir) {
   p.hidden = false;
@@ -1366,6 +1368,49 @@ function setStage(v) {
   const z = $('#dockSize');
   if (z) z.setAttribute('aria-label', v === 'large' ? 'Уменьшить схему' : 'Увеличить схему');
 }
+
+/* ─────────────────────────── Яндекс Метрика ─────────────────────────── */
+// Главы переключаются без перезагрузки, поэтому просмотры, цели и активное время
+// отправляются вручную: так в Метрике видны глубина просмотра и время на сайте.
+const YM_ID = 53657566;
+const YM_BASE = location.origin + location.pathname;
+const ym = (...a) => { try { if (typeof window.ym === 'function') window.ym(YM_ID, ...a); } catch (e) { /* блокировщик */ } };
+const ymOnce = new Set();
+const goalOnce = (id, params) => { if (!ymOnce.has(id)) { ymOnce.add(id); ym('reachGoal', id, params); } };
+let ymFirst = true, ymTimer = null, ymLastUrl = location.href;
+
+function trackChapter(page, i) {
+  clearTimeout(ymTimer);
+  const url = `${YM_BASE}?ch=${page.id}`;
+  if (i === pages.length - 1) goalOnce(`mcp3d_finish_${mode}`, { version: mode });
+  // первый экран уже засчитан при инициализации счётчика
+  if (ymFirst) { ymFirst = false; ymLastUrl = url; return; }
+  // короткие пролистывания не считаем просмотром главы
+  ymTimer = setTimeout(() => {
+    const title = `${mode === 'biz' ? '[Бизнес] ' : ''}${$('.kicker', page)?.textContent || ''} · ${$('h1, h2', page)?.textContent || ''} — MCP в 3D`;
+    ym('hit', url, { title, referer: ymLastUrl });
+    ymLastUrl = url;
+  }, 1200);
+}
+function trackMode(m) {
+  if (ymOnce.has(`mode_${m}`)) return;
+  ymOnce.add(`mode_${m}`);
+  ym('params', { 'MCP 3D': { 'Версия': m === 'biz' ? 'Для бизнеса' : 'Техническая' } });
+  if (m === 'biz') goalOnce('mcp3d_biz');
+}
+// активное время: минута засчитывается, если вкладка видна и читатель что-то делал за последние 2 минуты
+let ymActiveAt = performance.now(), ymActiveSec = 0, ymMinutes = 0;
+['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(ev =>
+  addEventListener(ev, () => { ymActiveAt = performance.now(); }, { passive: true, capture: true }));
+setInterval(() => {
+  if (document.visibilityState !== 'visible' || performance.now() - ymActiveAt > 120000 || ymMinutes >= 30) return;
+  ymActiveSec += 5;
+  if (ymActiveSec >= 60) {
+    ymActiveSec = 0;
+    ymMinutes++;
+    ym('params', { 'MCP 3D': { 'Активных минут': ymMinutes } });
+  }
+}, 5000);
 
 function openTOC() { $('#toc').classList.add('open'); $('#toc').setAttribute('aria-hidden', 'false'); }
 function closeTOC() { $('#toc').classList.remove('open'); $('#toc').setAttribute('aria-hidden', 'true'); }
@@ -1391,7 +1436,7 @@ function setupUI() {
     const li = e.target.closest('ol.steps > li');
     if (!li || !HAS3D) return;
     const idx = runner.steps.findIndex(s => s.el === li);
-    if (idx >= 0) runner.jump(idx);
+    if (idx >= 0) { runner.jump(idx); goalOnce('mcp3d_step', { chapter: pages[cur]?.id }); }
   });
   $('#btnPlay').addEventListener('click', () => runner.setPaused(!runner.paused));
   $$('[data-proxy]').forEach(b => b.addEventListener('click', () => $('#' + b.dataset.proxy).click()));
@@ -1428,7 +1473,9 @@ if (HAS3D) {
   resize();
   frame();
 }
-const hashPage = pagesAll.find(p => '#' + p.id === location.hash) || null;
+const chParam = new URLSearchParams(location.search).get('ch');
+const hashPage = pagesAll.find(p => '#' + p.id === location.hash)
+  || (chParam && pagesAll.find(p => p.id === chParam)) || null;
 let savedMode = null;
 try { savedMode = localStorage.getItem('mcp3d-mode'); } catch (e) { /* приватный режим */ }
 setMode(hashPage ? pageMode(hashPage) : (savedMode === 'biz' ? 'biz' : 'tech'), hashPage);

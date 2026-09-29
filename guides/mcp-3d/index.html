@@ -13,7 +13,7 @@
 <script>
   try { const t = localStorage.getItem('mcp3d-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   try { const s = localStorage.getItem('mcp3d-stage'); if (s === 'hidden' || s === 'large') document.documentElement.dataset.stage = s; } catch (e) {}
-  try { if (/^#biz/.test(location.hash) || (!location.hash && localStorage.getItem('mcp3d-mode') === 'biz')) document.documentElement.dataset.mode = 'biz'; } catch (e) {}
+  try { if (/^#biz/.test(location.hash) || /[?&]ch=biz/.test(location.search) || (!location.hash && !/[?&]ch=/.test(location.search) && localStorage.getItem('mcp3d-mode') === 'biz')) document.documentElement.dataset.mode = 'biz'; } catch (e) {}
 </script>
 
 <!-- Yandex.Metrika counter -->
@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260929">
+<link rel="stylesheet" href="style.css?v=20260929-2">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
@@ -1557,6 +1557,6 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
   </div>
 </div>
 
-<script type="module" src="app.js?v=20260929"></script>
+<script type="module" src="app.js?v=20260929-2"></script>
 </body>
 </html>
