@@ -1372,7 +1372,7 @@ function setStage(v) {
 /* ─────────────────────────── Яндекс Метрика ─────────────────────────── */
 // Главы переключаются без перезагрузки, поэтому просмотры, цели и активное время
 // отправляются вручную: так в Метрике видны глубина просмотра и время на сайте.
-const YM_ID = 53657566;
+const YM_ID = 113153530;
 const YM_BASE = location.origin + location.pathname;
 const ym = (...a) => { try { if (typeof window.ym === 'function') window.ym(YM_ID, ...a); } catch (e) { /* блокировщик */ } };
 const ymOnce = new Set();
