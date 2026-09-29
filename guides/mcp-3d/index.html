@@ -12,6 +12,7 @@
 <link rel="shortcut icon" href="../../favicon.ico">
 <script>
   try { const t = localStorage.getItem('mcp3d-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  try { const s = localStorage.getItem('mcp3d-stage'); if (s === 'hidden' || s === 'large') document.documentElement.dataset.stage = s; } catch (e) {}
   try { if (/^#biz/.test(location.hash) || (!location.hash && localStorage.getItem('mcp3d-mode') === 'biz')) document.documentElement.dataset.mode = 'biz'; } catch (e) {}
 </script>
 
@@ -30,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20260929">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
@@ -70,7 +71,7 @@
     <section id="stage" aria-label="3D-модель">
       <div class="chip" id="chapterChip"></div>
       <div class="stage-tools">
-        <button class="icon-btn" id="btnPlay" data-state="playing" aria-label="Пауза" title="Пауза / продолжить">
+        <button class="icon-btn js-play" id="btnPlay" data-state="playing" aria-label="Пауза" title="Пауза / продолжить">
           <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
           <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
         </button>
@@ -87,6 +88,29 @@
       <div class="legend" id="legend"></div>
       <div class="hint">тяните — вращать · колесо — масштаб · правая кнопка — сдвиг</div>
     </section>
+
+    <div class="dock" id="dock" aria-label="Управление схемой">
+      <button class="dock-toggle" id="dockToggle" aria-controls="stage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+        <span class="when-shown">Скрыть схему</span><span class="when-hidden">Показать 3D-схему</span>
+      </button>
+      <div class="dock-actions">
+        <button class="icon-btn js-play" data-state="playing" data-proxy="btnPlay" aria-label="Пауза">
+          <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+        </button>
+        <button class="icon-btn" data-proxy="btnReplay" aria-label="Проиграть главу заново">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button class="icon-btn" data-proxy="btnView" aria-label="Вернуть ракурс">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+        </button>
+        <button class="icon-btn" id="dockSize" aria-label="Увеличить схему">
+          <svg class="i-grow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          <svg class="i-shrink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>
+        </button>
+      </div>
+    </div>
 
     <aside class="panel">
       <div id="book">
@@ -1533,6 +1557,6 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
   </div>
 </div>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=20260929"></script>
 </body>
 </html>

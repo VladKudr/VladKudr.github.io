@@ -883,6 +883,7 @@ const runner = {
     followStep(s.el);
   },
   jump(i) {
+    if (stageState() === 'hidden') setStage('normal');
     clearPackets(); clearPulses();
     this.begin(i);
     this.setPaused(true);
@@ -897,8 +898,10 @@ const runner = {
   },
   setPaused(v) {
     this.paused = v;
-    const b = $('#btnPlay');
-    if (b) { b.dataset.state = v ? 'paused' : 'playing'; b.setAttribute('aria-label', v ? 'Продолжить анимацию' : 'Пауза'); }
+    $$('.js-play').forEach(b => {
+      b.dataset.state = v ? 'paused' : 'playing';
+      b.setAttribute('aria-label', v ? 'Продолжить анимацию' : 'Пауза');
+    });
   },
   tick(dt) {
     if (this.paused || this.phase === 'idle') return;
@@ -1130,14 +1133,17 @@ function frame() {
   tickPulses(dt);
 
   controls.update();
+  if (!stageVisible) return;
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
 
+let stageVisible = true;
 function resize() {
   if (!HAS3D) return;
   const w = stage.clientWidth, h = stage.clientHeight;
-  if (!w || !h) return;
+  stageVisible = w > 2 && h > 2;
+  if (!stageVisible) return;
   renderer.setSize(w, h, false);
   labelRenderer.setSize(w, h);
   camera.aspect = w / h;
@@ -1350,6 +1356,17 @@ function showPage(p, dir) {
   }
 }
 
+const stageState = () => document.documentElement.dataset.stage || 'normal';
+function setStage(v) {
+  if (v === 'normal') delete document.documentElement.dataset.stage;
+  else document.documentElement.dataset.stage = v;
+  try { localStorage.setItem('mcp3d-stage', v); } catch (e) { /* приватный режим */ }
+  const t = $('#dockToggle');
+  if (t) t.setAttribute('aria-expanded', String(v !== 'hidden'));
+  const z = $('#dockSize');
+  if (z) z.setAttribute('aria-label', v === 'large' ? 'Уменьшить схему' : 'Увеличить схему');
+}
+
 function openTOC() { $('#toc').classList.add('open'); $('#toc').setAttribute('aria-hidden', 'false'); }
 function closeTOC() { $('#toc').classList.remove('open'); $('#toc').setAttribute('aria-hidden', 'true'); }
 
@@ -1377,6 +1394,9 @@ function setupUI() {
     if (idx >= 0) runner.jump(idx);
   });
   $('#btnPlay').addEventListener('click', () => runner.setPaused(!runner.paused));
+  $$('[data-proxy]').forEach(b => b.addEventListener('click', () => $('#' + b.dataset.proxy).click()));
+  $('#dockToggle').addEventListener('click', () => setStage(stageState() === 'hidden' ? 'normal' : 'hidden'));
+  $('#dockSize').addEventListener('click', () => setStage(stageState() === 'large' ? 'normal' : 'large'));
   $('#btnReplay').addEventListener('click', () => runner.restart());
   $('#btnView').addEventListener('click', () => flyTo(camPreset));
   $('#btnRotate').addEventListener('click', e => {
