@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=lab1">
+<link rel="stylesheet" href="style.css?v=lab4">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
@@ -1551,9 +1551,9 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
 <article class="page lab" id="lab" data-mode="lab" data-ch="lab" data-show="@lab" data-cam="0.6,10,21,0.4,3,0" data-legend="ro,rw,danger,resource,prompt,req,res,err,task">
   <div class="kicker">Лаборатория</div>
   <h2>Отправьте запрос сами</h2>
-  <p class="lead">Учебный MCP-сервер по спецификации 2026-07-28 работает прямо в вашем браузере. Отправляйте запросы, ломайте протокол и смотрите, что происходит на схеме.</p>
+  <p class="lead">Учебный MCP-сервер по спецификации 2026-07-28 работает прямо в вашем браузере. Пройдите задания или экспериментируйте свободно — и смотрите, что происходит на схеме.</p>
 
-  <section class="lab-card">
+  <section class="lab-card lab-server">
     <div class="lab-srv-tabs" role="group" aria-label="Сервер">
       <button data-src="demo" aria-pressed="true">Учебный сервер</button>
       <button data-src="url" aria-pressed="false">Свой сервер по URL</button>
@@ -1562,14 +1562,45 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
       <input id="labUrl" type="url" placeholder="https://example.com/mcp" spellcheck="false" autocomplete="off">
       <input id="labAuth" type="text" placeholder="Authorization: Bearer … (необязательно)" spellcheck="false" autocomplete="off">
       <button class="lab-btn" id="labConnect">Подключить</button>
+      <div class="lab-lib">
+        <div class="lab-pk-h">Открытые серверы для теста — подключение в один клик</div>
+        <div class="lab-lib-list" id="labLib"></div>
+      </div>
     </div>
     <div class="lab-status" id="labConn">Загрузка…</div>
   </section>
 
-  <section class="lab-card">
-    <div class="lab-row"><h3>Запрос</h3><select id="labTpl" aria-label="Шаблон запроса"></select></div>
+  <div class="lab-modes" role="tablist" aria-label="Режим лаборатории">
+    <button role="tab" data-lmode="tasks" aria-selected="true">Задания <span class="lab-prog" id="labProg"></span></button>
+    <button role="tab" data-lmode="free" aria-selected="false">Свободный режим</button>
+  </div>
+
+  <section class="lab-card lab-task" id="labTask">
+    <div class="lab-task-top"><span id="labTaskN"></span><span class="lab-dots" id="labDots" aria-label="Задания"></span></div>
+    <div class="lab-task-note" id="labTaskNote" hidden>Задания собраны автоматически по каталогу этого сервера. Реальные серверы отвечают по-разному, поэтому засчитывается любой осмысленный ответ.</div>
+    <h3 id="labTaskT"></h3>
+    <p class="lab-task-d" id="labTaskD"></p>
+    <div id="labTaskX"></div>
+    <details class="lab-task-hint" id="labTaskHint"><summary>Подсказка</summary><div></div></details>
+    <div class="lab-task-ok" id="labTaskOk" hidden></div>
+    <div class="lab-actions">
+      <button class="lab-btn small" id="labTaskNext">Пропустить →</button>
+      <button class="lab-btn small ghost" id="labTaskRestart">Начать задание заново</button>
+      <button class="linklike small" id="labReset">сбросить прогресс</button>
+    </div>
+  </section>
+
+  <section class="lab-card lab-free" id="labFree" hidden>
+    <div class="lab-row"><h3>Что отправить</h3><span class="lab-meta">запрос появится в редакторе</span></div>
+    <div id="labPick"></div>
+  </section>
+
+  <section class="lab-card lab-req">
+    <div class="lab-row"><h3>Запрос</h3><span class="lab-meta">JSON, который уйдёт на сервер</span></div>
     <textarea id="labEditor" spellcheck="false" autocomplete="off" autocapitalize="off" rows="14" aria-label="JSON-RPC запрос"></textarea>
     <div class="lab-parse" id="labParse" hidden></div>
+    <div class="lab-consent" id="labConsent" hidden></div>
+    <div class="lab-undo" id="labUndo" hidden>Запрос в редакторе заменён. <button class="linklike" id="labUndoBtn">Вернуть прежний</button></div>
     <div class="lab-actions">
       <button class="lab-btn primary" id="labSend">Отправить <kbd>⌘/Ctrl ↵</kbd></button>
       <button class="lab-btn" id="labFormat">Формат</button>
@@ -1578,6 +1609,7 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
   </section>
 
   <section class="lab-card" id="labResult" hidden>
+    <div class="lab-restask" id="labResTask" hidden></div>
     <div class="lab-row"><h3>Ответ</h3><span class="lab-meta" id="labMeta"></span></div>
     <div class="lab-explain" id="labExplain"></div>
     <div id="labForm"></div>
@@ -1585,19 +1617,13 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
     <pre class="code lab-out"><code id="labOut"></code></pre>
   </section>
 
-  <section class="lab-card" id="labChallengesCard">
-    <div class="lab-row"><h3>Сломай протокол</h3><span class="lab-meta" id="labScore"></span></div>
-    <p class="lab-sub">Нажмите на задание — в редакторе появится заготовка. Отметка ставится сама, когда сервер ответит нужным образом.</p>
-    <ol class="lab-ch" id="labChallenges"></ol>
-    <button class="linklike" id="labReset">сбросить прогресс</button>
-  </section>
-
-  <section class="lab-card" id="labXray">
-    <div class="lab-row"><h3>Рентген сервера</h3><span class="lab-meta" id="labQuality"></span></div>
+  <details class="lab-card lab-xray" id="labXray" open>
+    <summary><h3>Рентген сервера</h3><span class="lab-meta" id="labQuality"></span></summary>
     <div class="lab-caps" id="labCaps"></div>
     <div class="lab-chips" id="labChips"></div>
     <ul class="lab-audit" id="labAudit"></ul>
-  </section>
+    <p class="lab-sub">Нажмите на инструмент — его вызов появится в редакторе.</p>
+  </details>
   <p class="foot">Учебный сервер живёт только в этой вкладке, данные вымышленные. Чтобы подключить свой сервер по URL, на нём нужен CORS для этой страницы.</p>
 </article>
       </div>
@@ -1617,6 +1643,6 @@ async function getCustomerDebt({ inn, as_of }, ctx) {
   </div>
 </div>
 
-<script type="module" src="app.js?v=lab1"></script>
+<script type="module" src="app.js?v=lab7"></script>
 </body>
 </html>

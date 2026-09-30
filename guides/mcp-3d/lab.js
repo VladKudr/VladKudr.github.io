@@ -1,4 +1,4 @@
-// Лаборатория: MCP-клиент прямо в браузере, задания «Сломай протокол» и «рентген» сервера.
+// Лаборатория: MCP-клиент прямо в браузере — два режима (задания и свободная работа) и «рентген» сервера.
 // Загружается лениво, при первом входе в режим «Лаборатория». Сцену рисует app.js через api.
 import * as demo from './lab-server.js?v=1';
 
@@ -10,33 +10,107 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const stripComments = src => src.replace(/("(?:\\.|[^"\\])*")|\/\/[^\n]*/g, (m, str) => str || '');
 const LS_KEY = 'mcp3d-lab';
 
-// Задания «Сломай протокол»: проверка по запросу, финальному ответу и всем сообщениям потока
-const CHALLENGES = [
-  { id: 'discover', t: 'Спросите сервер, что он умеет', h: '<code>server/discover</code>',
-    ok: (q, f) => q.method === 'server/discover' && f?.result, tpl: T => T.method('server/discover') },
-  { id: 'list', t: 'Получите список инструментов', h: '<code>tools/list</code>',
-    ok: (q, f) => q.method === 'tools/list' && f?.result?.tools, tpl: T => T.method('tools/list') },
-  { id: 'call', t: 'Вызовите инструмент и получите результат', h: 'например <code>get_customer_debt</code>',
-    ok: (q, f) => q.method === 'tools/call' && f?.result?.resultType === 'complete' && f.result.isError === false, tpl: T => T.call('get_customer_debt') },
-  { id: 'toolerr', t: 'Получите ошибку выполнения — <code>isError: true</code>', h: 'передайте ИНН из пяти цифр',
-    ok: (q, f) => f?.result?.isError === true, tpl: T => T.call('get_customer_debt') },
-  { id: 'meta', t: 'Уберите из запроса <code>_meta</code>', h: 'что ответит сервер без версии и capabilities?',
-    ok: (q, f) => f?.error?.code === -32602 && /_meta/.test(f.error.message), tpl: T => T.method('tools/list') },
-  { id: 'version', t: 'Укажите старую версию протокола <code>2025-06-18</code>', h: 'поле <code>protocolVersion</code> в <code>_meta</code>',
-    ok: (q, f) => f?.error?.code === -32022, tpl: T => T.method('tools/list') },
-  { id: 'method', t: 'Вызовите метод, которого нет', h: 'например <code>tools/delete</code>',
-    ok: (q, f) => f?.error?.code === -32601, tpl: T => T.method('tools/list') },
-  { id: 'cap', t: 'Вызовите <code>apply_migration</code>, не заявив <code>elicitation</code>', h: 'уберите его из <code>clientCapabilities</code>',
-    ok: (q, f) => f?.error?.code === -32021, tpl: T => T.call('apply_migration') },
-  { id: 'mrtr', t: 'Примените миграцию: подтвердите её в форме и отправьте повтор', h: 'Multi Round-Trip, глава 7',
-    ok: (q, f) => q.params?.name === 'apply_migration' && q.params?.inputResponses && f?.result?.resultType === 'complete' && f.result.isError === false,
-    tpl: T => T.call('apply_migration') },
-  { id: 'forge', t: 'Подделайте <code>requestState</code> в повторе', h: 'измените в нём один символ',
-    ok: (q, f) => q.params?.requestState && f?.error?.code === -32602 && /requestState/.test(f.error.message), tpl: T => T.call('apply_migration') },
-  { id: 'progress', t: 'Получите прогресс долгой операции', h: '<code>export_orders</code> + <code>progressToken</code> в <code>_meta</code>',
-    ok: (q, f, all) => all.some(m => m.method === 'notifications/progress'), tpl: T => T.call('export_orders') },
-  { id: 'chain', t: 'Посчитайте долг цепочкой из трёх вызовов, а затем одним', h: '<code>find_customer</code> → <code>list_contracts</code> → <code>calc_debt</code>, потом <code>get_customer_debt</code> (глава 14)',
-    ok: (q, f, all, S) => S.calls.has('calc_debt') && S.calls.has('get_customer_debt'), tpl: T => T.call('find_customer') },
+// Открытые MCP-серверы для теста: без авторизации, с CORS и подключением за 1–3 с (проверено 30.09.2026)
+const LIBRARY = [
+  { name: 'Context7', url: 'https://mcp.context7.com/mcp', desc: 'документация библиотек', era: 'new' },
+  { name: 'Hugging Face', url: 'https://huggingface.co/mcp', desc: 'модели, датасеты, Spaces', era: 'new' },
+  { name: 'Svelte', url: 'https://mcp.svelte.dev/mcp', desc: 'документация Svelte', era: 'new' },
+  { name: 'Microsoft Learn', url: 'https://learn.microsoft.com/api/mcp', desc: 'документация Microsoft', era: 'old' },
+  { name: 'DeepWiki', url: 'https://mcp.deepwiki.com/mcp', desc: 'вопросы по репозиториям GitHub', era: 'old' },
+  { name: 'Exa', url: 'https://mcp.exa.ai/mcp', desc: 'поиск по вебу', era: 'old' },
+  { name: 'Jina AI', url: 'https://mcp.jina.ai/v1', desc: 'чтение веб-страниц и поиск', era: 'old' },
+];
+
+// Выделение места правки в редакторе: значение строки по ключу, целый блок-объект, позиция после текста
+function valueRange(t, key) {
+  const k = `"${key}": "`;
+  const i = t.indexOf(k);
+  if (i < 0) return null;
+  const a = i + k.length;
+  return [a, t.indexOf('"', a)];
+}
+function blockRange(t, key) {
+  const k = `"${key}": {`;
+  const i = t.indexOf(k);
+  if (i < 0) return null;
+  let depth = 0, j = i + k.length - 1;
+  for (; j < t.length; j++) { if (t[j] === '{') depth++; else if (t[j] === '}' && --depth === 0) break; }
+  const c = t.lastIndexOf(',', i);
+  const a = c >= 0 && !t.slice(c + 1, i).trim() ? c : i; // вместе с запятой перед блоком, чтобы JSON остался валидным
+  return [a, j + 1];
+}
+function afterRange(t, k) {
+  const i = t.indexOf(k);
+  return i < 0 ? null : [i + k.length, i + k.length];
+}
+
+// Задания: по порядку, от основ к поломкам протокола и продвинутым сценариям.
+// start — стартовый запрос, sel — что выделить в редакторе, ok — как понять, что задание выполнено.
+const DEMO_TASKS = [
+  { id: 'discover', g: 'Основы', t: 'Спросите сервер, что он умеет',
+    d: 'Запрос <code>server/discover</code> уже в редакторе. Нажмите «Отправить» и найдите в ответе <code>capabilities</code>.',
+    lesson: 'Рукопожатия больше нет: клиент в любой момент может спросить сервер о версиях и возможностях.',
+    start: T => T.method('server/discover'),
+    ok: (q, f) => q.method === 'server/discover' && !!f?.result },
+  { id: 'list', g: 'Основы', t: 'Получите список инструментов',
+    d: 'Название метода выделено в редакторе. Напечатайте вместо него <code>tools/list</code> и отправьте.',
+    hint: 'Метод — строка в поле <code>"method"</code>. Кавычки вокруг оставьте.',
+    lesson: 'Стойка на схеме — это ответ tools/list: цвет полки показывает аннотации инструмента.',
+    start: T => T.method('server/discover'), sel: t => valueRange(t, 'method'),
+    ok: (q, f) => q.method === 'tools/list' && !!f?.result?.tools },
+  { id: 'call', g: 'Основы', t: 'Вызовите инструмент',
+    d: 'В редакторе вызов <code>get_customer_debt</code> для ИНН 7700000001. Отправьте и посмотрите, куда на схеме полетит пакет.',
+    lesson: 'В ответе и текст для модели (content), и структура по outputSchema (structuredContent).',
+    start: T => T.call('get_customer_debt'),
+    ok: (q, f) => q.method === 'tools/call' && f?.result?.resultType === 'complete' && f.result.isError === false },
+  { id: 'toolerr', g: 'Сломай протокол', t: 'Ошибка выполнения, а не протокола',
+    d: 'ИНН выделен. Напечатайте вместо него <code>12345</code> и отправьте.',
+    hint: 'Протокол при этом не нарушен: запрос корректный, инструмент сам проверит аргумент.',
+    lesson: 'isError: true — ошибка выполнения. Модель видит текст и может исправить аргументы.',
+    start: T => T.call('get_customer_debt'), sel: t => valueRange(t, 'inn'),
+    ok: (q, f) => f?.result?.isError === true },
+  { id: 'meta', g: 'Сломай протокол', t: 'Уберите _meta',
+    d: 'Блок <code>_meta</code> выделен. Удалите его клавишей Backspace и отправьте.',
+    lesson: 'Без версии и capabilities сервер отвечает −32602: в 2026-07-28 их несёт каждый запрос.',
+    start: T => T.method('tools/list'), sel: t => blockRange(t, '_meta'),
+    ok: (q, f) => f?.error?.code === -32602 && /_meta/.test(f.error.message) },
+  { id: 'version', g: 'Сломай протокол', t: 'Старая версия протокола',
+    d: 'Версия протокола выделена. Напечатайте <code>2025-06-18</code> и отправьте.',
+    lesson: 'Сервер отвечает −32022 и перечисляет свои версии — клиент повторяет запрос с подходящей.',
+    start: T => T.method('tools/list'), sel: t => valueRange(t, M + 'protocolVersion'),
+    ok: (q, f) => f?.error?.code === -32022 },
+  { id: 'method', g: 'Сломай протокол', t: 'Метод, которого нет',
+    d: 'Метод выделен. Напечатайте <code>tools/delete</code> и отправьте.',
+    lesson: 'Неизвестный метод — ошибка −32601 Method not found.',
+    start: T => T.method('tools/list'), sel: t => valueRange(t, 'method'),
+    ok: (q, f) => f?.error?.code === -32601 },
+  { id: 'cap', g: 'Сломай протокол', t: 'Без нужной возможности клиента',
+    d: 'Миграции нужно подтверждение человека. Возможность <code>elicitation</code> выделена — удалите её и отправьте.',
+    lesson: 'Сервер отвечает −32021: запросу нужна возможность клиента, которую тот не заявил.',
+    start: T => T.call('apply_migration'), sel: t => blockRange(t, 'elicitation'),
+    ok: (q, f) => f?.error?.code === -32021 },
+  { id: 'mrtr', g: 'Продвинутое', t: 'Подтверждение человеком (MRTR)',
+    d: 'Отправьте запрос — сервер не выполнит миграцию сразу, а пришлёт форму. Отметьте «Да, применить», нажмите «Принять» и отправьте собранный повтор.',
+    lesson: 'Сервер не шлёт клиенту запросов: он отвечает input_required, а клиент повторяет исходный запрос с ответами.',
+    start: T => T.call('apply_migration'),
+    ok: (q, f) => q.params?.name === 'apply_migration' && !!q.params?.inputResponses && f?.result?.resultType === 'complete' && f.result.isError === false },
+  { id: 'forge', g: 'Продвинутое', t: 'Подделайте requestState',
+    d: 'Отправьте запрос и нажмите «Принять» в форме. В собранном повторе часть <code>requestState</code> будет выделена — напечатайте что угодно и отправьте.',
+    lesson: 'Сервер подписывает requestState (HMAC) и привязывает к аргументам — подделку он отклоняет.',
+    start: T => T.call('apply_migration'),
+    ok: (q, f) => !!q.params?.requestState && f?.error?.code === -32602 && /requestState/.test(f.error.message) },
+  { id: 'progress', g: 'Продвинутое', t: 'Прогресс долгой операции',
+    d: 'Курсор стоит внутри <code>_meta</code>. Допишите строку <code>"progressToken": "p1",</code> и отправьте.',
+    hint: 'Запятая в конце нужна — после строки идут другие поля.',
+    lesson: 'Уведомления о прогрессе приходят потоком ответа на этот же запрос.',
+    start: T => T.call('export_orders'), sel: t => afterRange(t, '"_meta": {'),
+    ok: (q, f, all) => all.some(m => m.method === 'notifications/progress') },
+  { id: 'chain', g: 'Продвинутое', t: 'Цепочка против одного вызова',
+    d: 'Посчитайте долг «Ромашки» цепочкой из трёх вызовов, а потом одним. Заготовки — кнопками ниже, id в них уже подставлены: сверьте их с ответами.',
+    chain: ['find_customer', 'list_contracts', 'calc_debt', 'get_customer_debt'],
+    lesson: 'Один инструмент уровня задачи — меньше вызовов модели и меньше ошибок при переносе данных (глава 14).',
+    start: T => T.call('find_customer'),
+    ok: (q, f, all, S) => S.calls.has('calc_debt') && S.calls.has('get_customer_debt') },
 ];
 
 export function initLab(api) {
@@ -44,8 +118,14 @@ export function initLab(api) {
   const editor = $('#labEditor', root);
   const S = {
     src: 'demo', url: '', auth: '', era: 'modern', legacy: null, session: null,
-    cat: null, shelves: {}, id: 1, busy: false, calls: new Set(), done: loadDone(),
+    cat: null, shelves: {}, id: 1, busy: false, calls: new Set(), done: {},
+    lmode: 'tasks', task: 0, loaded: '', dirty: false, undo: null, undoTimer: 0,
+    gtasks: [], consented: new Set(), verdicts: {},
   };
+  // учебный сервер — готовые задания; любой другой — задания, собранные по его каталогу
+  const tasks = () => (S.src === 'demo' ? DEMO_TASKS : S.gtasks);
+  S.done = loadDone();
+  S.task = loadTask();
 
   /* ── запросы и шаблоны ── */
   const nextId = () => S.id++;
@@ -76,7 +156,29 @@ export function initLab(api) {
     },
   };
   const pretty = v => JSON.stringify(v, null, 2);
-  const setEditor = v => { editor.value = typeof v === 'string' ? v : pretty(v); checkParse(); };
+  // подставляет запрос в редактор; если пользователь уже правил текст — предлагает «Вернуть прежний»
+  function setEditor(v, { sel = null, undo = true } = {}) {
+    const text = typeof v === 'string' ? v : pretty(v);
+    if (undo && S.dirty && editor.value.trim() && editor.value !== text) showUndo(editor.value);
+    editor.value = text;
+    S.loaded = text;
+    S.dirty = false;
+    checkParse();
+    const r = sel?.(text);
+    if (r) {
+      editor.focus({ preventScroll: true });
+      editor.setSelectionRange(r[0], r[1]);
+      const lh = parseFloat(getComputedStyle(editor).lineHeight) || 19;
+      editor.scrollTop = Math.max(0, (text.slice(0, r[0]).split('\n').length - 4) * lh);
+    }
+  }
+  function showUndo(prev) {
+    S.undo = prev;
+    const box = $('#labUndo', root);
+    box.hidden = false;
+    clearTimeout(S.undoTimer);
+    S.undoTimer = setTimeout(() => { box.hidden = true; }, 9000);
+  }
 
   function parse(text) {
     try { return { ok: true, value: JSON.parse(stripComments(text)) }; }
@@ -90,31 +192,25 @@ export function initLab(api) {
     return p;
   }
 
-  function buildTemplates() {
-    const sel = $('#labTpl', root);
-    const opts = [['', 'Шаблон запроса…']];
+  // палитра «Что отправить» в свободном режиме
+  function renderPicker() {
     const c = S.cat;
-    if (S.era === 'modern') opts.push(['m:server/discover', 'server/discover']);
-    if (c?.caps?.tools) {
-      opts.push(['m:tools/list', 'tools/list']);
-      for (const t of c.tools) opts.push([`t:${t.name}`, `tools/call · ${t.name}`]);
-    }
-    if (c?.caps?.resources) {
-      opts.push(['m:resources/list', 'resources/list']);
-      for (const r of c.resources) opts.push([`r:${r.uri}`, `resources/read · ${r.name || r.uri}`]);
-    }
-    if (c?.caps?.prompts) {
-      opts.push(['m:prompts/list', 'prompts/list']);
-      for (const p of c.prompts) opts.push([`p:${p.name}`, `prompts/get · ${p.name}`]);
-    }
-    if (S.src === 'demo') {
-      opts.push(['x:completion', 'completion/complete · регион']);
-      opts.push(['x:listen', 'subscriptions/listen']);
-    }
-    opts.push(['x:cancel', 'уведомление · notifications/cancelled']);
-    sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('');
+    const b = (key, label, cls = '') => `<button class="lab-pk ${cls}" data-make="${esc(key)}">${esc(label)}</button>`;
+    const groups = [
+      ['О сервере', [S.era === 'modern' && b('m:server/discover', 'server/discover'), c?.caps?.tools && b('m:tools/list', 'tools/list'),
+        c?.caps?.resources && b('m:resources/list', 'resources/list'), c?.caps?.prompts && b('m:prompts/list', 'prompts/list')]],
+      ['Вызвать инструмент', (c?.tools || []).map(t => b(`t:${t.name}`, t.name, `k-${toolKind(t)[0]}`))],
+      ['Прочитать ресурс', (c?.resources || []).map(r => b(`r:${r.uri}`, r.name || r.uri, 'k-resource'))],
+      ['Получить промпт', (c?.prompts || []).map(p => b(`p:${p.name}`, p.name, 'k-prompt'))],
+      ['Ещё', [S.src === 'demo' && b('x:completion', 'completion/complete'), S.src === 'demo' && b('x:listen', 'subscriptions/listen'),
+        b('x:cancel', 'notifications/cancelled')]],
+    ];
+    $('#labPick', root).innerHTML = groups.map(([h, items]) => {
+      const it = items.filter(Boolean);
+      return it.length ? `<div class="lab-pk-g"><div class="lab-pk-h">${h}</div><div class="lab-pk-row">${it.join('')}</div></div>` : '';
+    }).join('');
   }
-  function fromTemplate(v) {
+  function make(v) {
     const [kind, ...rest] = v.split(':');
     const key = rest.join(':');
     if (kind === 'm') return req(key);
@@ -133,7 +229,7 @@ export function initLab(api) {
   }
 
   /* ── транспорт ── */
-  async function transport(msg) {
+  async function transport(msg, { timeout = 20000 } = {}) {
     const t0 = performance.now();
     if (S.src === 'demo') {
       await sleep(40 + Math.random() * 80);
@@ -151,15 +247,20 @@ export function initLab(api) {
     if (S.session) headers['Mcp-Session-Id'] = S.session;
     if (S.auth) headers.Authorization = S.auth;
     let res;
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeout);
     try {
-      res = await fetch(S.url, { method: 'POST', headers, body: JSON.stringify(msg) });
+      res = await fetch(S.url, { method: 'POST', headers, body: JSON.stringify(msg), signal: ctl.signal });
     } catch (e) {
-      return { netError: true, ms: Math.round(performance.now() - t0) };
+      clearTimeout(timer);
+      return { netError: true, timedOut: ctl.signal.aborted, ms: Math.round(performance.now() - t0) };
     }
     const sid = res.headers.get('Mcp-Session-Id');
     if (sid) S.session = sid;
     const ct = res.headers.get('Content-Type') || '';
-    const text = res.status === 202 ? '' : await res.text();
+    let text = '';
+    try { text = res.status === 202 ? '' : await res.text(); } catch (e) { clearTimeout(timer); return { netError: true, timedOut: ctl.signal.aborted, ms: Math.round(performance.now() - t0) }; }
+    clearTimeout(timer);
     let messages = [];
     if (ct.includes('text/event-stream')) messages = parseSSE(text);
     else if (text) { try { const j = JSON.parse(text); messages = Array.isArray(j) ? j : [j]; } catch (e) { /* не JSON */ } }
@@ -195,10 +296,10 @@ export function initLab(api) {
     return msg.method ? (n ? `${msg.method} · ${n}` : msg.method) : '???';
   }
 
-  async function exchange(msg, { speed = 1, quiet = false, silent = false } = {}) {
+  async function exchange(msg, { speed = 1, quiet = false, silent = false, timeout } = {}) {
     const k = silent || $('#labFast', root).checked ? 0 : speed;
     const isNote = msg && typeof msg === 'object' && !Array.isArray(msg) && !('id' in msg);
-    const pending = transport(msg);
+    const pending = transport(msg, timeout ? { timeout } : undefined);
     if (k) { api.packet(['lab_c', 'lab_srv'], isNote ? 'note' : 'req', labelOf(msg), 1.0 * k); await sleep(1000 * k); }
     const r = await pending;
     const ex = { msg, ...r };
@@ -233,6 +334,7 @@ export function initLab(api) {
   function explain(ex) {
     const f = ex.final;
     const origin = esc(location.origin);
+    if (ex.netError && ex.timedOut) return { cls: 'err', html: '<b>Сервер не ответил вовремя.</b> Запрос отменён по таймауту — сервер перегружен или ждёт чего-то, чего лаборатория не отправляет.' };
     if (ex.netError) return { cls: 'err', html: `<b>Браузер не получил ответ.</b> Чаще всего сервер не разрешает запросы с этой страницы (CORS) или недоступен. Для своего сервера разрешите origin <code>${origin}</code>, заголовки <code>content-type, mcp-protocol-version, mcp-method, mcp-name, authorization</code> и откройте <code>mcp-session-id</code> в Expose-Headers.` };
     if (ex.http === 401 || ex.http === 403) return { cls: 'err', html: `<b>HTTP ${ex.http}: нужна авторизация.</b> ${ex.wwwAuth ? `Сервер прислал <code>WWW-Authenticate: ${esc(ex.wwwAuth)}</code>. ` : ''}Вход по OAuth в лаборатории пока не реализован (глава 10). Если у сервера статический токен, укажите его в поле Authorization.` };
     if (!f) {
@@ -334,7 +436,8 @@ export function initLab(api) {
         retry.params.inputResponses = { ...(retry.params.inputResponses || {}), [key]: action === 'accept' ? { action, content } : { action } };
         if (r.requestState !== undefined) retry.params.requestState = r.requestState;
         else delete retry.params.requestState;
-        setEditor(retry);
+        const forging = S.lmode === 'tasks' && tasks()[S.task]?.id === 'forge';
+        setEditor(retry, { undo: false, sel: forging ? t => { const r = valueRange(t, 'requestState'); return r && [r[0] + 10, r[0] + 16]; } : null });
         box.innerHTML = '<div class="lab-hint ok">Повтор собран в редакторе: тот же запрос, новый <code>id</code>, ответы в <code>inputResponses</code> и неизменённый <code>requestState</code>. Нажмите «Отправить». А можно сначала изменить в <code>requestState</code> один символ — и посмотреть, что скажет сервер.</div>';
         $('#labSend', root).classList.add('pulse');
         editor.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -357,27 +460,174 @@ export function initLab(api) {
   const fixElicit = () => editJSON(v => { v.params = v.params || {}; v.params._meta = v.params._meta || meta(); v.params._meta[M + 'clientCapabilities'] = { ...(v.params._meta[M + 'clientCapabilities'] || {}), elicitation: { form: {} } }; v.id = nextId(); });
 
   /* ── задания ── */
-  function loadDone() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { return {}; } }
-  function saveDone() { try { localStorage.setItem(LS_KEY, JSON.stringify(S.done)); } catch (e) { /* приватный режим */ } }
+  const storeKey = () => LS_KEY + (S.src === 'demo' ? '' : '@' + S.url);
+  function loadDone() { try { return JSON.parse(localStorage.getItem(storeKey()) || '{}'); } catch (e) { return {}; } }
+  function loadTask() { try { return Math.min(Math.max(0, tasks().length - 1), Math.max(0, +localStorage.getItem(storeKey() + '-task') || 0)); } catch (e) { return 0; } }
+  function saveDone() { try { localStorage.setItem(storeKey(), JSON.stringify(S.done)); localStorage.setItem(storeKey() + '-task', S.task); } catch (e) { /* приватный режим */ } }
+
+  // Задания для любого сервера: собираются по его каталогу. Реальные серверы отвечают по-разному,
+  // поэтому в «поломках» засчитываем любой осмысленный отказ, а урок объясняет, чего ждёт спецификация.
+  function buildGenericTasks() {
+    const c = S.cat || {};
+    const tools = c.tools || [];
+    const needs = t => (t.inputSchema?.required || []).length > 0;
+    const ro = tools.filter(t => t.annotations?.readOnlyHint === true);
+    const pick = ro.find(needs) || ro[0] || tools.find(needs) || tools[0];
+    const arg = pick?.inputSchema?.required?.[0];
+    const argDesc = arg ? (pick.inputSchema.properties?.[arg]?.description || '') : '';
+    const argSel = arg ? (t => valueRange(t, arg) || afterRange(t, `"${arg}": `)) : null;
+    // «поломку» засчитываем по отправленному запросу, а вердикт — соблюдает ли сервер спецификацию — выносим по ответу
+    const KNOWN = ['server/discover', 'tools/list', 'tools/call', 'resources/list', 'resources/read', 'resources/templates/list', 'prompts/list',
+      'prompts/get', 'completion/complete', 'subscriptions/listen', 'initialize', 'ping', 'logging/setLevel'];
+    const answered = ex => !ex?.netError && (!!ex?.final || ex?.http >= 400);
+    const judge = ex => {
+      const f = ex.final;
+      const good = !!f?.error || f?.result?.isError === true || (ex.http >= 400 && ex.http < 500);
+      return { good, code: f?.error?.code ?? (f?.result?.isError ? 'isError: true' : `HTTP ${ex.http}`) };
+    };
+    const L = [];
+    if (S.era === 'modern') L.push({ id: 'discover', g: 'Основы', t: 'Спросите сервер, что он умеет',
+      d: 'Запрос <code>server/discover</code> уже в редакторе. Отправьте и найдите в ответе <code>capabilities</code> и <code>instructions</code>.',
+      lesson: 'Сервер новой схемы рассказывает о себе без рукопожатия.',
+      start: T => T.method('server/discover'), ok: (q, f) => q.method === 'server/discover' && !!f?.result });
+    if (c.caps?.tools) L.push({ id: 'list', g: 'Основы', t: 'Получите список инструментов',
+      d: `Отправьте <code>tools/list</code>. Инструментов у сервера: ${tools.length} — это полки на схеме.`,
+      lesson: 'Цвет полки — аннотации инструмента: зелёные только читают, красные могут менять данные.',
+      start: T => T.method('tools/list'), ok: (q, f) => q.method === 'tools/list' && !!f?.result?.tools });
+    if (pick) L.push({ id: 'call', g: 'Основы', t: `Вызовите ${pick.name}`,
+      d: arg ? `Аргумент <code>${esc(arg)}</code> выделен — впишите значение и отправьте.${argDesc ? ` Подсказка сервера: «${esc(argDesc.slice(0, 160))}».` : ''}` : 'У инструмента нет обязательных аргументов — просто отправьте.',
+      hint: pick.annotations?.readOnlyHint === true ? 'Инструмент помечен «только чтение» — вызов безопасен.' : 'Инструмент не помечен «только чтение» — лаборатория спросит согласие, как настоящий host.',
+      lesson: 'Это настоящий вызов реального сервера: ответ пришёл из внешнего мира.',
+      start: T => T.call(pick.name), sel: argSel,
+      ok: (q, f) => q.method === 'tools/call' && !!f?.result && f.result.isError !== true && f.result.resultType !== 'input_required' });
+    const res = (c.resources || [])[0];
+    if (res) L.push({ id: 'read', g: 'Основы', t: 'Прочитайте ресурс',
+      d: `В редакторе запрос <code>resources/read</code> для <code>${esc(res.name || res.uri)}</code>. Отправьте.`,
+      lesson: 'Ресурсы — данные для контекста; какие подмешать, решает приложение.',
+      start: T => req('resources/read', { uri: res.uri }), ok: (q, f) => q.method === 'resources/read' && !!f?.result?.contents });
+    const pr = (c.prompts || [])[0];
+    if (pr) {
+      const pa = (pr.arguments || []).find(a => a.required);
+      L.push({ id: 'prompt', g: 'Основы', t: 'Получите промпт',
+        d: `Промпт <code>${esc(pr.name)}</code>.${pa ? ` Аргумент <code>${esc(pa.name)}</code> выделен — впишите значение.` : ''} Отправьте.`,
+        lesson: 'Промпт — заготовка сценария, его выбирает пользователь.',
+        start: T => req('prompts/get', { name: pr.name, arguments: Object.fromEntries((pr.arguments || []).filter(a => a.required).map(a => [a.name, ''])) }),
+        sel: pa ? (t => valueRange(t, pa.name)) : null, ok: (q, f) => q.method === 'prompts/get' && !!f?.result?.messages });
+    }
+    L.push({ id: 'method', g: 'Сломай протокол', t: 'Метод, которого нет',
+      d: 'Метод выделен. Напечатайте <code>tools/delete</code> и отправьте.',
+      lesson: 'По спецификации ответ — −32601 Method not found. Сравните, что ответил этот сервер.',
+      start: T => T.method(c.caps?.tools ? 'tools/list' : 'ping'), sel: t => valueRange(t, 'method'), judge,
+      ok: (q, f, all, S2, ex) => typeof q.method === 'string' && !KNOWN.includes(q.method) && !q.method.startsWith('notifications/') && answered(ex) });
+    if (pick) L.push({ id: 'tool404', g: 'Сломай протокол', t: 'Инструмент, которого нет',
+      d: 'Имя инструмента выделено. Напечатайте <code>no_such_tool</code> и отправьте.',
+      lesson: 'Неизвестный инструмент — протокольная ошибка (обычно −32602), модель её обычно не видит.',
+      start: T => T.call(pick.name), sel: t => valueRange(t, 'name'), judge,
+      ok: (q, f, all, S2, ex) => q.method === 'tools/call' && !tools.some(t => t.name === q.params?.name) && answered(ex) });
+    if (arg) L.push({ id: 'noargs', g: 'Сломай протокол', t: 'Без обязательного аргумента',
+      d: 'Блок <code>arguments</code> выделен. Удалите его и отправьте.',
+      lesson: 'Без обязательного аргумента сервер отказывает — протокольной ошибкой или результатом с isError: true.',
+      start: T => T.call(pick.name), sel: t => blockRange(t, 'arguments'), judge,
+      ok: (q, f, all, S2, ex) => q.method === 'tools/call' && q.params?.name === pick.name && q.params?.arguments?.[arg] === undefined && answered(ex) });
+    if (S.era === 'modern') {
+      L.push({ id: 'meta', g: 'Сломай протокол', t: 'Уберите _meta',
+        d: 'Блок <code>_meta</code> выделен. Удалите его клавишей Backspace и отправьте.',
+        lesson: 'Без _meta сервер новой схемы не знает версию протокола и возможности клиента (по спецификации −32602).',
+        start: T => T.method('tools/list'), sel: t => blockRange(t, '_meta'), judge,
+        ok: (q, f, all, S2, ex) => typeof q.method === 'string' && !q.params?._meta && answered(ex) });
+      L.push({ id: 'version', g: 'Сломай протокол', t: 'Неизвестная версия протокола',
+        d: 'Версия выделена. Напечатайте <code>2099-01-01</code> и отправьте.',
+        lesson: 'По спецификации сервер отвечает −32022 и перечисляет поддерживаемые версии.',
+        start: T => T.method('tools/list'), sel: t => valueRange(t, M + 'protocolVersion'), judge,
+        ok: (q, f, all, S2, ex) => { const v = q.params?._meta?.[M + 'protocolVersion']; return !!v && v !== demo.PROTOCOL && answered(ex); } });
+    }
+    L.push({ id: 'note', g: 'Сломай протокол', t: 'Сообщение без ответа',
+      d: 'В редакторе уведомление: у него нет <code>id</code>. Отправьте и посмотрите, что вернёт сервер.',
+      lesson: 'На уведомление сервер не отвечает — по HTTP это 202 Accepted без тела.',
+      start: T => make('x:cancel'), ok: (q, f, all, S2, ex) => !ex?.netError && !('id' in q) && !f && ex?.http < 300 });
+    return L;
+  }
   function check(ex) {
     const q = ex.msg && typeof ex.msg === 'object' ? ex.msg : {};
     const f = ex.final;
     if (q.method === 'tools/call' && f?.result && !f.result.isError && f.result.resultType === 'complete') S.calls.add(q.params?.name);
-    if (S.src !== 'demo') return;
-    const fresh = CHALLENGES.filter(c => !S.done[c.id] && c.ok(q, f, ex.messages || [], S));
-    if (!fresh.length) return;
-    fresh.forEach(c => { S.done[c.id] = true; api.track('mcp3d_lab_challenge', { id: c.id }); });
-    saveDone();
-    renderChallenges(fresh.map(c => c.id));
-    api.pulse('lab_c', 'res', `Задание выполнено: ${fresh.length > 1 ? fresh.length + ' шт.' : '✓'}`, 1.8);
+    const bar = $('#labResTask', root);
+    bar.hidden = true;
+    if (!tasks().length) return;
+    const fresh = tasks().filter(t => !S.done[t.id] && t.ok(q, f, ex.messages || [], S, ex));
+    fresh.forEach(t => { S.done[t.id] = true; if (t.judge) S.verdicts[t.id] = t.judge(ex); api.track('mcp3d_lab_challenge', { id: t.id }); });
+    if (fresh.length) saveDone();
+    const cur = tasks()[S.task];
+    if (S.lmode === 'tasks' && S.done[cur.id] && (fresh.includes(cur) || cur.chain)) {
+      bar.hidden = false;
+      const v = S.verdicts[cur.id];
+      bar.classList.toggle('warn', !!v && !v.good);
+      bar.innerHTML = `<span>${v && !v.good ? `⚠ Сервер принял некорректный запрос — задание пройдено, но это отступление от спецификации` : `✓ Задание «${esc(cur.t)}» выполнено`}</span>${S.task < tasks().length - 1 ? '<button class="lab-btn small primary" data-next>Следующее задание →</button>' : ''}`;
+      api.pulse('lab_c', 'res', 'Задание выполнено ✓', 1.8);
+    } else if (fresh.length) {
+      api.pulse('lab_c', 'res', `Засчитано: ${fresh[0].t}`, 1.8);
+    }
+    renderTask();
   }
-  function renderChallenges(fresh = []) {
-    const list = $('#labChallenges', root);
-    const n = CHALLENGES.filter(c => S.done[c.id]).length;
-    $('#labScore', root).textContent = `${n} / ${CHALLENGES.length}`;
-    list.innerHTML = CHALLENGES.map(c => `<li class="${S.done[c.id] ? 'done' : ''} ${fresh.includes(c.id) ? 'fresh' : ''}" data-id="${c.id}">
-      <span class="t">${c.t}</span><span class="h">${c.h}</span></li>`).join('');
-    $('#labChallengesCard', root).hidden = S.src !== 'demo';
+  function renderTask() {
+    const t = tasks()[S.task];
+    $('#labTaskNote', root).hidden = S.src === 'demo';
+    if (!t) {
+      $('#labDots', root).innerHTML = '';
+      $('#labProg', root).textContent = '';
+      $('#labTaskN', root).textContent = '';
+      $('#labTaskT', root).textContent = 'Подключите сервер';
+      $('#labTaskD', root).innerHTML = 'Задания соберутся по каталогу сервера после подключения.';
+      $('#labTaskOk', root).hidden = true;
+      return;
+    }
+    const n = tasks().filter(x => S.done[x.id]).length;
+    $('#labProg', root).textContent = `${n}/${tasks().length}`;
+    $('#labTaskN', root).textContent = `Задание ${S.task + 1} из ${tasks().length} · ${t.g}`;
+    $('#labDots', root).innerHTML = tasks().map((x, i) =>
+      `<button class="${S.done[x.id] ? 'done' : ''} ${i === S.task ? 'cur' : ''}" data-task="${i}" title="${esc(x.t)}" aria-label="Задание ${i + 1}: ${esc(x.t)}"></button>`).join('');
+    $('#labTaskT', root).textContent = t.t;
+    $('#labTaskD', root).innerHTML = t.d;
+    const hint = $('#labTaskHint', root);
+    hint.hidden = !t.hint;
+    hint.open = false;
+    $('div', hint).innerHTML = t.hint || '';
+    $('#labTaskX', root).innerHTML = t.chain
+      ? `<div class="lab-chain">${t.chain.map((name, i) => `${i ? '<span>→</span>' : ''}<button class="lab-pk ${S.calls.has(name) ? 'ok' : ''}" data-make="t:${name}">${S.calls.has(name) ? '✓ ' : ''}${name}</button>`).join('')}</div>`
+      : '';
+    const done = !!S.done[t.id];
+    const ok = $('#labTaskOk', root);
+    ok.hidden = !done;
+    const v = S.verdicts[t.id];
+    ok.classList.toggle('warn', !!v && !v.good);
+    ok.innerHTML = !done ? '' : v
+      ? (v.good ? `<b>✓ Сервер отказал (${esc(v.code)})</b> — как и требует спецификация. ${esc(t.lesson)}`
+        : `<b>⚠ Сервер принял некорректный запрос</b> (${esc(v.code)}). Это отступление от спецификации 2026-07-28 — или сервер молча понимает запросы старой схемы. ${esc(t.lesson)}`)
+      : `<b>✓ Выполнено.</b> ${esc(t.lesson)}`;
+    const next = $('#labTaskNext', root);
+    next.hidden = S.task >= tasks().length - 1 && done;
+    next.textContent = done ? 'Следующее задание →' : 'Пропустить →';
+    next.classList.toggle('primary', done);
+    $('#labTask', root).classList.toggle('is-done', done);
+    if (n === tasks().length && S.task === tasks().length - 1 && done) ok.innerHTML += `<br><b>Все задания пройдены.</b> ${S.src === 'demo' ? 'Дальше — свой сервер по URL или сервер из библиотеки.' : 'Попробуйте другой сервер из библиотеки или «Свободный режим».'}`;
+  }
+  function goTask(i, { load = true } = {}) {
+    S.task = Math.max(0, Math.min(tasks().length - 1, i));
+    saveDone();
+    renderTask();
+    $('#labResTask', root).hidden = true;
+    const t = tasks()[S.task];
+    if (load && t) setEditor(t.start(T), { sel: t.sel, undo: true });
+  }
+  function setLMode(m) {
+    if (m === 'tasks' && !tasks().length) m = 'free';
+    S.lmode = m;
+    $$('.lab-modes button', root).forEach(b => b.setAttribute('aria-selected', String(b.dataset.lmode === m)));
+    $('#labTask', root).hidden = m !== 'tasks';
+    $('#labFree', root).hidden = m !== 'free';
+    const tb = $('.lab-modes [data-lmode="tasks"]', root);
+    tb.disabled = !tasks().length;
+    tb.title = tb.disabled ? 'Подключите сервер — задания соберутся по его каталогу' : '';
   }
 
   /* ── рентген: каталог на схеме и аудит качества ── */
@@ -437,7 +687,16 @@ export function initLab(api) {
     S.legacy = null;
     S.era = 'modern';
     S.cat = null;
+    S.gtasks = [];
     api.setCatalog([]);
+    // всё от прошлого сервера убираем сразу, чтобы при неудаче не остались чужие данные
+    $('#labCaps', root).innerHTML = '';
+    $('#labChips', root).innerHTML = '';
+    $('#labAudit', root).innerHTML = '';
+    $('#labQuality', root).textContent = '';
+    renderPicker();
+    setLMode(S.lmode);
+    renderTask();
     const status = (html, cls = '') => { const el = $('#labConn', root); el.className = `lab-status ${cls}`; el.innerHTML = html; };
     const isDemo = S.src === 'demo';
     if (!isDemo) {
@@ -448,10 +707,9 @@ export function initLab(api) {
     api.setServer(isDemo ? 'Учебный сервер' : new URL(S.url).host, isDemo ? 'работает в браузере' : 'подключение…');
     status('Сканирую сервер…');
     try {
-      const d = await exchange(req('server/discover'), { speed: 0.6, quiet: true });
-      if (d.netError || d.http === 401 || d.http === 403) {
-        const e = explain(d);
-        status(e.html, 'err');
+      const d = await exchange(req('server/discover'), { speed: 0.6, quiet: true, timeout: 5000 });
+      if (d.http === 401 || d.http === 403) {
+        status(explain(d).html, 'err');
         api.setServer(new URL(S.url).host, 'нет доступа');
         return;
       }
@@ -465,7 +723,13 @@ export function initLab(api) {
         const init = await exchange({ jsonrpc: '2.0', id: nextId(), method: 'initialize',
           params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'mcp3d-lab', version: '0.1.0' } } }, { speed: 0.6, quiet: true });
         const r = init.final?.result;
-        if (!r) { status('Сервер не ответил ни по новой схеме (2026-07-28), ни по старой (initialize).', 'err'); S.era = 'modern'; return; }
+        if (!r) {
+          // сетевая ошибка на обеих схемах — почти всегда CORS; старые серверы не разрешают заголовок Mcp-Method
+          status(d.netError && init.netError ? explain(d).html : 'Сервер не ответил ни по новой схеме (2026-07-28), ни по старой (initialize).', 'err');
+          api.setServer(new URL(S.url).host, 'нет ответа');
+          S.era = 'modern';
+          return;
+        }
         S.legacy = { version: r.protocolVersion };
         caps = r.capabilities; info = r.serverInfo; instructions = r.instructions;
         await transport({ jsonrpc: '2.0', method: 'notifications/initialized' });
@@ -488,15 +752,23 @@ export function initLab(api) {
       renderXray(a);
       api.markIssues(a.findings.filter(f => f.sev !== 'idea' && f.tool).map(f => S.shelves[`tool:${f.tool}`]).filter(Boolean));
       api.setServer(isDemo ? 'Учебный сервер' : (info?.title || info?.name || new URL(S.url).host), `${S.cat.tools.length} tools · ${S.cat.resources.length + S.cat.templates.length} resources · ${S.cat.prompts.length} prompts`);
-      buildTemplates();
+      renderPicker();
+      S.calls.clear();
+      S.verdicts = {};
+      S.gtasks = isDemo ? [] : buildGenericTasks();
+      S.done = loadDone();
+      S.task = loadTask();
+      if (!isDemo && !S.external) S.lmode = 'tasks';
       status(isDemo
         ? '<b>Подключено.</b> Сервер работает в этой вкладке, данные вымышленные.'
         : `<b>Подключено</b> (${S.era === 'modern' ? 'протокол 2026-07-28' : `старая схема ${esc(S.legacy.version)}`}).`, 'ok');
-      if (!editor.value.trim()) setEditor(T.call(S.cat.tools[0]?.name || '') );
+      if (S.lmode === 'tasks' && !S.dirty && !S.external) goTask(S.task);
+      else if (!editor.value.trim()) setEditor(T.call(S.cat.tools[0]?.name || ''), { undo: false });
     } finally {
       S.busy = false;
       setBusy(false);
-      renderChallenges();
+      setLMode(S.lmode);
+      renderTask();
     }
   }
 
@@ -506,6 +778,19 @@ export function initLab(api) {
     if (S.busy) return;
     const p = checkParse();
     if (!p.ok) return;
+    const q = p.value;
+    if (S.src === 'url' && q?.method === 'tools/call' && !S.consented.has(q.params?.name)) {
+      const tool = S.cat?.tools.find(t => t.name === q.params?.name);
+      if (tool && tool.annotations?.readOnlyHint !== true) {
+        const box = $('#labConsent', root);
+        box.hidden = false;
+        box.innerHTML = `<b>Вызвать «${esc(tool.name)}»?</b> Инструмент не помечен «только чтение» и может менять данные на сервере. Настоящий host обязан спросить согласие (глава 11).
+          <div class="lab-actions"><button class="lab-btn small primary" data-consent="yes">Вызвать</button><button class="lab-btn small" data-consent="no">Отмена</button></div>`;
+        box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return;
+      }
+    }
+    $('#labConsent', root).hidden = true;
     $('#labSend', root).classList.remove('pulse');
     S.busy = true;
     setBusy(true);
@@ -515,8 +800,21 @@ export function initLab(api) {
   /* ── события ── */
   $('#labSend', root).addEventListener('click', onSend);
   $('#labFormat', root).addEventListener('click', () => { const p = checkParse(); if (p.ok) setEditor(p.value); });
-  $('#labTpl', root).addEventListener('change', e => { const v = fromTemplate(e.target.value); if (v) setEditor(v); e.target.value = ''; });
-  editor.addEventListener('input', () => checkParse());
+  editor.addEventListener('input', () => { S.dirty = editor.value !== S.loaded; checkParse(); });
+  $('#labUndoBtn', root).addEventListener('click', () => {
+    if (S.undo == null) return;
+    const cur = editor.value;
+    editor.value = S.undo; S.loaded = cur; S.dirty = true; S.undo = null;
+    $('#labUndo', root).hidden = true;
+    checkParse();
+  });
+  $$('.lab-modes button', root).forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return;
+    setLMode(b.dataset.lmode);
+    if (b.dataset.lmode === 'tasks') goTask(S.task);
+  }));
+  $('#labTaskNext', root).addEventListener('click', () => goTask(S.task + 1));
+  $('#labTaskRestart', root).addEventListener('click', () => goTask(S.task));
   editor.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); onSend(); }
     if (e.key === 'Tab') {
@@ -532,30 +830,52 @@ export function initLab(api) {
     $$('.lab-srv-tabs button', root).forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     $('.lab-url', root).hidden = S.src !== 'url';
     if (S.src === 'demo') connect();
-    else { $('#labConn', root).className = 'lab-status'; $('#labConn', root).innerHTML = 'Укажите адрес MCP-сервера (Streamable HTTP) и нажмите «Подключить».'; api.setCatalog([]); api.setServer('Ваш сервер', 'не подключён'); renderChallenges(); }
+    else { $('#labConn', root).className = 'lab-status'; $('#labConn', root).innerHTML = 'Укажите адрес MCP-сервера (Streamable HTTP) и нажмите «Подключить».'; api.setCatalog([]); api.setServer('Ваш сервер', 'не подключён'); setLMode('free'); }
   }));
   $('#labConnect', root).addEventListener('click', connect);
+  $('#labLib', root).innerHTML = LIBRARY.map(s2 => `<button class="lab-lib-item" data-url="${esc(s2.url)}"><b>${esc(s2.name)}</b><span>${esc(s2.desc)}</span><i class="${s2.era}">${s2.era === 'new' ? '2026-07-28' : 'старая схема'}</i></button>`).join('');
+  $('#labLib', root).addEventListener('click', e => {
+    const b = e.target.closest('[data-url]');
+    if (!b || S.busy) return;
+    $('#labUrl', root).value = b.dataset.url;
+    S.external = false;
+    connect();
+  });
+  $('#labConsent', root).addEventListener('click', e => {
+    const b = e.target.closest('[data-consent]');
+    if (!b) return;
+    const box = $('#labConsent', root);
+    box.hidden = true;
+    if (b.dataset.consent === 'yes') {
+      const p = parse(editor.value);
+      if (p.ok) S.consented.add(p.value?.params?.name);
+      onSend();
+    }
+  });
   $('#labUrl', root).addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') connect(); });
   $('#labAuth', root).addEventListener('keydown', e => e.stopPropagation());
   root.addEventListener('click', e => {
     const chip = e.target.closest('.lab-chip');
-    if (chip) { setEditor(T.call(chip.dataset.tool)); editor.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
-    const ch = e.target.closest('#labChallenges li');
-    if (ch) {
-      const c = CHALLENGES.find(x => x.id === ch.dataset.id);
-      if (c) { setEditor(c.tpl(T)); editor.scrollIntoView({ block: 'center', behavior: 'smooth' }); editor.focus({ preventScroll: true }); }
-      return;
-    }
+    if (chip) { setLMode('free'); setEditor(T.call(chip.dataset.tool)); editor.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    const pk = e.target.closest('[data-make]');
+    if (pk) { const v = make(pk.dataset.make); if (v) { setEditor(v); editor.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } return; }
+    const dot = e.target.closest('[data-task]');
+    if (dot) { goTask(+dot.dataset.task); return; }
+    if (e.target.closest('[data-next]')) { goTask(S.task + 1); $('#labTask', root).scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
     const link = e.target.closest('[data-chapter]');
     if (link) api.goChapter(link.dataset.chapter);
   });
-  $('#labReset', root).addEventListener('click', () => { S.done = {}; S.calls.clear(); saveDone(); renderChallenges(); });
+  $('#labReset', root).addEventListener('click', () => { S.done = {}; S.calls.clear(); saveDone(); goTask(0); });
 
-  renderChallenges();
+  setLMode('tasks');
+  renderTask();
   connect();
 
   return {
     load(text) {
+      // запрос из главы книги — это свободная работа, а не задание
+      S.external = true;
+      setLMode('free');
       const p = parse(text);
       setEditor(p.ok ? p.value : text);
       editor.scrollIntoView({ block: 'center', behavior: 'smooth' });

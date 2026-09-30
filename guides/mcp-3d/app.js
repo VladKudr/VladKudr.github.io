@@ -54,7 +54,7 @@ if (HAS3D) {
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 5;
-  controls.maxDistance = 70;
+  controls.maxDistance = 120;
   controls.maxPolarAngle = Math.PI * 0.49;
   controls.autoRotateSpeed = 0.6;
   controls.addEventListener('start', () => { camTween = null; userOrbit = true; });
@@ -537,7 +537,10 @@ function buildLab() {
 const LAB_KIND = {
   ro: [COL.ok, 'только чтение'], rw: [COL.tools, 'меняет данные'], danger: [COL.threat, 'разрушающий'],
   resource: [COL.host, 'ресурс'], template: [COL.client, 'шаблон ресурса'], prompt: [COL.prompts, 'промпт'],
+  more: [COL.user, 'ещё'],
 };
+// сколько полок каждой группы помещаем на стойку; остальное сворачивается в «+N ещё» (полный список — в «Рентгене»)
+const LAB_CAP = { tools: 12, res: 6, prompts: 5 };
 let labItems = [];
 let labCam = null;
 function removeEnt(id) {
@@ -555,8 +558,16 @@ function setLabCatalog(items) {
   labItems.forEach(removeEnt);
   labItems = [];
   const on = curCh === 'lab' ? 1 : 0;
+  const byGroup = new Map();
+  for (const it of items) (byGroup.get(it.group) || byGroup.set(it.group, []).get(it.group)).push(it);
+  const rack = [];
+  for (const [g, list] of byGroup) {
+    const cap = LAB_CAP[g] ?? 8;
+    rack.push(...list.slice(0, cap));
+    if (list.length > cap) rack.push({ key: `more:${g}`, name: `+${list.length - cap} ещё`, kind: 'more', group: g });
+  }
   let y = 0.35, group = null;
-  items.forEach((it, i) => {
+  rack.forEach((it, i) => {
     if (group !== null && it.group !== group) y += 0.45;
     group = it.group;
     const [color] = LAB_KIND[it.kind] || LAB_KIND.rw;
@@ -1497,7 +1508,7 @@ const labApi = {
 function ensureLab() {
   const feed = () => { if (pendingLab && labMod) { labMod.load(pendingLab); pendingLab = null; } };
   if (labMod) return feed();
-  labLoading ||= import('./lab.js?v=1')
+  labLoading ||= import('./lab.js?v=7')
     .then(m => { labMod = m.initLab(labApi); feed(); })
     .catch(e => { labLoading = null; console.error('Лаборатория не загрузилась', e); });
 }
