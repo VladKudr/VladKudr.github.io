@@ -520,6 +520,86 @@ function buildWorld() {
   buildChain();
   buildDesign();
   buildEco();
+  buildLab();
+}
+
+// ── Станция «Лаборатория»: клиент в браузере → сервер → стойка каталога (строится по tools/list)
+const LAB_RACK_X = 3.4;
+function buildLab() {
+  ent('lab_c', place(box(1.1, 1.1, 1.1, COL.client, { fill: 0.45 }), -7, 1, 0), {
+    label: 'Вы · MCP-клиент', sub: 'прямо в браузере', color: COL.client, anchor: [-7, 1, 0],
+  });
+  ent('lab_srv', place(tower(COL.server, 3, 1.7), -1.4, 0, 0), {
+    label: 'Учебный сервер', sub: 'работает в браузере', color: COL.server, anchor: [-1.4, 1.3, 0], labelPos: [0, 2.75, 0],
+  });
+  pipe('lab_p', 'lab_c', 'lab_srv', COL.client, { lift: 0.4, r: 0.06 });
+}
+const LAB_KIND = {
+  ro: [COL.ok, 'только чтение'], rw: [COL.tools, 'меняет данные'], danger: [COL.threat, 'разрушающий'],
+  resource: [COL.host, 'ресурс'], template: [COL.client, 'шаблон ресурса'], prompt: [COL.prompts, 'промпт'],
+};
+let labItems = [];
+let labCam = null;
+function removeEnt(id) {
+  const e = ents.get(id);
+  if (!e) return;
+  for (const l of e.labels) l.element.remove();
+  world.remove(e.obj);
+  e.obj.traverse(o => { o.geometry?.dispose?.(); if (o.material) [].concat(o.material).forEach(m => m.dispose()); });
+  ents.delete(id);
+  for (const k of [...curveCache.keys()]) if (k.split('|').includes(id)) curveCache.delete(k);
+}
+function setLabCatalog(items) {
+  const shelves = {};
+  if (!HAS3D) return shelves;
+  labItems.forEach(removeEnt);
+  labItems = [];
+  const on = curCh === 'lab' ? 1 : 0;
+  let y = 0.35, group = null;
+  items.forEach((it, i) => {
+    if (group !== null && it.group !== group) y += 0.45;
+    group = it.group;
+    const [color] = LAB_KIND[it.kind] || LAB_KIND.rw;
+    const g = box(2.4, 0.42, 1.6, color, { fill: 0.62, emissive: 0.5 });
+    const gem = threatGem();
+    gem.scale.setScalar(0.42);
+    gem.position.set(-1.6, 0, 0);
+    gem.visible = false;
+    g.add(gem);
+    g.userData.gem = gem;
+    place(g, LAB_RACK_X, y, 0);
+    const id = `lab_i${i}`;
+    const e = ent(id, g, {
+      label: it.name, color, labelCls: 'small', labelPos: [1.35, 0, 0], labelCenter: [0, 0.5],
+      anchor: [LAB_RACK_X - 1.2, y, 0],
+    });
+    e.target = on;
+    labItems.push(id);
+    shelves[it.key] = id;
+    y += 0.6;
+  });
+  if (items.length) {
+    const h = y + 0.05;
+    const frame = new THREE.Group();
+    for (const [dx, dz] of [[-1.3, -0.9], [1.3, -0.9], [-1.3, 0.9], [1.3, 0.9]]) {
+      const post = box(0.07, h, 0.07, COL.server, { fill: 0.55, edge: 0 });
+      post.position.set(dx, h / 2, dz);
+      frame.add(post);
+    }
+    place(frame, LAB_RACK_X, 0, 0);
+    ent('lab_rack', frame, {}).target = on;
+    labItems.push('lab_rack');
+  }
+  const H = Math.max(3, y);
+  labCam = [0.6, H * 0.5 + 4.5, H * 0.95 + 12, 0.4, H * 0.42, 0];
+  if (curCh === 'lab') flyTo(labCam);
+  return shelves;
+}
+function setLabel(id, text, sub = '') {
+  const l = ents.get(id)?.labels[0];
+  if (!l) return;
+  l.element._t = [text, sub];
+  applyLabels();
 }
 
 // ── Станция «Без рукопожатия»: клиент → балансировщик → любая реплика
@@ -736,6 +816,7 @@ function packetMesh(color) {
 }
 
 function sendPacket({ from, to, path, kind = 'req', label = '', dur = 1.5, delay = 0 }) {
+  if (path && path.length === 2) { from = path[0]; to = path[1]; path = null; }
   if (!HAS3D) return;
   let getPoint;
   if (path) {
@@ -923,6 +1004,13 @@ const runner = {
   },
 };
 
+function runnable(src) {
+  try {
+    const v = JSON.parse(src.replace(/("(?:\\.|[^"\\])*")|\/\/[^\n]*/g, (m, str) => str || ''));
+    return v && typeof v === 'object' && !Array.isArray(v) && typeof v.method === 'string' && 'id' in v;
+  } catch (e) { return false; }
+}
+
 function listMsg(ol) {
   const n = ol.nextElementSibling;
   return n && n.classList.contains('msg') ? n : null;
@@ -944,6 +1032,15 @@ function showMessage(box, s) {
   d.className = 'dir';
   d.textContent = s.payload.dataset.title || (from && to ? `${from} → ${to}` : '');
   head.append(k, d);
+  if (runnable(src)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'run-in-lab';
+    b.textContent = '▶ В песочнице';
+    b.title = 'Выполнить этот запрос на учебном сервере';
+    b.addEventListener('click', e => { e.stopPropagation(); pendingLab = src; switchMode('lab'); });
+    head.append(b);
+  }
   box.classList.add('has');
 }
 
@@ -981,6 +1078,13 @@ const TRAFFIC = [
 let designK = 0, designTarget = 0;
 
 const hooks = {
+  lab: {
+    enter() {
+      labItems.forEach(id => setT(id, 1));
+      if (labCam) flyTo(labCam);
+      ensureLab();
+    },
+  },
   cover: {
     enter() { this.t = 0; },
     update(dt) {
@@ -1159,6 +1263,7 @@ const GROUPS = {
   why: ['why_a0', 'why_a1', 'why_a2', 'why_s0', 'why_s1', 'why_s2', 'why_s3'],
   layers: ['lay_L1', 'lay_L2', 'lay_L3', 'lay_R1', 'lay_R2', 'lay_R3', 'lay_Ln', 'lay_Rn', 'lay_wire'],
   chain: ['ch_host', 'ch_llm', 'ch_cl', 'ch_srv', 'ch_p', 'ch_api1', 'ch_api2', 'ch_api3', 'ch_x1', 'ch_x2', 'ch_x3'],
+  lab: ['lab_c', 'lab_srv', 'lab_p'],
   life: ['life_c', 'life_lb', 'life_r1', 'life_r2', 'life_r3', 'life_p0', 'life_p1', 'life_p2', 'life_p3'],
   design: ['d1', 'd2', 'd3', 'd4', 'd5', 'd_obs', 'd_client', 'd_ext'],
   eco: ['eco_spec', 'eco_sdks', 'eco_registry', 'eco_inspector', 'eco_hosts', 'eco_servers'],
@@ -1196,6 +1301,8 @@ const LEGEND = {
   host: ['Host', COL.host], client: ['Client', COL.client], server: ['Server', COL.server], llm: ['LLM', COL.llm],
   ext: ['Внешняя система', COL.ext], user: ['Пользователь', COL.user], auth: ['OAuth', COL.auth], threat: ['Угроза', COL.threat],
   req: ['запрос', KIND.req], res: ['ответ', KIND.res], note: ['уведомление', KIND.note], err: ['ошибка', KIND.err], task: ['задача', KIND.task],
+  ro: ['только чтение', COL.ok], rw: ['меняет данные', COL.tools], danger: ['разрушающий', COL.threat],
+  resource: ['ресурс', COL.host], prompt: ['промпт', COL.prompts],
 };
 const LEGEND_BIZ = {
   host: 'ИИ-приложение', client: 'Подключение', server: 'Коннектор', llm: 'Модель ИИ', ext: 'Ваша система',
@@ -1285,9 +1392,11 @@ function setMode(m, target = null) {
   go(Math.max(0, pages.indexOf(target)), true);
 }
 // при переключении стараемся открыть соответствующую главу другой версии
+const lastPage = {};
 function switchMode(m) {
   if (m === mode) return;
   const here = pages[cur];
+  if (here) lastPage[mode] = here.id;
   let target = null;
   if (here && m === 'biz') {
     target = pagesAll.find(p => pageMode(p) === 'biz' && (p.dataset.pair || '').split(',').includes(here.id)) || null;
@@ -1295,6 +1404,7 @@ function switchMode(m) {
     const id = (here.dataset.pair || '').split(',')[0];
     target = id ? document.getElementById(id) : null;
   }
+  if (!target && lastPage[m]) target = document.getElementById(lastPage[m]);
   setMode(m, target);
 }
 
@@ -1369,12 +1479,36 @@ function setStage(v) {
   if (z) z.setAttribute('aria-label', v === 'large' ? 'Уменьшить схему' : 'Увеличить схему');
 }
 
+/* ─────────────────────────── Лаборатория ─────────────────────────── */
+let labMod = null, labLoading = null, pendingLab = null;
+const labApi = {
+  highlightJSON,
+  packet: (path, kind, label, dur, delay = 0) => sendPacket({ path, kind, label, dur, delay }),
+  pulse: (id, kind, label, dur) => pulseAt(id, { kind, label, dur }),
+  setServer: (title, sub) => setLabel('lab_srv', title, sub),
+  setCatalog: items => setLabCatalog(items),
+  markIssues: ids => {
+    const bad = new Set(ids);
+    for (const id of labItems) { const g = ents.get(id)?.obj.userData.gem; if (g) g.visible = bad.has(id); }
+  },
+  goChapter: id => { const p = document.getElementById(id); if (p) { lastPage.lab = 'lab'; setMode(pageMode(p), p); } },
+  track: (goal, params) => goalOnce(goal, params),
+};
+function ensureLab() {
+  const feed = () => { if (pendingLab && labMod) { labMod.load(pendingLab); pendingLab = null; } };
+  if (labMod) return feed();
+  labLoading ||= import('./lab.js?v=1')
+    .then(m => { labMod = m.initLab(labApi); feed(); })
+    .catch(e => { labLoading = null; console.error('Лаборатория не загрузилась', e); });
+}
+
 /* ─────────────────────────── Яндекс Метрика ─────────────────────────── */
 // Главы переключаются без перезагрузки, поэтому просмотры, цели и активное время
 // отправляются вручную: так в Метрике видны глубина просмотра и время на сайте.
 const YM_ID = 113153530;
 const YM_BASE = location.origin + location.pathname;
-const ym = (...a) => { try { if (typeof window.ym === 'function') window.ym(YM_ID, ...a); } catch (e) { /* блокировщик */ } };
+const YM_OFF = /^(localhost|127\.|\[::1\])/.test(location.hostname);
+const ym = (...a) => { try { if (!YM_OFF && typeof window.ym === 'function') window.ym(YM_ID, ...a); } catch (e) { /* блокировщик */ } };
 const ymOnce = new Set();
 const goalOnce = (id, params) => { if (!ymOnce.has(id)) { ymOnce.add(id); ym('reachGoal', id, params); } };
 let ymFirst = true, ymTimer = null, ymLastUrl = location.href;
