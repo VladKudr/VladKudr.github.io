@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Как устроен ИИ-агент: harness · Влад Кудрявцев</title>
+<meta name="description" content="Лёгкий 3D-путеводитель: что такое harness, как он превращает модель в агента, из чего состоит, какие бывают типы и зачем всё это нужно. С тренажёром «соберите свой harness».">
+<meta property="og:title" content="Как устроен ИИ-агент. Часть 1: harness">
+<meta property="og:description" content="Почему одна и та же модель в чате только советует, а в агенте сама делает работу. Агентный цикл, контекст, инструменты, разрешения, память, проверка и лимиты — в живой 3D-модели и тренажёре.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://vladkudr.github.io/guides/agents/">
+<link rel="shortcut icon" href="../../favicon.ico">
+<link rel="alternate" hreflang="ru" href="https://vladkudr.github.io/guides/agents/">
+<link rel="alternate" hreflang="en" href="https://vladkudr.github.io/guides/agents/en/">
+<link rel="alternate" hreflang="de" href="https://vladkudr.github.io/guides/agents/de/">
+<script>
+  try { const t = localStorage.getItem('agents-theme') || localStorage.getItem('mcp3d-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  try { const s = localStorage.getItem('agents-stage'); if (s === 'hidden' || s === 'large') document.documentElement.dataset.stage = s; } catch (e) {}
+</script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113153530', 'ym');
+
+    ym(113153530, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113153530" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=3">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <nav class="crumbs" aria-label="Навигация">
+      <a href="https://vladkudr.github.io" class="hide-sm">vladkudr.github.io</a>
+      <span class="sep hide-sm">/</span>
+      <a href="../">guides</a>
+      <span class="sep sep-here">/</span>
+      <span class="here">Как устроен ИИ-агент</span>
+    </nav>
+    <div class="top-actions">
+      <nav class="lang-switch" aria-label="Язык">
+        <a aria-current="page">RU</a>
+        <a href="en/" data-base="en/" hreflang="en" lang="en">EN</a>
+        <a href="de/" data-base="de/" hreflang="de" lang="de">DE</a>
+      </nav>
+      <button class="icon-btn top-sim" id="simBtn" aria-label="Тренажёр">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        <span class="lbl-txt">Тренажёр</span>
+      </button>
+      <button class="icon-btn" id="tocBtn" aria-label="Оглавление">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <span class="lbl-txt">Оглавление</span>
+      </button>
+      <button class="icon-btn" id="themeToggle" aria-label="Переключить тему">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      </button>
+    </div>
+    <div class="progress" id="progress"></div>
+  </header>
+
+  <main class="app">
+    <section id="stage" aria-label="3D-модель">
+      <div class="chip" id="chapterChip"></div>
+      <div class="stage-tools">
+        <button class="icon-btn js-play" id="btnPlay" data-state="playing" aria-label="Пауза" title="Пауза / продолжить">
+          <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+        </button>
+        <button class="icon-btn" id="btnReplay" aria-label="Проиграть главу заново" title="Сначала">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button class="icon-btn" id="btnView" aria-label="Вернуть ракурс" title="Вернуть ракурс">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V4h5M21 9V4h-5M3 15v5h5M21 15v5h-5"/></svg>
+        </button>
+        <button class="icon-btn" id="btnRotate" aria-label="Автовращение" title="Автовращение">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="4"/><path d="M12 2v4M12 18v4"/></svg>
+        </button>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="hint">тяните — вращать · колесо — масштаб · правая кнопка — сдвиг</div>
+    </section>
+
+    <div class="dock" id="dock" aria-label="Управление схемой">
+      <button class="dock-toggle" id="dockToggle" aria-controls="stage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+        <span class="when-shown">Скрыть схему</span><span class="when-hidden">Показать 3D-схему</span>
+      </button>
+      <div class="dock-actions">
+        <button class="icon-btn js-play" data-state="playing" data-proxy="btnPlay" aria-label="Пауза">
+          <svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+        </button>
+        <button class="icon-btn" data-proxy="btnReplay" aria-label="Проиграть главу заново">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button class="icon-btn" data-proxy="btnView" aria-label="Вернуть ракурс">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+        </button>
+        <button class="icon-btn" id="dockSize" aria-label="Увеличить схему">
+          <svg class="i-grow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          <svg class="i-shrink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div id="book">
+
+<!-- ═════════════════════════ ОБЛОЖКА ═════════════════════════ -->
+<article class="page" id="cover" data-ch="cover" data-show="@main" data-rotate data-cam="0,17,23,0,0.6,0.8" data-legend="model,ctx,tools,gate,check,stop,memory,instr">
+  <div class="kicker">Путеводитель · часть 1</div>
+  <h1>Как устроен ИИ-агент: harness</h1>
+  <p class="lead">Одна и та же модель в чате даёт советы, а в агенте сама открывает файлы, находит ошибку и исправляет её. Модель та же, разница в том, что вокруг неё. Это «что-то вокруг» называют <strong>harness</strong>.</p>
+  <p>Буквально harness — «упряжь». Лошадь сильная, но без упряжи телегу не повезёт: некуда приложить силу и нечем править. С языковой моделью то же самое. В русскоязычной среде термин обычно не переводят.</p>
+  <div class="cover-badges">
+    <span class="badge acc">13 коротких глав · ~15 минут</span>
+    <span class="badge">без кода</span>
+    <span class="badge">с тренажёром</span>
+  </div>
+  <button class="cta" data-go-next>Начать →</button>
+  <div class="callout sim-invite"><b>Сразу к делу?</b> <button class="linklike" data-go="sim">Соберите harness в тренажёре</button>: включайте и выключайте его компоненты и смотрите, где агент ломается.</div>
+  <div class="howto">
+    <div><span class="ic">🖱</span><span>Рядом с текстом — живая 3D-модель агента. Её можно вращать мышью или пальцем.</span></div>
+    <div><span class="ic">▶</span><span>В главах есть анимированные шаги. <strong>Нажмите на шаг</strong>, чтобы остановиться на нём.</span></div>
+    <div><span class="ic">💡</span><span>Термины даны так, как их называют в индустрии. Бытовые сравнения вынесены в блоки «Как в жизни».</span></div>
+    <div><span class="ic">⌨</span><span><kbd>←</kbd> <kbd>→</kbd> листают страницы.</span></div>
+  </div>
+  <h3>Содержание</h3>
+  <ol class="toc-list cover-toc"></ol>
+  <div class="callout soon"><b>Часть 2 — скоро.</b> Скиллы, цели, циклы, субагенты и обмен контекстом между ними. Всё это надстройки над harness из этой части.</div>
+</article>
+
+<!-- ═════════════════════════ 1. МОДЕЛЬ ═════════════════════════ -->
+<article class="page" id="model" data-ch="model" data-show="room,model,person" data-cam="7,6.5,15.5,0,1.4,5" data-legend="model,user,think,res">
+  <div class="kicker">Глава 1</div>
+  <h2>Модель умеет только одно</h2>
+  <p class="lead">Языковая модель (LLM) получает текст и генерирует продолжение. Больше ничего: она не открывает файлы, не ходит в интернет и не помнит вчерашний разговор.</p>
+  <div class="steps-h"><h3>Один вызов модели</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-from="person" data-to="model" data-kind="user" data-label="промпт">Человек отправляет запрос — <strong>промпт</strong>.</li>
+    <li data-at="model" data-kind="think" data-label="генерирует ответ токен за токеном">Модель генерирует ответ <strong>токен за токеном</strong> (токен — кусочек слова).</li>
+    <li data-from="model" data-to="person" data-kind="res" data-label="ответ">Ответ возвращается. Если для него нужен файл, модель может только попросить его.</li>
+    <li data-at="model" data-kind="note" data-label="вызов закончен — состояние не сохранилось" data-do="forget">Вызов закончен. Модель <strong>stateless</strong>: в следующий раз она увидит только то, что ей передадут заново.</li>
+  </ol>
+  <h3>Чего у модели нет</h3>
+  <ul class="bul">
+    <li><strong>Действий во внешнем мире.</strong> Она может написать «открой файл report.xlsx», но открыть его не может.</li>
+    <li><strong>Памяти между вызовами.</strong> Каждый раз ей заново передают всю историю диалога.</li>
+    <li><strong>Знания о текущем моменте.</strong> Дата, состояние файлов, свежие данные — только то, что есть в запросе.</li>
+    <li><strong>Способа проверить себя.</strong> Она не узнает, сработал ли её совет.</li>
+  </ul>
+  <div class="callout life">Гениальный консультант, запертый в комнате без окон и телефона. Под дверь ему просовывают листок, он пишет ответ и отдаёт обратно. Что происходит за дверью, он не видит, а следующий листок читает с чистого листа.</div>
+  <p class="takeaway">Поэтому «научить ИИ работать с отчётами» — почти всегда задача не про модель, а про то, что вокруг неё.</p>
+</article>
+
+<!-- ═════════════════════════ 2. HARNESS ═════════════════════════ -->
+<article class="page" id="harness" data-ch="harness" data-show="@main" data-cam="0,17,21,0,0.6,0.8" data-legend="model,ctx,tools,gate,check,stop,memory,instr">
+  <div class="kicker">Глава 2</div>
+  <h2>Harness — всё, что вокруг модели</h2>
+  <p class="lead"><strong>Agent = Model + Harness.</strong> Модель рассуждает и выбирает следующий шаг. Harness даёт ей инструменты, контекст, память и ограничения и гоняет работу по агентному циклу, пока задача не решена.</p>
+  <p>В LangChain сформулировали проще всего: если это не модель — это harness. Системный промпт, инструменты, разрешения, хуки, память, логи, лимиты — всё это его части.</p>
+  <div class="steps-h"><h3>Четыре задачи harness</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-do="see" data-at="ctx" data-kind="note" data-label="контекст" data-dur="2.6"><strong>Собрать контекст.</strong> Положить в контекст модели всё нужное: задачу, системный промпт, документы, память.</li>
+    <li data-do="act" data-at="tools" data-kind="req" data-label="инструменты" data-dur="2.6"><strong>Выполнять действия.</strong> Превращать вызовы инструментов (tool calls) в реальные действия: открыть файл, посчитать, найти в интернете.</li>
+    <li data-do="safe" data-at="gate" data-kind="err" data-label="разрешения" data-dur="2.6"><strong>Не навредить.</strong> Проверять разрешения (permissions) и звать человека, если без него нельзя.</li>
+    <li data-do="track" data-at="stop" data-kind="note" data-label="проверка, логи, лимиты" data-dur="2.6"><strong>Держать под контролем.</strong> Проверять результат, писать логи, следить за лимитами и вовремя остановиться.</li>
+  </ol>
+  <div class="callout life">Вокруг комнаты консультанта появляется офис. Ассистент собирает папку с документами, бегает с поручениями, сверяется с регламентом, спрашивает начальника, если нужно разрешение, и ведёт учёт.</div>
+  <div class="callout">Вы уже пользовались harness. ChatGPT, Claude, GigaChat, Cursor, Claude Code, Codex — это разные harness вокруг моделей, иногда вокруг одной и той же модели.</div>
+  <details class="deep"><summary>Для инженеров</summary>
+    <p>Термин закрепился в 2026 году. Митчелл Хашимото (создатель Terraform) в феврале описал практику <strong>harness engineering</strong>, OpenAI в том же месяце выпустили статью «Harness engineering», а в марте LangChain предложили формулу «Agent = Model + Harness».</p>
+    <p>Сегодня harness поставляется и как готовый компонент. Например, в Microsoft Agent Framework есть Harness, где по умолчанию включены function invocation с лимитом итераций, compaction, todo-список, режимы plan / execute, файловая память, tool approval, OpenTelemetry и Agent Skills.</p>
+  </details>
+</article>
+
+<!-- ═════════════════════════ 3. АГЕНТНЫЙ ЦИКЛ ═════════════════════════ -->
+<article class="page" id="loop" data-ch="loop" data-show="@main" data-cam="1,16,20,-0.6,0.6,0.5" data-legend="user,req,think,res">
+  <div class="kicker">Глава 3</div>
+  <h2>Агентный цикл — сердце harness</h2>
+  <p class="lead">Агент работает итерациями. На каждой итерации модель выбирает один следующий шаг, а harness выполняет его и возвращает результат. Это <strong>агентный цикл</strong> (agent loop).</p>
+  <div class="steps-h"><h3>Одна итерация</h3><small>нажмите, чтобы остановиться</small></div>
+  <ol class="steps">
+    <li data-path="person,ctx" data-kind="user" data-label="задача" data-do="start">Задача попадает в контекст вместе с системным промптом.</li>
+    <li data-path="ctx,model" data-kind="req" data-label="весь контекст">Harness отправляет модели весь контекст.</li>
+    <li data-path="model,gate" data-kind="think" data-label="tool call: открыть отчёт">Модель отвечает не текстом для человека, а <strong>вызовом инструмента</strong> (tool call): «открой отчёт».</li>
+    <li data-at="gate" data-kind="res" data-label="разрешено: чтение" data-do="open">Harness проверяет разрешения: это действие можно выполнять без подтверждения?</li>
+    <li data-path="gate,tools,world" data-kind="req" data-label="открыть файл">Harness сам выполняет действие. Модель к файлу не прикасается.</li>
+    <li data-path="world,tools,check,log,stop,ctx" data-kind="res" data-label="tool result: отчёт" data-dur="3.4" data-do="card">Результат (tool result) проходит хуки, попадает в логи и добавляется в контекст. Итерация закончена.</li>
+    <li data-path="ctx,model" data-kind="req" data-label="следующая итерация" data-dur="1.2">Итераций может быть десять, а может быть сотня.</li>
+    <li data-path="model,ctx,person" data-kind="res" data-label="готово: вот что я нашёл">Когда модель отвечает без вызова инструментов, цикл заканчивается.</li>
+  </ol>
+  <p class="takeaway">Сам агентный цикл — десяток строк кода. Умным агента делает модель, надёжным — то, что harness делает вокруг цикла.</p>
+  <details class="deep"><summary>Для инженеров: цикл в псевдокоде</summary>
+<pre class="code"><code>messages = [system_prompt, task]
+while True:
+    reply = model(messages, tools=tool_definitions)
+    if not reply.tool_calls:          # модель закончила
+        return reply.text
+    for call in reply.tool_calls:
+        if allowed(call): result = run(call)
+        else:             result = ask_human(call)
+        messages.append(result)       # tool result — в контекст
+    if over_budget(): stop()</code></pre>
+    <p>Остальное в harness — это то, как устроены <code>messages</code>, <code>allowed</code>, <code>run</code> и <code>over_budget</code>, а также что происходит до цикла и после него.</p>
+  </details>
+</article>
+
+<!-- ═════════════════════════ 4. КОНТЕКСТ ═════════════════════════ -->
+<article class="page" id="context" data-ch="context" data-show="@main,press" data-focus="ctx,model,room,person,instr,memory,press" data-cam="7,8,19,0,1.3,5.5" data-legend="instr,user,tools,model,memory">
+  <div class="kicker">Глава 4</div>
+  <h2>Контекст: что модель видит прямо сейчас</h2>
+  <p class="lead">Модель видит только свой <strong>контекст</strong>. Его размер ограничен <strong>контекстным окном</strong> (context window), и чем больше в нём лишнего, тем хуже модель замечает важное.</p>
+  <h3>Из чего состоит контекст</h3>
+  <ul class="desk">
+    <li><span class="dot" style="--c:#ec4899"></span><span><b>Системный промпт</b> — инструкции: кто ты, как работать, чего нельзя.</span></li>
+    <li><span class="dot" style="--c:#cbd5e1"></span><span><b>Задача</b> и история диалога с человеком.</span></li>
+    <li><span class="dot" style="--c:#f97316"></span><span><b>Результаты инструментов</b> (tool results) — обычно самое объёмное: один отчёт может занять полокна.</span></li>
+    <li><span class="dot" style="--c:#d946ef"></span><span><b>Рассуждения и вызовы</b> самой модели.</span></li>
+  </ul>
+  <div class="steps-h"><h3>Контекст заполняется</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-at="ctx" data-kind="note" data-label="системный промпт + задача" data-do="f1">В начале в контексте почти ничего нет: системный промпт и задача.</li>
+    <li data-path="tools,check,log,stop,ctx" data-kind="res" data-label="+ 3 отчёта" data-do="f2" data-dur="2.4">Каждая итерация добавляет tool results: открытые файлы, ответы сервисов.</li>
+    <li data-at="ctx" data-kind="err" data-label="контекст заполнен на 92%" data-do="f3">Окно почти заполнено. Модель начинает упускать начало задачи, а потом работа просто обрывается.</li>
+    <li data-at="press" data-kind="res" data-label="compaction: страница вместо 40" data-do="compact" data-dur="2.4">Harness делает <strong>compaction</strong> (сжатие контекста): модель кратко записывает, что сделано и что осталось, и эта сводка заменяет историю.</li>
+    <li data-path="ctx,model" data-kind="req" data-label="работа продолжается" data-do="f4">Работа продолжается со свободным окном и сводкой о главном.</li>
+  </ol>
+  <div class="callout life">Контекст — рабочий стол. Хороший ассистент не вываливает на стол руководителю весь архив: кладёт три нужных документа и короткую справку.</div>
+  <p class="takeaway">Harness всё время решает, что положить в контекст, а что убрать. Это называют context engineering, и от этого зависит половина качества агента.</p>
+  <details class="deep"><summary>Для инженеров</summary>
+    <p>Контекстное окно измеряют в токенах. У современных моделей это сотни тысяч токенов, у некоторых до миллиона. Но качество падает раньше: в длинном контексте модель хуже находит нужное.</p>
+    <p>Кроме compaction бывает <strong>context reset</strong>: агент записывает прогресс в файл и начинает с пустого окна. В Anthropic заметили, что некоторым моделям reset помогает больше compaction: при почти полном окне модель начинает торопиться и сворачивать работу. Это явление назвали <strong>context anxiety</strong>.</p>
+  </details>
+</article>
+
+<!-- ═════════════════════════ 5. ИНСТРУМЕНТЫ ═════════════════════════ -->
+<article class="page" id="tools" data-ch="tools" data-show="@main" data-focus="tools,world,gate,model,room,ctx" data-cam="13,9,6,4,1,-3.5" data-legend="tools,world,think,req,res">
+  <div class="kicker">Глава 5</div>
+  <h2>Инструменты (tools)</h2>
+  <p class="lead">Модель может только запросить действие: «открой файл», «найди в интернете», «отправь письмо». Выполняет его harness, и он же возвращает результат.</p>
+  <table class="tbl">
+    <tr><th>Инструменты</th><th>Что умеют</th></tr>
+    <tr><td>Файлы</td><td>Читать, искать, править.</td></tr>
+    <tr><td>Терминал</td><td>Запускать программы, скрипты, тесты.</td></tr>
+    <tr><td>Браузер и веб-поиск</td><td>Читать сайты и документацию.</td></tr>
+    <tr><td>Корпоративные системы</td><td>CRM, учёт, почта, таск-трекер. Обычно подключаются через MCP-серверы.</td></tr>
+    <tr><td>Другие агенты</td><td>Поручить часть работы субагенту. Подробно — в части 2.</td></tr>
+  </table>
+  <div class="steps-h"><h3>Как модель вызывает инструмент</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-at="tools" data-kind="note" data-label="tool definitions: 12 инструментов">В начале harness добавляет в контекст описания инструментов (tool definitions): название, назначение, параметры.</li>
+    <li data-path="model,gate,tools" data-kind="think" data-label="tool call: search «выручка Q3»">Модель выбирает инструмент по описанию и формирует tool call с параметрами.</li>
+    <li data-path="tools,world" data-kind="req" data-label="поиск по файлам">Harness выполняет вызов в реальном мире.</li>
+    <li data-path="world,tools,check,log,stop,ctx" data-kind="res" data-label="tool result: 3 совпадения" data-dur="3">Результат возвращается в контекст модели.</li>
+  </ol>
+  <div class="callout life">Консультант не ходит в архив сам. Он пишет записку «принесите договор №17», а ассистент знает, где архив и как туда пройти.</div>
+  <p class="takeaway">Описание инструмента — это инструкция для модели. Нечёткое описание ведёт к неправильному выбору.</p>
+  <p>Как подключать корпоративные системы через MCP и проектировать инструменты, подробно разобрано в <a href="../mcp-3d/">гиде «MCP в 3D»</a>.</p>
+</article>
+
+<!-- ═════════════════════════ 6. РАЗРЕШЕНИЯ ═════════════════════════ -->
+<article class="page" id="brakes" data-ch="brakes" data-show="@main" data-focus="gate,tools,world,model,room,person" data-cam="12.5,5.8,9.5,4.6,1.3,2.2" data-legend="gate,think,req,err,user">
+  <div class="kicker">Глава 6</div>
+  <h2>Разрешения и песочница</h2>
+  <p class="lead">Чем больше у агента инструментов, тем важнее, что ему можно делать без подтверждения. Это определяют <strong>разрешения</strong> (permissions) в harness, а не модель, — и проверяются они до выполнения действия.</p>
+  <div class="steps-h"><h3>Как срабатывают разрешения</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-path="model,gate" data-kind="think" data-label="tool call: прочитать отчёт" data-do="close">Модель запрашивает безопасное действие — чтение.</li>
+    <li data-at="gate" data-kind="res" data-label="allow: чтение разрешено" data-do="open">Правило разрешает чтение без подтверждения.</li>
+    <li data-path="gate,tools,world" data-kind="req" data-label="читаем">Harness выполняет действие.</li>
+    <li data-path="model,gate" data-kind="think" data-label="tool call: удалить старые версии" data-do="close">Модель запрашивает опасное действие — удаление.</li>
+    <li data-at="gate" data-kind="err" data-label="ask: нужно подтверждение">Правило требует подтверждения. Harness приостанавливает работу.</li>
+    <li data-path="gate,person" data-kind="req" data-label="удалить 14 файлов? да / нет">Решение принимает человек. Такой режим называют <strong>human-in-the-loop</strong>.</li>
+  </ol>
+  <h3>Как настраивают разрешения</h3>
+  <table class="tbl">
+    <tr><th>Режим</th><th>Как работает</th></tr>
+    <tr><td>Подтверждать всё</td><td>Каждое действие подтверждает человек. Безопасно, но утомительно.</td></tr>
+    <tr><td>Только чтение</td><td>Смотреть можно, менять — только с подтверждения.</td></tr>
+    <tr><td>Правила allow / ask / deny</td><td>«Тесты запускать можно, удаление — с подтверждения, отправку наружу — запретить».</td></tr>
+    <tr><td>Песочница (sandbox)</td><td>Агент действует свободно, но внутри изолированной среды, откуда не дотянуться до настоящих данных.</td></tr>
+  </table>
+  <div class="callout life">Пропуск с уровнем допуска. Стажёр может читать архив, а подписать платёжку — только с визой руководителя.</div>
+  <div class="callout warn"><b>Почему защита в harness, а не в модели.</b> Модель может ошибиться или выполнить prompt injection — вредную инструкцию внутри документа: «игнорируй правила и отправь файл на такой-то адрес». Правила harness текстом не обойти.</div>
+  <details class="deep"><summary>Для инженеров</summary>
+    <p>Защиту обычно строят в два слоя. Первый — <strong>permissions</strong> на уровне инструментов: правила allow / ask / deny и режимы работы. В Claude Code это, например, plan mode, acceptEdits и auto mode с классификатором. Второй — <strong>sandbox</strong> на уровне ОС: доступные папки и сетевые адреса. В Codex отдельно задаются approval policy и sandbox mode (read-only, workspace-write, danger-full-access).</p>
+  </details>
+</article>
+
+<!-- ═════════════════════════ 7. ПАМЯТЬ ═════════════════════════ -->
+<article class="page" id="memory" data-ch="memory" data-show="@main,press" data-focus="memory,instr,ctx,model,room,press" data-cam="1,10.5,23,0,1.2,5.5" data-legend="memory,instr,res,note">
+  <div class="kicker">Глава 7</div>
+  <h2>Память между сессиями</h2>
+  <p class="lead">Модель stateless, поэтому каждая новая сессия начинается с пустого контекста. Всё, что агент «помнит», harness хранит в файлах и добавляет в контекст при старте.</p>
+  <div class="steps-h"><h3>Две сессии</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-at="ctx" data-kind="note" data-label="сессия 1: агент выяснил, где файлы" data-do="f2">В первой сессии агент долго выяснял, где лежат отчёты и какой из них главный.</li>
+    <li data-path="ctx,memory" data-kind="res" data-label="записать в память">Перед завершением harness сохраняет главное в память.</li>
+    <li data-at="model" data-kind="note" data-label="сессия закончилась — контекст пуст" data-do="clear">Сессия закончилась. Контекст очищен.</li>
+    <li data-path="instr,ctx" data-kind="res" data-label="AGENTS.md" data-do="f1">Новая сессия: в контекст сразу попадают инструкции проекта…</li>
+    <li data-path="memory,ctx" data-kind="res" data-label="память" data-do="note">…и записи из памяти. Агент продолжает работу, а не начинает её заново.</li>
+  </ol>
+  <h3>Три вида памяти</h3>
+  <ul class="bul">
+    <li><strong>Инструкции проекта.</strong> Файл, который читается при каждом запуске, — например, <code>AGENTS.md</code> или <code>CLAUDE.md</code>: «главный источник — бухгалтерия», «отчёты лежат в /finance».</li>
+    <li><strong>Память агента.</strong> То, что он выяснил сам: «у отдела продаж суммы в отчётах без НДС».</li>
+    <li><strong>Файл прогресса</strong> (progress file). Для долгих задач: что сделано и что дальше. Следующая сессия начинает с него.</li>
+  </ul>
+  <div class="callout life">В Anthropic сравнили долгую работу агента со сменами инженеров, где каждый новый приходит без памяти о прошлой смене. Выручает журнал передачи смены.</div>
+  <p class="takeaway">Память тоже занимает контекст. Поэтому в неё пишут коротко и только то, что пригодится.</p>
+</article>
+
+<!-- ═════════════════════════ 8. ПРОВЕРКА ═════════════════════════ -->
+<article class="page" id="check" data-ch="check" data-show="@main" data-focus="check,ctx,model,room,person,log,stop" data-cam="-9.5,9,-15,-1,1,-2.5" data-legend="check,think,req,err,res">
+  <div class="kicker">Глава 8</div>
+  <h2>Проверка: хуки, тесты, evaluator</h2>
+  <p class="lead">Модели склонны переоценивать собственную работу. «Готово, всё сходится» ещё не значит, что всё сходится. Поэтому хороший harness проверяет результат сам.</p>
+  <div class="steps-h"><h3>Автоматическая проверка</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-path="model,check" data-kind="think" data-label="«Готово! Всё сходится»">Модель считает задачу выполненной.</li>
+    <li data-at="check" data-kind="req" data-label="хук: пересчитать итоги">Срабатывает <strong>хук</strong> на завершение: «перед завершением пересчитай итоги».</li>
+    <li data-at="check" data-kind="err" data-label="расхождение 1,2 млн ₽">Проверка находит ошибку, которую модель не заметила.</li>
+    <li data-path="check,log,stop,ctx" data-kind="err" data-label="ошибка → в контекст" data-dur="2.4">Harness добавляет ошибку в контекст, и цикл продолжается.</li>
+    <li data-path="ctx,model" data-kind="req" data-label="исправь расхождение">Модель видит конкретную ошибку и исправляет её.</li>
+    <li data-path="model,ctx,person" data-kind="res" data-label="исправлено и проверено">Только после успешной проверки результат уходит человеку.</li>
+  </ol>
+  <h3>Чем проверяют</h3>
+  <ul class="bul">
+    <li><strong>Хуки</strong> (hooks) — автоматические правила на событиях: «после правки пересчитай итоги», «перед отправкой письма проверь адресата». Они срабатывают всегда, модель не может о них забыть.</li>
+    <li><strong>Тесты и линтеры.</strong> Запустить проверку и добавить её результат в контекст.</li>
+    <li><strong>Evaluator.</strong> Отдельный агент ищет ошибки в чужой работе (подход LLM-as-a-judge): чужое оценивают строже, чем своё.</li>
+  </ul>
+  <div class="callout life">Бухгалтер может быть уверен в своём отчёте, но сверку всё равно делает контролёр — по регламенту, а не по настроению.</div>
+  <p class="takeaway">Правило Митчелла Хашимото: каждый раз, когда агент ошибается, доработайте harness так, чтобы эта ошибка больше не повторилась.</p>
+</article>
+
+<!-- ═════════════════════════ 9. ЛИМИТЫ И ЛОГИ ═════════════════════════ -->
+<article class="page" id="stop" data-ch="stop" data-show="@main" data-focus="stop,log,tools,world,gate,model,room,person,check" data-cam="-9,12,15,-1.5,0.8,1" data-legend="stop,log,req,err,user">
+  <div class="kicker">Глава 9</div>
+  <h2>Лимиты и логи</h2>
+  <p class="lead">Агент может зациклиться: повторять одно и то же действие и расходовать токены. Harness считает итерации и стоимость и останавливает работу по <strong>лимитам</strong>.</p>
+  <div class="steps-h"><h3>Файл занят</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-path="model,gate,tools,world" data-kind="req" data-label="открыть sales_q3.xlsx">Агент пытается открыть отчёт.</li>
+    <li data-path="world,tools,check,log" data-kind="err" data-label="ошибка: файл занят">Файл открыт у коллеги — ошибка.</li>
+    <li data-path="model,gate,tools,world" data-kind="req" data-label="повтор" data-count="3" data-dur="1.8">Агент пробует ещё раз. И ещё. И ещё.</li>
+    <li data-at="log" data-kind="note" data-label="лог: 4 одинаковые ошибки · $0,40">Каждая попытка и её стоимость попадают в логи.</li>
+    <li data-at="stop" data-kind="err" data-label="лимит повторов: стоп" data-do="stop">Срабатывает лимит: одна и та же ошибка несколько раз подряд — работа останавливается.</li>
+    <li data-path="stop,person" data-kind="req" data-label="нужна помощь: файл занят">Harness передаёт задачу человеку и объясняет, что случилось.</li>
+  </ol>
+  <h3>Что ограничивают</h3>
+  <ul class="bul">
+    <li><strong>Итерации, время, токены и деньги.</strong> «Не больше 50 итераций и $5 на задачу».</li>
+    <li><strong>Повторы.</strong> Одна и та же ошибка несколько раз подряд — признак, что агент зациклился.</li>
+    <li><strong>Логи и трейсы.</strong> Каждый шаг, вызов и его стоимость записываются — для разбора ошибок и аудита. Это называют observability.</li>
+  </ul>
+  <div class="callout life">Счётчик в такси и правило «если трижды не получилось — позвони».</div>
+</article>
+
+<!-- ═════════════════════════ 10. ТИПЫ ═════════════════════════ -->
+<article class="page" id="types" data-ch="types" data-show="@types" data-cam="44,19,24,44,0,0.5" data-legend="model,user,tools,gate">
+  <div class="kicker">Глава 10</div>
+  <h2>Какие бывают harness</h2>
+  <p class="lead">Все harness устроены по одной схеме, но настроены по-разному: сколько решает человек, где работает агент и сколько у него инструментов.</p>
+  <div class="scale">
+    <div class="scale-ends"><span>решает человек</span><span>автономно</span></div>
+    <div class="scale-track"></div>
+    <div class="scale-pts"><span>чат-ассистент</span><span>встроенный агент</span><span>локальный агент</span><span>облачный агент</span><span>оркестратор</span></div>
+  </div>
+  <div class="steps-h"><h3>Шесть типов</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-at="t_chat" data-kind="user"><strong>Чат-ассистент.</strong> Отвечает, иногда ищет в интернете или запускает код. Человек ведёт каждый шаг. <em>ChatGPT, Claude, GigaChat.</em></li>
+    <li data-at="t_embed" data-kind="note"><strong>Встроенный агент.</strong> Узкий harness внутри продукта: несколько инструментов и жёсткие правила. <em>Агент поддержки, помощник в личном кабинете.</em></li>
+    <li data-at="t_local" data-kind="req"><strong>Локальный агент.</strong> Полный агентный цикл на вашей машине: файлы, терминал, браузер. Работает в CLI, IDE или десктоп-приложении и спрашивает разрешения. <em>Claude Code, Codex CLI, Cursor, Gemini CLI.</em></li>
+    <li data-at="t_cloud" data-kind="req"><strong>Облачный (фоновый) агент.</strong> Тот же цикл, но в изолированной облачной среде. Работает без вас и возвращает результат на ревью, например pull request. <em>Claude Code в облаке, Codex Cloud, Devin, Jules.</em></li>
+    <li data-at="t_sdk" data-kind="note"><strong>SDK и фреймворки.</strong> Компоненты harness в виде библиотеки: собираете своего агента под свою задачу. <em>Claude Agent SDK, OpenAI Agents SDK, Microsoft Agent Framework, LangChain Deep Agents.</em></li>
+    <li data-at="t_orch" data-kind="think"><strong>Оркестратор (multi-agent).</strong> Harness, который распределяет работу между несколькими агентами и собирает результат. Об этом — часть 2.</li>
+  </ol>
+  <div class="callout"><b>Не путайте.</b> В машинном обучении есть ещё <strong>test harness</strong> и <strong>eval harness</strong> — стенды, на которых прогоняют тесты и измеряют качество моделей (например, lm-evaluation-harness). Слово то же, но это про испытания модели, а не про её работу в агенте.</div>
+</article>
+
+<!-- ═════════════════════════ 11. ПОЧЕМУ ВАЖНО ═════════════════════════ -->
+<article class="page" id="why" data-ch="why" data-show="@cmp" data-cam="-40,8.5,15,-40,2.2,0" data-legend="model,res">
+  <div class="kicker">Глава 11</div>
+  <h2>Harness важен не меньше модели</h2>
+  <p class="lead">На одном и том же бенчмарке одна и та же модель набирает разные баллы — в зависимости от того, в каком harness она работает.</p>
+  <h3>Terminal-Bench 2.1: задачи в терминале</h3>
+  <div class="bars">
+    <div class="bar-g"><h4>GPT-5.5 <em>+5,1 п. п.</em></h4>
+      <div class="bar"><span style="--v:78">Terminus 2</span><b>78,0%</b></div>
+      <div class="bar hi"><span style="--v:83.1">Codex CLI</span><b>83,1%</b></div>
+    </div>
+    <div class="bar-g"><h4>Gemini 3 Pro <em>+8,1 п. п.</em></h4>
+      <div class="bar"><span style="--v:65.8">Gemini CLI</span><b>65,8%</b></div>
+      <div class="bar hi"><span style="--v:73.9">Terminus 2</span><b>73,9%</b></div>
+    </div>
+    <div class="bar-g"><h4>Claude Fable 5 <em>+3,4 п. п.</em></h4>
+      <div class="bar"><span style="--v:80.4">Terminus 2</span><b>80,4%</b></div>
+      <div class="bar hi"><span style="--v:83.8">Claude Code</span><b>83,8%</b></div>
+    </div>
+  </div>
+  <p class="bars-note">Terminus 2 — нейтральный harness авторов бенчмарка. Обратите внимание: harness самого вендора не всегда лучший.</p>
+  <div class="steps-h"><h3>Та же модель — другой результат</h3><small>нажмите на шаг</small></div>
+  <ol class="steps">
+    <li data-do="gpt" data-at="cmpB" data-kind="res">GPT-5.5: нейтральный Terminus 2 против Codex CLI.</li>
+    <li data-do="gemini" data-at="cmpB" data-kind="res">Gemini 3 Pro: Gemini CLI против нейтрального Terminus 2.</li>
+    <li data-do="lc" data-at="cmpB" data-kind="res">LangChain не меняли модель, а только доработали harness — и поднялись на Terminal-Bench 2.0 с 52,8% до 66,5%: из-за пределов топ-30 в топ-5.</li>
+    <li data-do="anth" data-at="cmpB" data-kind="res">Anthropic: модель без harness за 20 минут и $9 сделала неработающую игру. Та же модель в harness из трёх агентов (planner, generator и evaluator) за 6 часов и $200 сделала полностью рабочую.</li>
+  </ol>
+  <div class="callout ok"><b>Что это значит для бизнеса.</b>
+    <ul class="bul" style="margin:6px 0 0">
+      <li>Выбирая «ИИ-агента», вы в основном выбираете harness. Модель внутри часто можно заменить.</li>
+      <li>Риски — доступы, утечки, ошибочные действия — контролируются в harness, а не формулировками промпта.</li>
+      <li>Работа людей смещается к harness engineering. В OpenAI команда за пять месяцев выпустила продукт, в котором около миллиона строк кода написали агенты Codex, а люди проектировали среду, правила и проверки: «люди направляют, агенты выполняют».</li>
+    </ul>
+  </div>
+  <p class="takeaway">Harness не застывает: каждый его компонент — допущение о том, чего модель пока не умеет. С новыми моделями лишние компоненты убирают.</p>
+</article>
+
+<!-- ═════════════════════════ 12. ТРЕНАЖЁР ═════════════════════════ -->
+<article class="page" id="sim" data-ch="sim" data-show="@main,press" data-cam="0,17,21,0,0.6,0.8" data-legend="model,ctx,tools,gate,check,stop,memory,instr">
+  <div class="kicker">Глава 12 · тренажёр</div>
+  <h2>Соберите свой harness</h2>
+  <p class="lead">Включите компоненты harness и запустите агента. Посмотрите, где он справится, а где сломается.</p>
+  <div class="sim-task"><small>Задача агенту</small>«Найди, почему продажи за квартал не сходятся с бухгалтерией, исправь и отправь итог финдиректору».</div>
+  <div id="simRoot"><p class="lab-sub">Тренажёр загружается…</p></div>
+  <p class="foot">Сценарий и цифры условные. Они показывают типичные поломки, а не замеры конкретного продукта.</p>
+</article>
+
+<!-- ═════════════════════════ 13. ЧЕК-ЛИСТ ═════════════════════════ -->
+<article class="page" id="checklist" data-ch="checklist" data-show="@main" data-rotate data-cam="0,17,23,0,0.6,0.8" data-legend="model,ctx,tools,gate,check,stop,memory,instr">
+  <div class="kicker">Глава 13</div>
+  <h2>8 вопросов к любому ИИ-агенту</h2>
+  <p class="lead">Пригодится, когда вам предлагают «внедрить агента». Каждый вопрос — про один компонент harness.</p>
+  <ol class="qs">
+    <li><b>Какие у него инструменты</b> и какие из них меняют данные или отправляют что-то наружу?</li>
+    <li><b>Что он может делать без подтверждения</b> человека?</li>
+    <li><b>Где он работает:</b> на машине сотрудника, в песочнице, в облаке вендора?</li>
+    <li><b>Что попадает в его контекст:</b> какие документы и данные он видит и куда они уходят?</li>
+    <li><b>Что он хранит в памяти</b> между сессиями и кто может её очистить?</li>
+    <li><b>Кто проверяет результат,</b> кроме самой модели?</li>
+    <li><b>Какие лимиты</b> по итерациям, токенам и деньгам и что будет, если их превысить?</li>
+    <li><b>Есть ли логи</b> каждого шага — для разбора ошибок и аудита?</li>
+  </ol>
+  <h3>Что дальше — часть 2</h3>
+  <div class="next-grid">
+    <div class="next-item"><span class="ic">📚</span><span><b>Скиллы (skills)</b>Инструкции и скрипты, которые агент подгружает в контекст только тогда, когда они нужны.</span></div>
+    <div class="next-item"><span class="ic">🎯</span><span><b>Цели</b>Как поставить агенту задачу «работай, пока не будет сделано» и как он поймёт, что сделано.</span></div>
+    <div class="next-item"><span class="ic">🔁</span><span><b>Циклы</b>Агент, который возвращается к задаче по расписанию или сам решает, когда проверить снова.</span></div>
+    <div class="next-item"><span class="ic">👥</span><span><b>Субагенты</b>Агент поручает части работы субагентам, у каждого из которых свой отдельный контекст.</span></div>
+    <div class="next-item"><span class="ic">🔀</span><span><b>Обмен контекстом</b>Как субагенты передают друг другу результаты, не перегружая контекст главного агента.</span></div>
+  </div>
+  <h3>Словарик</h3>
+  <dl class="gloss">
+    <dt>Harness</dt><dd>Всё, что вокруг модели и превращает её в агента: агентный цикл, инструменты, разрешения, память, проверки, лимиты.</dd>
+    <dt>Агентный цикл (agent loop)</dt><dd>Повторяющиеся итерации «вызвать модель → выполнить её tool call → добавить результат в контекст» до конца задачи.</dd>
+    <dt>Контекст и контекстное окно (context window)</dt><dd>Всё, что модель видит в данный момент, и предельный размер этого объёма в токенах.</dd>
+    <dt>Токен</dt><dd>Кусочек текста, примерно полслова. В токенах считают размер контекста и стоимость.</dd>
+    <dt>Системный промпт</dt><dd>Инструкции, которые harness добавляет в начало контекста при каждом запуске.</dd>
+    <dt>Инструмент и tool call</dt><dd>Действие, которое harness умеет выполнять, и запрос модели на его выполнение.</dd>
+    <dt>MCP</dt><dd>Model Context Protocol — открытый стандарт подключения инструментов и данных к ИИ-приложениям.</dd>
+    <dt>Разрешения (permissions) и песочница (sandbox)</dt><dd>Правила, что агенту можно без подтверждения, и изолированная среда, где ошибка не навредит.</dd>
+    <dt>Human-in-the-loop</dt><dd>Режим, в котором ключевые действия подтверждает человек.</dd>
+    <dt>Хук (hook)</dt><dd>Автоматическое правило на событии: «после правки пересчитай», «перед отправкой проверь».</dd>
+    <dt>Compaction</dt><dd>Сжатие контекста: история заменяется краткой сводкой, чтобы освободить окно.</dd>
+    <dt>Evaluator</dt><dd>Отдельный агент или модель, который проверяет результат работы другого агента.</dd>
+  </dl>
+  <h3>Источники</h3>
+  <ul class="bul sources">
+    <li>LangChain: <a href="https://blog.langchain.com/improving-deep-agents-with-harness-engineering" target="_blank" rel="noopener">Improving Deep Agents with harness engineering</a></li>
+    <li>Anthropic: <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Effective harnesses for long-running agents</a> (ноябрь 2025) и <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps" target="_blank" rel="noopener">Harness design for long-running application development</a> (март 2026)</li>
+    <li>OpenAI: <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noopener">Harness engineering: leveraging Codex in an agent-first world</a> (февраль 2026)</li>
+    <li>Митчелл Хашимото: <a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noopener">My AI Adoption Journey</a> (февраль 2026)</li>
+    <li>Microsoft: <a href="https://learn.microsoft.com/en-us/agent-framework/concepts/harness" target="_blank" rel="noopener">Agent Harness в Agent Framework</a></li>
+    <li><a href="https://snorkel.ai/leaderboard/terminal-bench-2-1/" target="_blank" rel="noopener">Лидерборд Terminal-Bench 2.1</a></li>
+  </ul>
+  <p class="foot">Путеводитель подготовлен в октябре 2026. Сцена сделана на <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a>. Соседний гид: <a href="../mcp-3d/">MCP в 3D</a>. <a href="../">← Все гайды</a></p>
+</article>
+
+      </div>
+      <nav class="pager" aria-label="Страницы">
+        <button id="prev" aria-label="Предыдущая глава">← Назад</button>
+        <span id="pageNo">1 / 14</span>
+        <button id="next" aria-label="Следующая глава">Далее →</button>
+      </nav>
+    </aside>
+  </main>
+</div>
+
+<div class="toc" id="toc" aria-hidden="true">
+  <div class="toc-sheet" role="dialog" aria-label="Оглавление">
+    <header><h2>Оглавление</h2><button class="icon-btn" id="tocClose" aria-label="Закрыть">✕</button></header>
+    <ol class="toc-list" id="tocList"></ol>
+  </div>
+</div>
+
+<script type="module" src="app.js?v=4"></script>
+</body>
+</html>
