@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Финансовый аналитик в Cowork</title>
+<meta name="description" content="Инструкции по агенту «Финансовый аналитик 1С» в GigaCowork для бухгалтера, казначея, финдиректора, руководителя, ИТ-специалиста и команд банка.">
+<meta property="og:title" content="Финансовый аналитик в Cowork">
+<meta property="og:description" content="Как работать с агентом по данным 1С и СберБизнеса: инструкции по ролям, видео и скриншоты с демо-стенда.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://vladkudr.github.io/guides/fin-agent/">
+<meta property="og:image" content="https://vladkudr.github.io/guides/fin-agent/media/svodka-canvas.png">
+<link rel="shortcut icon" href="../../favicon.ico">
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113153530', 'ym');
+
+    ym(113153530, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/113153530" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Literata:opsz,wght@7..72,500;7..72,600&display=swap">
+<style>
+/* Layout: one long reference page — header, sticky role navigation, sections per audience; tables scroll inside their own frames */
+:root {
+  --bg: #F3F4F1;
+  --surface: #FFFFFF;
+  --ink: #1C2321;
+  --muted: #59625D;
+  --line: #D8DDD6;
+  --accent: #2D4B8E;
+  --accent-soft: #E4EAF6;
+  --code-bg: #ECEFEA;
+  --ok: #2E7D4F;
+  --warn: #A86E12;
+  --bad: #B4372F;
+  --font-display: "Literata", "PT Serif", Georgia, serif;
+  --font-body: "Golos Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121614; --surface: #1A1F1D; --ink: #E6EBE7; --muted: #9AA49F; --line: #2D3531;
+    --accent: #93ACE9; --accent-soft: #1F2A44; --code-bg: #222A27;
+    --ok: #5FC48C; --warn: #E2AA4C; --bad: #EA7B71; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121614; --surface: #1A1F1D; --ink: #E6EBE7; --muted: #9AA49F; --line: #2D3531;
+  --accent: #93ACE9; --accent-soft: #1F2A44; --code-bg: #222A27;
+  --ok: #5FC48C; --warn: #E2AA4C; --bad: #EA7B71; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(64px + env(safe-area-inset-top, 0px)); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+.wrap { max-width: 920px; margin-inline: auto; }
+header.top { padding-block: 40px 28px; display: grid; gap: 12px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 600; }
+h2 { font-size: clamp(24px, 3.6vw, 30px); font-weight: 600; }
+h3 { font-size: 19px; font-weight: 600; margin-top: 8px; }
+p { margin: 0; max-width: 68ch; }
+.lead { font-size: 18px; color: var(--muted); max-width: 64ch; }
+.meta { font-size: 13px; color: var(--muted); }
+
+nav.roles {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  margin-inline: -16px; padding: 10px 16px;
+}
+nav.roles .tabs { margin: 0 auto; padding: 0; display: flex; gap: 6px; overflow-x: auto; max-width: 920px; scrollbar-width: thin; }
+nav.roles button {
+  display: block; white-space: nowrap; color: var(--ink); cursor: pointer;
+  font: 500 14px/1.4 var(--font-body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+}
+nav.roles button:hover { border-color: var(--accent); }
+nav.roles button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+section.part { padding-block: 36px 8px; display: grid; gap: 18px; }
+.part-head { display: grid; gap: 8px; }
+
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.source { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.source b { font-size: 15px; }
+.source span { color: var(--muted); font-size: 14px; }
+
+ul.list, ol.list { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; max-width: 70ch; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+ol.steps li::before { content: counter(s); font-family: var(--font-mono); font-size: 13px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+
+.table { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--bg); }
+td:first-child { min-width: 200px; }
+td.ask { font-weight: 500; }
+
+code, .sk { font-family: var(--font-mono); font-size: 13px; }
+.sk { background: var(--code-bg); border-radius: 5px; padding: 1px 6px; white-space: nowrap; color: var(--ink); }
+code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; overflow-wrap: anywhere; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box.no { border-left: 3px solid var(--bad); }
+.box.yes { border-left: 3px solid var(--ok); }
+.box h3 { margin: 0; font-size: 17px; }
+
+.lights { display: flex; flex-wrap: wrap; gap: 10px; }
+.light { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px 4px 8px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.dot.g { background: var(--ok); } .dot.y { background: var(--warn); } .dot.r { background: var(--bad); }
+
+.rhythm { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.rhythm div { display: grid; grid-template-columns: minmax(110px, 160px) 1fr; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.rhythm div:last-child { border-bottom: 0; }
+.rhythm b { font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { .rhythm div { grid-template-columns: 1fr; gap: 2px; } }
+
+.flow { display: grid; gap: 10px; }
+.tier { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: stretch; }
+.tier > .lab { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-top: 12px; }
+.tier .cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; min-width: 0; }
+.cell { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 14px; display: grid; gap: 2px; min-width: 0; }
+.cell small { color: var(--muted); font-size: 12.5px; }
+.down { text-align: center; color: var(--muted); font-size: 13px; }
+@media (max-width: 600px) { .tier { grid-template-columns: 1fr; } .tier > .lab { padding-top: 0; } }
+
+.issue { display: grid; gap: 6px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.issue .tag { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+.issues { display: grid; gap: 10px; }
+.note { font-size: 14px; color: var(--muted); max-width: 70ch; }
+.media { display: grid; gap: 12px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.media-hd { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+.media-hd b { font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+.demo-note { font-size: 12px; color: var(--muted); }
+.media figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+.media video, .media img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.media img { cursor: zoom-in; }
+.media figcaption { font-size: 13px; color: var(--muted); max-width: 70ch; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.zoom { position: fixed; inset: 0; z-index: 30; background: rgba(10, 14, 12, .82); display: grid; place-items: center; padding: 16px; cursor: zoom-out; }
+.zoom img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">GigaCowork · 1С:Бухгалтерия · СберБизнес</div>
+    <h1>Финансовый аналитик в Cowork</h1>
+    <p class="lead">Как работать с агентом «Финансовый аналитик 1С»: что он умеет, как его спрашивать, как читать ответы и как всё устроено. Отдельные разделы для бухгалтера, казначея, финансового директора, руководителя, ИТ-специалиста и команд банка.</p>
+    <p class="meta">Редакция от 08.10.2026. Примеры вопросов условные, данные организации в инструкции не приводятся. Скриншоты и видео сняты с демо-стенда на вымышленных данных; его интерфейс упрощён и внешне отличается от Cowork.</p>
+  </header>
+</div>
+
+<nav class="roles" aria-label="Разделы инструкции">
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab-ustroystvo" data-target="ustroystvo" aria-controls="ustroystvo" aria-selected="true">Как устроено</button>
+    <button type="button" role="tab" id="tab-buhgalter" data-target="buhgalter" aria-controls="buhgalter" aria-selected="false">Бухгалтер</button>
+    <button type="button" role="tab" id="tab-kaznachey" data-target="kaznachey" aria-controls="kaznachey" aria-selected="false">Казначей</button>
+    <button type="button" role="tab" id="tab-findirektor" data-target="findirektor" aria-controls="findirektor" aria-selected="false">Финдиректор</button>
+    <button type="button" role="tab" id="tab-rukovoditel" data-target="rukovoditel" aria-controls="rukovoditel" aria-selected="false">Руководитель</button>
+    <button type="button" role="tab" id="tab-it" data-target="it" aria-controls="it" aria-selected="false">ИТ-специалист</button>
+    <button type="button" role="tab" id="tab-bank" data-target="bank" aria-controls="bank" aria-selected="false">Команды банка</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ ОБЩЕЕ ============ -->
+<section class="part" id="ustroystvo">
+  <div class="part-head">
+    <div class="eyebrow">Для всех</div>
+    <h2>Как это устроено</h2>
+    <p>«Финансовый аналитик 1С» — агент в пространстве «Финансы» GigaCowork. Он берёт данные из учёта и банка, считает и даёт заключение. Решения принимает и документы подписывает человек.</p>
+  </div>
+
+  <h3>Откуда агент берёт данные</h3>
+  <div class="sources">
+    <div class="source"><b>1С:Бухгалтерия</b><span>Документы, контрагенты, договоры, остатки и обороты по счетам учёта. Интеграция MCP_FULL_1C.</span></div>
+    <div class="source"><b>СберБизнес API</b><span>Счета, остатки, выписка, статусы платёжек, требования на акцепт, письма банка, сертификаты ЭП, депозиты. Интеграция MCP_FULL_SBER.</span></div>
+    <div class="source"><b>«Операционный директор»</b><span>Транзакционный агент СберБизнеса: ограничения и аресты по счетам, долги перед банком, сроки полномочий, задачи банка, справки, бизнес-карты.</span></div>
+  </div>
+
+  <div class="two">
+    <div class="box yes">
+      <h3>Что агент делает</h3>
+      <ul class="list">
+        <li>Читает данные 1С и банка.</li>
+        <li>Считает, сравнивает, ищет расхождения и риски.</li>
+        <li>Готовит отчёты, таблицы Excel, слайды и черновики документов: акт сверки, реестр платежей, ответ банку.</li>
+      </ul>
+    </div>
+    <div class="box no">
+      <h3>Чего агент не делает никогда</h3>
+      <ul class="list">
+        <li>Не создаёт, не меняет и не проводит документы в 1С.</li>
+        <li>Не создаёт, не подписывает и не отправляет платёжки, письма и заявления в банк, не акцептует требования.</li>
+        <li>Не пишет контрагентам и в чаты от имени компании.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Как задать вопрос</h3>
+  <ol class="steps">
+    <li><span>Откройте пространство «Финансы» и нажмите «Новая задача».</span></li>
+    <li><span>Через значок <b>@</b> выберите агента «Финансовый аналитик 1С».</span></li>
+    <li><span>Спросите обычными словами, как спросили бы коллегу: «Кто нам должен?», «Ушли ли вчерашние платёжки?». Период и счёт можно не называть — агент возьмёт значения по умолчанию и напишет, какие взял.</span></li>
+    <li><span>Если агенту не хватает данных для ответа, он задаст один уточняющий вопрос. В остальных случаях отвечает сразу.</span></li>
+  </ol>
+
+  <h3>Как читать ответ</h3>
+  <ul class="list">
+    <li><b>В чате</b> — до 10 строк: светофор, 3–6 ключевых показателей, главный вывод и что сделать человеку.</li>
+    <li><b>В холсте</b> — полный отчёт с таблицами и графиками. Попросите «в Excel», «в Word» или «сделай слайд» — агент подготовит файл.</li>
+    <li>В каждом ответе указаны <b>источник</b> (1С или банк, какие документы и счета), <b>период</b>, <b>дата актуальности</b> данных и допущения.</li>
+  </ul>
+  <div class="lights" aria-label="Светофор">
+    <span class="light"><span class="dot g"></span>в порядке</span>
+    <span class="light"><span class="dot y"></span>есть что проверить</span>
+    <span class="light"><span class="dot r"></span>нужно действие сегодня</span>
+  </div>
+
+  <div class="media">
+  <div class="media-hd"><b>Как выглядит ответ</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <div class="shots"><figure><img src="media/svodka-chat.png" alt="Слева — вопрос и ответ в чате. Справа — ход работы: этапы, подключённые навыки, вызовы инструментов к 1С и банку" loading="lazy" width="1600" height="1000"><figcaption>Слева — вопрос и ответ в чате. Справа — ход работы: этапы, подключённые навыки, вызовы инструментов к 1С и банку</figcaption></figure><figure><img src="media/svodka-canvas.png" alt="Кнопка «Открыть» показывает полный отчёт в холсте; его можно выгрузить в Excel или Word" loading="lazy" width="1600" height="1000"><figcaption>Кнопка «Открыть» показывает полный отчёт в холсте; его можно выгрузить в Excel или Word</figcaption></figure></div>
+  </div>
+
+  
+  <h3>Насколько свежие данные</h3>
+  <ul class="list">
+    <li><b>1С</b> актуальна на дату последнего загруженного банковского документа. Если она отстаёт, агент пишет об этом в первой строке ответа: «1С отстаёт: данные на …».</li>
+    <li><b>Выписка банка</b> за сегодняшний день может быть неполной — агент это помечает.</li>
+    <li><b>«Операционный директор»</b> отдаёт сводку банка, которая может отставать на дни и недели. Агент всегда показывает дату среза.</li>
+  </ul>
+
+  <h3>Карта навыков</h3>
+  <p class="note">Агент сам выбирает навык по вопросу. Карта нужна, чтобы понимать, что именно он умеет.</p>
+  <div class="table"><table>
+    <thead><tr><th>Задача</th><th>Навык</th><th>Источник</th></tr></thead>
+    <tbody>
+      <tr><td>Сводка за день: деньги, движение, платежи, риски банка</td><td><span class="sk">onec-svodka-dnya</span></td><td>банк, 1С, «Операционный директор»</td></tr>
+      <tr><td>Сколько денег на счетах сейчас или на дату</td><td><span class="sk">sber-ostatki</span></td><td>банк</td></tr>
+      <tr><td>Хватит ли денег, кассовый разрыв, платёжный календарь</td><td><span class="sk">onec-platezhnyi-kalendar</span></td><td>1С, остаток из банка</td></tr>
+      <tr><td>Свободные деньги, депозиты, НСО, кредитные предложения</td><td><span class="sk">sber-razmeshchenie</span></td><td>банк, 1С</td></tr>
+      <tr><td>ДДС по учёту, план-факт, сравнение с бюджетом</td><td><span class="sk">onec-dds-plan-fakt</span></td><td>1С</td></tr>
+      <tr><td>ДДС по выписке банка</td><td><span class="sk">sber-dds</span></td><td>банк</td></tr>
+      <tr><td>Выписка и поиск операций</td><td><span class="sk">sber-vypiska</span></td><td>банк</td></tr>
+      <tr><td>Кто нам должен</td><td><span class="sk">onec-debitorka</span></td><td>1С</td></tr>
+      <tr><td>Кому мы должны, очерёдность оплаты</td><td><span class="sk">onec-kreditorka</span></td><td>1С</td></tr>
+      <tr><td>Досье контрагента, сальдо, акт сверки</td><td><span class="sk">onec-kontragent</span></td><td>1С</td></tr>
+      <tr><td>Деньги с контрагентом по банку, СберРейтинг</td><td><span class="sk">sber-kontragent</span></td><td>банк</td></tr>
+      <tr><td>Проверка платёжек до отправки</td><td><span class="sk">onec-proverka-platezhek</span></td><td>1С</td></tr>
+      <tr><td>Ушли ли платёжки, статусы, требования на акцепт</td><td><span class="sk">sber-ispolnenie-platezhek</span></td><td>банк, 1С</td></tr>
+      <tr><td>Сверка выписки с 1С</td><td><span class="sk">onec-sverka-banka</span></td><td>банк, 1С</td></tr>
+      <tr><td>Выручка по клиентам</td><td><span class="sk">onec-vyruchka</span></td><td>1С</td></tr>
+      <tr><td>Проверка учёта перед закрытием периода</td><td><span class="sk">onec-predzakrytie</span></td><td>1С</td></tr>
+      <tr><td>Письма банка, 115-ФЗ, валютный контроль, сертификаты ЭП</td><td><span class="sk">sber-pisma-ep</span></td><td>банк</td></tr>
+      <tr><td>Ограничения по счетам, долги перед банком, полномочия, задачи банка</td><td><span class="sk">sber-operdir</span></td><td>«Операционный директор»</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Ещё два навыка служебные: <span class="sk">onec-osnovy</span> и <span class="sk">sber-osnovy</span> задают правила чтения 1С и API банка. Их подключают другие навыки, отдельно спрашивать их не нужно.</p>
+</section>
+
+<!-- ============ БУХГАЛТЕР ============ -->
+<section class="part" id="buhgalter">
+  <div class="part-head">
+    <div class="eyebrow">Главный бухгалтер, бухгалтер</div>
+    <h2>Бухгалтеру</h2>
+    <p>Агент берёт на себя сверку, поиск расхождений и подготовку черновиков. Исправления в 1С, проведение документов и закрытие периода остаются за вами.</p>
+  </div>
+
+  <h3>Как спросить и что получите</h3>
+  <div class="table"><table>
+    <thead><tr><th>Вопрос</th><th>Что получите</th><th>Навык</th></tr></thead>
+    <tbody>
+      <tr><td class="ask">«Сверь выписку банка с 1С за сентябрь»</td><td>Операции банка, которых нет в 1С; лишние и задвоенные документы; расхождения сумм, дат и контрагентов; сверка остатка по расчётному счёту</td><td><span class="sk">onec-sverka-banka</span></td></tr>
+      <tr><td class="ask">«Проверь учёт перед закрытием сентября»</td><td>Десять проверок: непроведённые и помеченные на удаление документы, банковские операции без договора, списания без подтверждения выпиской, дубли поступлений, документы будущими датами, развёрнутое сальдо, старые авансы, старая дебиторка, неподписанная первичка</td><td><span class="sk">onec-predzakrytie</span></td></tr>
+      <tr><td class="ask">«Подготовь акт сверки с ООО «Ромашка» с начала года»</td><td>Досье контрагента и черновик акта сверки в Word: сальдо на начало, документы, обороты, сальдо на конец</td><td><span class="sk">onec-kontragent</span></td></tr>
+      <tr><td class="ask">«Пришли ли деньги от ООО «Ромашка» на этой неделе?»</td><td>Поступления и оплаты по банку с этим контрагентом, ссылки на счета и договоры из назначения платежа</td><td><span class="sk">sber-kontragent</span></td></tr>
+      <tr><td class="ask">«Покажи операции по счёту за 3 октября», «Найди платёж с назначением …»</td><td>Список операций с поиском по контрагенту, сумме и назначению, контроль целостности выписки, выгрузка в Excel</td><td><span class="sk">sber-vypiska</span></td></tr>
+      <tr><td class="ask">«Какие авансы мы выдали поставщикам?»</td><td>Дебиторка по видам с возрастом долга</td><td><span class="sk">onec-debitorka</span></td></tr>
+      <tr><td class="ask">«Что пишет банк? Есть запросы по 115-ФЗ?»</td><td>Письма банка и валютного контроля со сроками ответа; по просьбе — черновик ответа с перечнем документов</td><td><span class="sk">sber-pisma-ep</span></td></tr>
+      <tr><td class="ask">«Найди в 1С платёжку № …»</td><td>Разовый поиск документа или записи справочника</td><td><span class="sk">onec-osnovy</span></td></tr>
+    </tbody>
+  </table></div>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/sverka-canvas.png" src="media/sverka.mp4"></video><figcaption>Сверка выписки с 1С за месяц: агент собирает выписку по дням, документы 1С, сопоставляет и выдаёт список расхождений с действиями</figcaption></figure>
+  <div class="shots"><figure><img src="media/sverka-canvas.png" alt="Сверка: операции, которых нет в 1С, дубли и разница остатков — с подсказкой, что сделать" loading="lazy" width="1600" height="1000"><figcaption>Сверка: операции, которых нет в 1С, дубли и разница остатков — с подсказкой, что сделать</figcaption></figure><figure><img src="media/predzakrytie-canvas.png" alt="Предзакрытие: десять проверок учёта, по каждой — результат и число найденного" loading="lazy" width="1600" height="1000"><figcaption>Предзакрытие: десять проверок учёта, по каждой — результат и число найденного</figcaption></figure></div>
+  </div>
+
+  <h3>Ритм работы</h3>
+  <div class="rhythm">
+    <div><b>Каждый день</b><span>После загрузки выписки в 1С: «Сверь вчерашнюю выписку с 1С». Список расхождений — готовый план правок.</span></div>
+    <div><b>1–10 число</b><span>«Проверь учёт перед закрытием прошлого месяца». Агент сам берёт прошлый месяц, если сегодня с 1 по 10 число.</span></div>
+    <div><b>Раз в квартал</b><span>Акты сверки с ключевыми контрагентами.</span></div>
+    <div><b>По событию</b><span>Пришло письмо банка — разбор, срок ответа, черновик ответа.</span></div>
+  </div>
+
+  <div class="two">
+    <div class="box no">
+      <h3>Что делаете вы, а не агент</h3>
+      <ul class="list">
+        <li>Загружаете выписку в 1С, проводите и исправляете документы.</li>
+        <li>Закрываете период и делаете регламентные операции.</li>
+        <li>Отправляете акт сверки контрагенту и отвечаете банку.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Советы</h3>
+      <ul class="list">
+        <li>Называйте период и счёт, если нужен не основной.</li>
+        <li>Агент пишет «1С отстаёт»? Сначала загрузите выписку, потом повторите вопрос.</li>
+        <li>После исправлений повторите сверку: в отчёте должно остаться только то, что объяснимо.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КАЗНАЧЕЙ ============ -->
+<section class="part" id="kaznachey">
+  <div class="part-head">
+    <div class="eyebrow">Казначей</div>
+    <h2>Казначею</h2>
+    <p>Деньги на счетах, прогноз, контроль платёжек до и после отправки, размещение свободных средств. Подпись, отправка и акцепт — только в СберБизнесе и только человеком.</p>
+  </div>
+
+  <h3>Как спросить и что получите</h3>
+  <div class="table"><table>
+    <thead><tr><th>Вопрос</th><th>Что получите</th><th>Навык</th></tr></thead>
+    <tbody>
+      <tr><td class="ask">«Сколько денег на счетах?», «Какие были остатки на 1 октября?»</td><td>Остатки и обороты по каждому счёту, итог по валютам, на сколько дней хватит при среднем расходе</td><td><span class="sk">sber-ostatki</span></td></tr>
+      <tr><td class="ask">«Хватит ли денег на платежи на следующей неделе?», «Будет ли кассовый разрыв?»</td><td>Прогноз по дням на 14 дней: платёжки в работе, кредиторка со сроком, регулярные платежи по истории, ожидаемые поступления; дата и величина разрыва</td><td><span class="sk">onec-platezhnyi-kalendar</span></td></tr>
+      <tr><td class="ask">«Проверь платёжки перед отправкой»</td><td>11 проверок каждой неотправленной платёжки: реквизиты получателя, дубли, новые получатели, крупные суммы, договор и долг, НДС, реквизиты налоговых платежей</td><td><span class="sk">onec-proverka-platezhek</span></td></tr>
+      <tr><td class="ask">«Ушли ли вчерашние платёжки?», «Почему платёж не прошёл?»</td><td>Платёжки из 1С против выписки и статусов банка: исполнена, принята, отклонена с причиной, не найдена</td><td><span class="sk">sber-ispolnenie-platezhek</span></td></tr>
+      <tr><td class="ask">«Какие требования ждут акцепта?»</td><td>Входящие платёжные требования за 10 рабочих дней со сроками акцепта</td><td><span class="sk">sber-ispolnenie-platezhek</span></td></tr>
+      <tr><td class="ask">«Кому платить в первую очередь?», «Подготовь черновик реестра платежей»</td><td>Кредиторка по срокам и очерёдность; видно, на какие долги оплата уже в пути</td><td><span class="sk">onec-kreditorka</span></td></tr>
+      <tr><td class="ask">«Есть ли свободные деньги на депозит?», «Нужен ли овердрафт?»</td><td>Свободный остаток на горизонте 30 дней с учётом неснижаемого остатка и буфера, действующие депозиты, предложения банка</td><td><span class="sk">sber-razmeshchenie</span></td></tr>
+      <tr><td class="ask">«Есть ли ограничения или аресты по счетам?»</td><td>Ограничения по счетам и долги перед банком по данным «Операционного директора»</td><td><span class="sk">sber-operdir</span></td></tr>
+    </tbody>
+  </table></div>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/platezhki-canvas.png" src="media/platezhki.mp4"></video><figcaption>Проверка платёжек перед отправкой: по каждой платёжке — замечания и итог «отправлять / проверить / стоп»</figcaption></figure>
+  <div class="shots"><figure><img src="media/platezhki-canvas.png" alt="Таблица проверки: новый получатель с крупной суммой и вероятный дубль выделены светофором" loading="lazy" width="1600" height="1000"><figcaption>Таблица проверки: новый получатель с крупной суммой и вероятный дубль выделены светофором</figcaption></figure><figure><img src="media/kalendar-canvas.png" alt="Платёжный календарь на 14 дней: остаток по дням и день кассового разрыва" loading="lazy" width="1600" height="1000"><figcaption>Платёжный календарь на 14 дней: остаток по дням и день кассового разрыва</figcaption></figure></div>
+  </div>
+
+  <h3>Ритм работы</h3>
+  <div class="rhythm">
+    <div><b>09:00</b><span>Сводка дня приходит регулярной задачей: деньги, вчерашнее движение, платежи в работе, риски банка.</span></div>
+    <div><b>Перед подписью</b><span>«Проверь платёжки перед отправкой». Удобно поставить регулярной задачей на 11:00 и 16:00.</span></div>
+    <div><b>После отправки</b><span>«Ушли ли сегодняшние платёжки?» и «Какие требования ждут акцепта?».</span></div>
+    <div><b>Пн и чт</b><span>Платёжный календарь на 14 дней.</span></div>
+    <div><b>При профиците</b><span>«Куда разместить свободные деньги?»</span></div>
+  </div>
+
+  <div class="two">
+    <div class="box no">
+      <h3>Что делаете вы, а не агент</h3>
+      <ul class="list">
+        <li>Подписываете, отправляете и отзываете платёжки.</li>
+        <li>Акцептуете или отклоняете требования.</li>
+        <li>Открываете депозиты и подаёте заявки на кредит.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Советы</h3>
+      <ul class="list">
+        <li>Неснижаемый остаток назовите один раз в вопросе — иначе агент считает его нулевым.</li>
+        <li>Известные будущие платежи можно приложить файлом: агент добавит их в календарь.</li>
+        <li>Платёжка «Отправлено» больше 2 рабочих дней без исполнения — повод проверить её в банке.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ФИНДИРЕКТОР ============ -->
+<section class="part" id="findirektor">
+  <div class="part-head">
+    <div class="eyebrow">Финансовый директор</div>
+    <h2>Финансовому директору</h2>
+    <p>Утренняя картина дня, движение денег, долги, выручка и риски в банке. Ответы можно сразу получить в виде таблицы Excel или слайда.</p>
+  </div>
+
+  <h3>Как спросить и что получите</h3>
+  <div class="table"><table>
+    <thead><tr><th>Вопрос</th><th>Что получите</th><th>Навык</th></tr></thead>
+    <tbody>
+      <tr><td class="ask">«Дай обзор вчерашнего дня», «Что у нас на утро?»</td><td>Одна сводка: деньги на счетах, поступления и списания за день, крупное и необычное, платежи в работе, риски в банке, сигналы по дебиторке</td><td><span class="sk">onec-svodka-dnya</span></td></tr>
+      <tr><td class="ask">«ДДС за сентябрь», «План-факт ДДС», «Сравни с бюджетом»</td><td>Поступления и списания по статьям ДДС, по неделям или месяцам; отклонения от бюджета. Бюджет — файл Excel «статья × период» или документ в пространстве</td><td><span class="sk">onec-dds-plan-fakt</span></td></tr>
+      <tr><td class="ask">«ДДС по выписке банка», «Сколько ушло на налоги и зарплату?»</td><td>Фактическое движение по банку, разложенное по статьям и разделам</td><td><span class="sk">sber-dds</span></td></tr>
+      <tr><td class="ask">«Кто нам должен?», «Топ должников», «Что просрочено больше 90 дней?»</td><td>Дебиторка по возрасту, просрочка, концентрация, список «с кем работать по долгам»</td><td><span class="sk">onec-debitorka</span></td></tr>
+      <tr><td class="ask">«Выручка по клиентам за квартал», «Кто перестал покупать?»</td><td>Выручка по клиентам и номенклатуре, динамика, концентрация, новые и ушедшие клиенты</td><td><span class="sk">onec-vyruchka</span></td></tr>
+      <tr><td class="ask">«Будет ли кассовый разрыв в октябре?»</td><td>Прогноз денег по дням с датой разрыва</td><td><span class="sk">onec-platezhnyi-kalendar</span></td></tr>
+      <tr><td class="ask">«Есть ли свободные деньги под депозит?»</td><td>Свободная сумма на горизонте и лучшее предложение банка</td><td><span class="sk">sber-razmeshchenie</span></td></tr>
+      <tr><td class="ask">«Всё ли в порядке в банке?»</td><td>Риск-обзор: ограничения по счетам, долги перед банком, полномочия, задачи банка</td><td><span class="sk">sber-operdir</span></td></tr>
+    </tbody>
+  </table></div>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/svodka-canvas.png" src="media/svodka.mp4"></video><figcaption>Вопрос «Дай обзор вчерашнего дня»: один навык сводки сам собирает банк, 1С и риски банка и отдаёт короткий ответ и отчёт в холсте</figcaption></figure>
+  <div class="shots"><figure><img src="media/svodka-canvas.png" alt="Сводка дня в холсте: деньги, обороты по счетам, необычные операции, риски в банке" loading="lazy" width="1600" height="1000"><figcaption>Сводка дня в холсте: деньги, обороты по счетам, необычные операции, риски в банке</figcaption></figure><figure><img src="media/kalendar-chat.png" alt="Короткий ответ о кассовом разрыве: дата, сумма, причина и варианты" loading="lazy" width="1600" height="1000"><figcaption>Короткий ответ о кассовом разрыве: дата, сумма, причина и варианты</figcaption></figure></div>
+  </div>
+
+  <h3>Ритм работы</h3>
+  <div class="rhythm">
+    <div><b>Каждый день</b><span>Сводка дня в 09:00 — в Cowork или кратко в Telegram (только в личный чат).</span></div>
+    <div><b>Понедельник</b><span>Дебиторка: возраст долгов и список для работы.</span></div>
+    <div><b>Конец месяца</b><span>ДДС план-факт и выручка по клиентам.</span></div>
+    <div><b>Перед совещанием</b><span>«Собери слайд по ДДС и дебиторке за месяц» или «Выгрузи в Excel».</span></div>
+  </div>
+
+  <div class="box">
+    <h3>Советы</h3>
+    <ul class="list">
+      <li>Просите формат прямо в вопросе: «в Excel», «слайд для правления», «график по неделям».</li>
+      <li>Пороги можно задать свои: «просрочка больше 30 дней», «крупные — от …».</li>
+      <li>Сравнение с прошлым периодом агент делает, только если за него есть данные. Нет данных — так и напишет, а не сравнит с нулём.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ РУКОВОДИТЕЛЬ ============ -->
+<section class="part" id="rukovoditel">
+  <div class="part-head">
+    <div class="eyebrow">Руководитель организации</div>
+    <h2>Руководителю</h2>
+    <p>Агент даёт быстрые ответы о деньгах и рисках компании по данным 1С и банка. Он только читает: ничего не платит, не подписывает и не меняет в учёте.</p>
+  </div>
+
+  <h3>Что вы получаете</h3>
+  <ul class="list">
+    <li><b>Утреннюю сводку</b>: деньги, вчерашнее движение, платежи в работе, сигналы.</li>
+    <li><b>Риски в банке</b>: ограничения и аресты по счетам, долги перед банком, сроки ваших полномочий и доверенностей подписантов, задачи банка.</li>
+    <li><b>Ответы без ожидания отчёта</b>: кто должен, хватит ли денег, что с выручкой.</li>
+  </ul>
+
+  <h3>Вопросы, с которых стоит начать</h3>
+  <div class="table"><table>
+    <thead><tr><th>Вопрос</th><th>Что получите</th></tr></thead>
+    <tbody>
+      <tr><td class="ask">«Что у нас на утро?»</td><td>Сводка дня одним сообщением</td></tr>
+      <tr><td class="ask">«Всё ли в порядке в банке?»</td><td>Ограничения, долги перед банком, полномочия, задачи банка</td></tr>
+      <tr><td class="ask">«Когда истекают мои полномочия и доверенности подписантов?»</td><td>Сроки и сколько дней осталось</td></tr>
+      <tr><td class="ask">«Хватит ли денег на платежи до конца месяца?»</td><td>Прогноз по дням и возможный кассовый разрыв</td></tr>
+      <tr><td class="ask">«Кто нам больше всего должен?»</td><td>Топ должников и просрочка</td></tr>
+    </tbody>
+  </table></div>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/riski-canvas.png" src="media/riski.mp4"></video><figcaption>Вопрос «Всё ли в порядке в банке?»: агент запускает сбор у банка, ждёт готовности и раскладывает риски по разделам</figcaption></figure>
+  <div class="shots"><figure><img src="media/riski-canvas.png" alt="Риски в банке: ограничения по счетам, долги, полномочия, задачи банка — со сроками и действиями" loading="lazy" width="1600" height="1000"><figcaption>Риски в банке: ограничения по счетам, долги, полномочия, задачи банка — со сроками и действиями</figcaption></figure></div>
+  </div>
+
+  <h3>Контроль и безопасность</h3>
+  <ul class="list">
+    <li><b>Только чтение.</b> Запрет на создание документов закреплён дважды: в правах на инструменты интеграций и в инструкции агента.</li>
+    <li><b>Доступ</b> есть только у участников пространства «Финансы». Каждый пользователь подключает банковскую интеграцию своим токеном.</li>
+    <li><b>Банковская тайна и персональные данные.</b> ФИО агент показывает, только если без них ответ непонятен. Номера счетов — по последним 4 цифрам. Данные не пересылаются в другие системы.</li>
+    <li><b>Журнал действий</b> ведётся в администрировании Cowork («Аудит событий»).</li>
+    <li>Выводы агента — аналитика, а не юридическое заключение. По ограничениям и долгам перед банком сверяйтесь с документами в СберБизнесе.</li>
+  </ul>
+
+  <h3>Что нужно решить руководителю</h3>
+  <ol class="steps">
+    <li><span>Кто входит в пространство «Финансы» и пользуется агентом.</span></li>
+    <li><span>Кто подключает «Операционного директора» — банковскую сводку о рисках — своим токеном.</span></li>
+    <li><span>Нужна ли доставка утренней сводки в Telegram (только в личный чат получателя).</span></li>
+    <li><span>Утвердить права на инструменты: запись в 1С и банк запрещена или требует подтверждения.</span></li>
+    <li><span>Назначить ответственных по ролям.</span></li>
+  </ol>
+  <div class="table"><table>
+    <thead><tr><th>Роль</th><th>За что отвечает</th></tr></thead>
+    <tbody>
+      <tr><td>Бухгалтер</td><td>Актуальность 1С: загрузка выписки, исправления по итогам сверки и предзакрытия</td></tr>
+      <tr><td>Казначей</td><td>Платежи: проверка до подписи, контроль исполнения, размещение денег</td></tr>
+      <tr><td>Финансовый директор</td><td>Сводка, ДДС, долги, выручка; пороги и параметры отчётов</td></tr>
+      <tr><td>ИТ-специалист</td><td>Интеграции, доступы, токены, права на инструменты, обновление навыков</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ ИТ ============ -->
+<section class="part" id="it">
+  <div class="part-head">
+    <div class="eyebrow">ИТ-специалист организации</div>
+    <h2>ИТ-специалисту</h2>
+    <p>Как устроены интеграции, что где настраивается, какие права выставить и что делать при сбоях.</p>
+  </div>
+
+  <h3>Схема</h3>
+  <div class="flow" aria-label="Схема решения">
+    <div class="tier"><div class="lab">Пользователи</div><div class="cells">
+      <div class="cell">Бухгалтер, казначей, финдиректор, руководитель<small>пространство «Финансы»</small></div>
+    </div></div>
+    <div class="down">↓</div>
+    <div class="tier"><div class="lab">GigaCowork</div><div class="cells">
+      <div class="cell">Агент «Финансовый аналитик 1С»<small>инструкция, 20 навыков + 11 системных</small></div>
+      <div class="cell">Регулярные задачи и команды<small>сводка дня, проверка платёжек</small></div>
+    </div></div>
+    <div class="down">↓ интеграции MCP</div>
+    <div class="tier"><div class="lab">Интеграции</div><div class="cells">
+      <div class="cell">MCP_FULL_1C<small>шлюз mcp-1c, Bearer-токен шлюза</small></div>
+      <div class="cell">MCP_FULL_SBER<small>MCP СберБизнес API, режим «только чтение»</small></div>
+      <div class="cell">«Операционный директор»<small>MCP банка напрямую, токен пользователя</small></div>
+    </div></div>
+    <div class="down">↓</div>
+    <div class="tier"><div class="lab">Системы</div><div class="cells">
+      <div class="cell">1С:Бухгалтерия<small>OData (standard.odata)</small></div>
+      <div class="cell">СберБизнес API<small>mTLS-сертификат + OAuth</small></div>
+      <div class="cell">Транзакционный агент<small>/fintech/api/transactional-agent/mcp</small></div>
+    </div></div>
+  </div>
+
+  <h3>Что где настраивается</h3>
+  <div class="table"><table>
+    <thead><tr><th>Компонент</th><th>Где</th><th>Что важно</th></tr></thead>
+    <tbody>
+      <tr><td>Интеграция MCP_FULL_1C</td><td>Администрирование → Интеграции</td><td>Адрес шлюза mcp-1c и Bearer-токен из кабинета шлюза. 8 инструментов: <code>list_entities</code>, <code>describe_entity</code>, <code>query</code>, <code>get_item</code>, <code>refresh_metadata</code> и три на запись</td></tr>
+      <tr><td>Интеграция MCP_FULL_SBER</td><td>Администрирование → Интеграции</td><td>Режим «только чтение». Навыки используют только инструменты <code>sber-api-*</code> — вызовы эндпоинтов API; сводные <code>sber-util-*</code> и <code>sber-ops-*</code> не используются</td></tr>
+      <tr><td>«Операционный директор»</td><td>Администрирование → Интеграции</td><td>Streamable HTTP, аутентификация «Токен доступа». Каждый пользователь подключает интеграцию своим токеном СберБизнес API с услугами <code>MCP_COMMON</code> и <code>MCP_TRANSACT_AGENT</code>. Идёт напрямую в банк, без шлюза</td></tr>
+      <tr><td>Навыки</td><td>Пространство → Навыки</td><td>20 файлов Markdown. Исходники — в репозитории, папка <code>cowork-skills/</code>; это источник истины</td></tr>
+      <tr><td>Агент</td><td>Пространство → Агенты</td><td>Название, описание, инструкция, 31 навык (20 своих + 11 системных), 3 интеграции</td></tr>
+      <tr><td>Регулярные задачи, команды</td><td>Пространство → Регулярные задачи, Команды</td><td>Сводка дня 09:00; проверка платёжек 11:00 и 16:00; дебиторка по понедельникам; календарь пн и чт</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Права на инструменты</h3>
+  <div class="table"><table>
+    <thead><tr><th>Инструменты</th><th>Право</th></tr></thead>
+    <tbody>
+      <tr><td>1С: <code>list_entities</code>, <code>describe_entity</code>, <code>query</code>, <code>get_item</code>, <code>refresh_metadata</code></td><td>разрешить</td></tr>
+      <tr><td>1С: <code>create_item</code>, <code>update_item</code></td><td>запретить или «спрашивать подтверждение»</td></tr>
+      <tr><td>1С: <code>post_document</code></td><td>запретить</td></tr>
+      <tr><td>Банк: <code>sber-api-*</code> чтения</td><td>разрешить, пока интеграция в режиме «только чтение»; если режим меняется — <code>sber-api-call</code> перевести в «спрашивать подтверждение»</td></tr>
+      <tr><td>«Операционный директор»: <code>summarise-agent-check-collect</code>, <code>summarise-agent-get-data</code></td><td>разрешить (только чтение)</td></tr>
+    </tbody>
+  </table></div>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит: права на инструменты</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/ints1c.png" src="media/ints.mp4"></video><figcaption>Администрирование интеграций: запись в 1С запрещается, у «Операционного директора» оба инструмента только на чтение, авторизация — токеном пользователя</figcaption></figure>
+  <div class="shots"><figure><img src="media/ints1c.png" alt="Права агента на инструменты интеграции 1С: чтение разрешено, создание, изменение и проведение запрещены" loading="lazy" width="1600" height="1000"><figcaption>Права агента на инструменты интеграции 1С: чтение разрешено, создание, изменение и проведение запрещены</figcaption></figure></div>
+  </div>
+
+  <h3>Подключение источников</h3>
+  <div class="two">
+    <div class="box">
+      <h3>1С</h3>
+      <ul class="list">
+        <li>Опубликовать стандартный интерфейс OData; пользователь OData — только с правами на чтение.</li>
+        <li>Зарегистрировать подключение в кабинете шлюза mcp-1c и выпустить токен.</li>
+        <li>После изменения конфигурации 1С вызвать <code>refresh_metadata</code>.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Банк</h3>
+      <ul class="list">
+        <li>Подключение к СберБизнес API: client_id, клиентский сертификат mTLS нужного контура (боевой или тестовый), услуги под нужные эндпоинты чтения.</li>
+        <li>Для «Операционного директора» — услуги <code>MCP_COMMON</code> и <code>MCP_TRANSACT_AGENT</code>.</li>
+        <li>Access-токен короткоживущий, refresh-токен меняется при каждом обновлении. Обновляйте токены в одном месте, не параллельно из разных систем.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Навыки и агент: как вносить изменения</h3>
+  <ol class="steps">
+    <li><span>Правьте файл навыка в репозитории. Описание пишется по шаблону «Используй этот навык, когда… Не используй для… — навык X»: строка «Не используй» не даёт соседним навыкам перехватывать вопросы.</span></li>
+    <li><span>Новый навык: «Навыки → Добавить → Загрузить файл навыка». Существующий: меню навыка → «Редактировать», поля «Когда применять» (описание) и «Инструкции» (тело). API навыков защищён CSRF — правки только через интерфейс.</span></li>
+    <li><span>Агент: после правки дождитесь активной кнопки «Сохранить» и уведомления «Агент сохранен».</span></li>
+    <li><span>Прогоните набор проверочных фраз (<code>routing-tests.md</code>, 32 вопроса): агент должен выбирать ожидаемый навык.</span></li>
+  </ol>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит: правка описания навыка</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/skill.png" src="media/skill.mp4"></video><figcaption>В описание навыка добавляется строка «Не используй для… — навык X», затем «Сохранить»</figcaption></figure>
+  </div>
+
+  <h3>Диагностика</h3>
+  <div class="table"><table>
+    <thead><tr><th>Симптом</th><th>Причина</th><th>Что делать</th></tr></thead>
+    <tbody>
+      <tr><td>401 от интеграции 1С</td><td>Токен шлюза на паузе или отозван</td><td>Проверить в кабинете шлюза, снять паузу или выпустить новый токен</td></tr>
+      <tr><td>Ответ 1С обрезан</td><td>Лимит размера ответа шлюза</td><td>Навыки сами уменьшают выборку; в своих запросах — <code>select</code> и постраничная выгрузка</td></tr>
+      <tr><td>«1С отстаёт: данные на …»</td><td>В 1С не загружена выписка</td><td>Загрузить выписку, повторить вопрос</td></tr>
+      <tr><td>Банк отвечает 202 <code>STATEMENT_RESPONSE_PROCESSING</code></td><td>Выписка формируется</td><td>Навык повторяет запрос до 3 раз; иначе день помечается как неполученный</td></tr>
+      <tr><td>Медленно, 429</td><td>Ограничение частоты запросов к банку</td><td>Сузить период или число счетов</td></tr>
+      <tr><td>401 у «Операционного директора»</td><td>Токен пользователя истёк или не подключён</td><td>Переподключить интеграцию своим токеном</td></tr>
+      <tr><td>403 у «Операционного директора»</td><td>Нет услуги <code>MCP_TRANSACT_AGENT</code></td><td>Добавить услугу в подключении к СберБизнес API</td></tr>
+      <tr><td><code>Unexpected value 'account_turns'</code></td><td>Запрос разделов без явного списка</td><td>Навык всегда передаёт список; если повторяется — обращение к команде банка</td></tr>
+      <tr><td>503 сервиса суммаризации</td><td>Временная недоступность сервиса банка</td><td>Повторить через несколько минут</td></tr>
+      <tr><td>Разрыв TLS, <code>ECONNRESET</code></td><td>Сертификат не того контура</td><td>Боевой сертификат — для боевого адреса, тестовый — для тестового</td></tr>
+      <tr><td><code>sendMessage failed: 500</code> в задаче с агентом</td><td>Сбой платформы Cowork</td><td>Проверить задачу без агента; если без агента работает — обращение в поддержку Cowork</td></tr>
+      <tr><td>Агент выбрал не тот навык</td><td>Пересечение описаний</td><td>Прогнать проверочные фразы, уточнить строку «Не используй для…»</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="box">
+    <h3>Безопасность</h3>
+    <ul class="list">
+      <li>Токены и пароли вводятся только в формы администрирования и хранятся в менеджере паролей — не в чате, не в файлах навыков и не в репозитории.</li>
+      <li>Минимум прав: OData-пользователь только на чтение, интеграция банка в режиме «только чтение», запись в 1С запрещена.</li>
+      <li>Сотрудник уходит из компании — отзовите его токены и уберите из пространства.</li>
+      <li>Периодически просматривайте «Аудит событий».</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ БАНК ============ -->
+<section class="part" id="bank">
+  <div class="part-head">
+    <div class="eyebrow">Продукт СберБизнес API, команда Транзакционного агента, клиентский менеджер, безопасность, поддержка</div>
+    <h2>Как это выглядит для команд банка</h2>
+    <p>Клиент подключил банк к своему ИИ-агенту в GigaCowork. Агент только читает данные банка и строит из них финансовую аналитику для бухгалтера, казначея, финдиректора и руководителя.</p>
+  </div>
+
+  <h3>Два канала в банк</h3>
+  <div class="two">
+    <div class="box">
+      <h3>СберБизнес API</h3>
+      <p>Через MCP-сервер клиента в режиме «только чтение». Запросы идут с клиентским сертификатом mTLS и OAuth-токеном клиента. Используются эндпоинты API напрямую, без собственных агрегатов банка.</p>
+    </div>
+    <div class="box">
+      <h3>MCP «Транзакционный агент»</h3>
+      <p>Из Cowork напрямую в <code>/fintech/api/transactional-agent/mcp</code> с токеном пользователя (<code>MCP_COMMON</code> + <code>MCP_TRANSACT_AGENT</code>). Один сбор на вопрос: <code>summarise.agent_check_collect</code>, затем <code>summarise.agent_get_data</code> с явным списком разделов.</p>
+    </div>
+  </div>
+
+<div class="media">
+  <div class="media-hd"><b>Как это выглядит со стороны банка</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
+  <figure><video controls muted playsinline preload="metadata" poster="media/log.png" src="media/log.mp4"></video><figcaption>Иллюстрация: обращения к банку во время сводки дня — только чтение, включая повтор после ответа 202</figcaption></figure>
+  <div class="shots"><figure><img src="media/log.png" alt="Журнал обращений: канал, метод, ответ банка; вызовов на запись — ноль" loading="lazy" width="1600" height="1000"><figcaption>Журнал обращений: канал, метод, ответ банка; вызовов на запись — ноль</figcaption></figure></div>
+  </div>
+
+  <h3>Какие сервисы вызывает каждый сценарий</h3>
+  <div class="table"><table>
+    <thead><tr><th>Сценарий клиента</th><th>Сервисы банка</th><th>Нагрузка</th></tr></thead>
+    <tbody>
+      <tr><td>Сводка дня</td><td>client-info; statement summary по каждому счёту за день; Транзакционный агент: разделы <code>fskk</code>, <code>udkz</code>, <code>authority</code>, <code>tasklist</code>, <code>client_profile</code></td><td>Единицы вызовов в день</td></tr>
+      <tr><td>Остатки</td><td>client-info, statement summary</td><td>Один вызов на счёт и день</td></tr>
+      <tr><td>Выписка, ДДС, деньги с контрагентом</td><td>statement summary + statement transactions «счёт × день × страница», до 100 операций на страницу</td><td>До ~150 вызовов на вопрос; при большем объёме агент предупреждает и просит сузить период. Темп — около 4 запросов в секунду</td></tr>
+      <tr><td>Исполнение платёжек</td><td>payments / state по externalId; входящие платёжные требования по дням</td><td>Десятки вызовов</td></tr>
+      <tr><td>Письма банка и ЭП</td><td>Письма из банка, письма валютного контроля, криптопрофиль</td><td>Несколько вызовов</td></tr>
+      <tr><td>Размещение</td><td>Действующие депозиты, предложения по депозитам, кредитные предложения</td><td>Несколько вызовов</td></tr>
+      <tr><td>Надёжность контрагента</td><td>СберРейтинг, светофор по ИНН</td><td>Один вызов на контрагента</td></tr>
+      <tr><td>Риски компании в банке</td><td>Транзакционный агент: все разделы из схемы</td><td>Один сбор на вопрос; опрос готовности раз в 5 секунд, не дольше 2 минут</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="box no">
+    <h3>Что не вызывается никогда</h3>
+    <p>Создание и подпись платёжных поручений, письма и заявления в банк, акцепт требований, переводы, активация сертификатов. MCP-сервер СберБизнес API у клиента работает в режиме «только чтение», а агенту запрет записан в инструкции.</p>
+  </div>
+
+  <h3>Наблюдения и пожелания</h3>
+  <p class="note">Собраны при подключении и эксплуатации. Для каждого пункта указано, какой команде он адресован.</p>
+  <div class="issues">
+    <div class="issue"><span class="tag">Транзакционный агент</span><b>Ошибка «Unexpected value 'account_turns'»</b><p>Вызов <code>agent_get_data</code> без <code>integrationName</code> периодически падает: сборщик отдаёт раздел, которого нет в enum схемы. Просьба: согласовать enum и фактическую выдачу, опубликовать перечень разделов боевого контура. В описании сервиса упомянуты обороты, балансы, операции и поручения, а в схеме их нет.</p></div>
+    <div class="issue"><span class="tag">Транзакционный агент</span><b>Объявлена outputSchema, но не приходит structuredContent</b><p>Строгие MCP-клиенты отбраковывают такие ответы. Просьба: возвращать <code>structuredContent</code> или не объявлять <code>outputSchema</code>.</p></div>
+    <div class="issue"><span class="tag">Транзакционный агент</span><b>Данные разделов — свободный текст</b><p>Даты, суммы и сроки приходится извлекать из текста GigaChat. Просьба: рядом с текстом отдавать структурированные поля — счёт, сумма, валюта, дата, срок, статус.</p></div>
+    <div class="issue"><span class="tag">Транзакционный агент</span><b>Нет даты актуальности раздела</b><p>Данные могут отставать на дни и недели. Просьба: поле «по состоянию на» в каждом разделе.</p></div>
+    <div class="issue"><span class="tag">Транзакционный агент</span><b>Ошибки внутреннего сервиса уходят клиенту как есть</b><p>При отсутствии <code>legalPersonSessionId</code> возвращается сырой ответ 422 внутреннего сервиса с его адресом. Иногда приходит 503 сервиса суммаризации. Просьба: проверять параметры на входе MCP и не раскрывать внутренние адреса.</p></div>
+    <div class="issue"><span class="tag">СберБизнес API</span><b>Не подтверждены пути части эндпоинтов чтения</b><p>Письма из банка, письма валютного контроля, депозиты и предложения, СберРейтинг, корпоративные карты: пути и параметры не подтверждены публичной спецификацией. Просьба: опубликовать или подтвердить спецификации.</p></div>
+    <div class="issue"><span class="tag">СберБизнес API</span><b>Выписка за период — сотни вызовов</b><p>Модель «счёт × день × страница» при периоде в месяц по нескольким счетам даёт сотни запросов. Просьба: выписка за период одним запросом или увеличенный размер страницы.</p></div>
+  </div>
+
+  <h3>Что важно каждой команде</h3>
+  <div class="table"><table>
+    <thead><tr><th>Команда</th><th>Что смотреть</th></tr></thead>
+    <tbody>
+      <tr><td>Продукт СберБизнес API</td><td>Сценарии и эндпоинты, профиль нагрузки, запросы на доработку API</td></tr>
+      <tr><td>Транзакционный агент («Операционный директор»)</td><td>Пять пунктов выше по агенту: enum разделов, structuredContent, структурированные поля, дата актуальности, обработка ошибок</td></tr>
+      <tr><td>Клиентский менеджер</td><td>Клиент ежедневно видит риск-сигналы банка: ограничения, долги, полномочия, задачи. Предложения по депозитам и кредитам попадают в ответы, когда у клиента появляются свободные деньги или их не хватает</td></tr>
+      <tr><td>Безопасность</td><td>Только чтение, mTLS, отдельный токен у каждого пользователя, запрет записи на уровне сервера и инструкции, журнал событий на стороне клиента</td></tr>
+      <tr><td>Поддержка</td><td>Таблица диагностики на вкладке «ИТ-специалист»: типовые ошибки и действия</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>Инструкция описывает работу агента и не содержит данных организации. Источник навыков и описаний — папка <code>cowork-skills/</code> в репозитории проекта.</footer>
+</main>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('nav.roles [role="tab"]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('section.part'));
+  var nav = document.querySelector('nav.roles');
+  var strip = document.querySelector('nav.roles .tabs');
+  panels.forEach(function (p) { p.setAttribute('role', 'tabpanel'); p.setAttribute('aria-labelledby', 'tab-' + p.id); });
+  function show(id, scroll) {
+    if (!document.getElementById(id)) id = 'ustroystvo';
+    panels.forEach(function (p) { p.hidden = p.id !== id; });
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-target') === id;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      if (on && strip) {
+        var l = t.offsetLeft - strip.offsetLeft, r = l + t.offsetWidth;
+        if (l < strip.scrollLeft) strip.scrollLeft = l - 8;
+        else if (r > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = r - strip.clientWidth + 8;
+      }
+    });
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    if (scroll && nav) {
+      var top = nav.getBoundingClientRect().top + window.pageYOffset;
+      if (window.pageYOffset > top) window.scrollTo(0, top);
+    }
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t.getAttribute('data-target'), true); });
+    t.addEventListener('keydown', function (e) {
+      var k = e.key, n = null;
+      if (k === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      if (k === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      if (k === 'Home') n = tabs[0];
+      if (k === 'End') n = tabs[tabs.length - 1];
+      if (n) { e.preventDefault(); n.focus(); show(n.getAttribute('data-target'), true); }
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var img = e.target.closest && e.target.closest('.media img');
+    var z = document.querySelector('.zoom');
+    if (z) { z.remove(); return; }
+    if (!img) return;
+    var o = document.createElement('div'); o.className = 'zoom';
+    var i = document.createElement('img'); i.src = img.src; i.alt = img.alt; o.appendChild(i);
+    document.body.appendChild(o);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var z = document.querySelector('.zoom'); if (z) z.remove(); } });
+  var start = '';
+  try { start = (location.hash || '').slice(1); } catch (e) {}
+  show(start || 'ustroystvo', false);
+})();
+</script>
+</body>
+</html>
