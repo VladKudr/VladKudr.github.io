@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Финансовый аналитик в Cowork</title>
-<meta name="description" content="Инструкции по агенту «Финансовый аналитик 1С» в GigaCowork для бухгалтера, казначея, финдиректора, руководителя, ИТ-специалиста и команд банка.">
+<meta name="description" content="Инструкции по агенту «Финансовый аналитик 1С» в GigaCowork для бухгалтера, казначея, финдиректора, руководителя и ИТ-специалиста.">
 <meta property="og:title" content="Финансовый аналитик в Cowork">
-<meta property="og:description" content="Как работать с агентом по данным 1С и СберБизнеса: инструкции по ролям, видео и скриншоты с демо-стенда.">
+<meta property="og:description" content="Как работать с агентом по данным 1С и СберБизнеса: инструкции по ролям, видео и скриншоты, ИИ-ассистент по схеме работы.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://vladkudr.github.io/guides/fin-agent/">
 <meta property="og:image" content="https://vladkudr.github.io/guides/fin-agent/media/svodka-canvas.png">
@@ -161,6 +161,60 @@ code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; overflo
 .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 .zoom { position: fixed; inset: 0; z-index: 30; background: rgba(10, 14, 12, .82); display: grid; place-items: center; padding: 16px; cursor: zoom-out; }
 .zoom img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+/* ---------- ассистент ---------- */
+.ai-fab { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 12px 18px; background: var(--accent); color: var(--surface); font: 600 15px/1 var(--font-body); box-shadow: 0 8px 24px rgba(20, 30, 60, .25); cursor: pointer; }
+.ai-fab svg { width: 18px; height: 18px; }
+.ai-panel { position: fixed; right: 16px; bottom: 16px; z-index: 21; width: min(420px, calc(100vw - 32px)); height: min(640px, calc(100vh - 32px)); display: grid; grid-template-rows: auto 1fr auto; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 50px rgba(10, 20, 15, .28); overflow: hidden; }
+.ai-head { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 8px; align-items: start; padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
+.ai-head b { font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+.ai-head small { grid-column: 1 / -1; color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.ai-icon { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; height: 30px; min-width: 30px; padding: 0 8px; font: 500 13px var(--font-body); cursor: pointer; }
+.ai-log { overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; overscroll-behavior: contain; }
+.ai-msg { max-width: 92%; padding: 9px 12px; border-radius: 12px; font-size: 14.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.ai-msg.u { align-self: flex-end; background: var(--accent-soft); }
+.ai-msg.a { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); }
+.ai-msg.err { align-self: flex-start; color: var(--bad); background: transparent; border: 1px dashed var(--bad); }
+.ai-msg p { margin: 0 0 6px; } .ai-msg p:last-child { margin-bottom: 0; }
+.ai-msg ul, .ai-msg ol { margin: 4px 0 6px; padding-left: 20px; }
+.ai-msg code { font-size: 12.5px; }
+.ai-typing { display: inline-flex; gap: 4px; } .ai-typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: aib 1s infinite ease-in-out; } .ai-typing i:nth-child(2) { animation-delay: .15s; } .ai-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes aib { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+.ai-sugg { display: flex; flex-wrap: wrap; gap: 6px; }
+.ai-sugg button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 11px; font: 500 13px/1.3 var(--font-body); cursor: pointer; text-align: left; }
+.ai-sugg button:hover { border-color: var(--accent); }
+.ai-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--surface); }
+.ai-form textarea { resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; font: 15px/1.4 var(--font-body); color: var(--ink); background: var(--bg); max-height: 120px; min-height: 42px; }
+.ai-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.ai-send { border: 0; border-radius: 10px; padding: 0 14px; background: var(--accent); color: var(--surface); font: 600 14px var(--font-body); cursor: pointer; }
+.ai-send:disabled { opacity: .5; cursor: default; }
+.ai-note { font-size: 11.5px; color: var(--muted); grid-column: 1 / -1; }
+
+/* ---------- телефон ---------- */
+@media (max-width: 640px) {
+  body { font-size: 15.5px; }
+  header.top { padding-block: 22px 14px; gap: 8px; }
+  h1 { font-size: 28px; }
+  .lead { font-size: 16px; }
+  nav.roles { padding: 8px 16px; }
+  nav.roles .tabs { scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); padding-right: 28px; }
+  nav.roles .tabs::-webkit-scrollbar { display: none; }
+  section.part { padding-block: 24px 4px; gap: 14px; }
+  h2 { font-size: 24px; }
+  .table { border-radius: 10px; }
+  .table table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table thead { display: none; }
+  .table tr { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .table tr:last-child { border-bottom: 0; }
+  .table td { border: 0; padding: 2px 0; min-width: 0 !important; }
+  .table td:first-child { font-weight: 600; padding-bottom: 4px; }
+  .table td[data-label]:not(:first-child)::before { content: attr(data-label); display: block; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .media { padding: 12px; }
+  .shots { grid-template-columns: 1fr; }
+  .media figure img, .media video { max-height: 78vh; width: auto; max-width: 100%; margin-inline: auto; }
+  .ai-fab { padding: 11px 15px; font-size: 14px; }
+  .ai-panel { inset: 0; width: 100%; height: 100%; border-radius: 0; border: 0; padding-top: env(safe-area-inset-top, 0px); }
+  .ai-form textarea { font-size: 16px; }
+}
 footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 </style>
 </head>
@@ -169,8 +223,7 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
   <header class="top">
     <div class="eyebrow">GigaCowork · 1С:Бухгалтерия · СберБизнес</div>
     <h1>Финансовый аналитик в Cowork</h1>
-    <p class="lead">Как работать с агентом «Финансовый аналитик 1С»: что он умеет, как его спрашивать, как читать ответы и как всё устроено. Отдельные разделы для бухгалтера, казначея, финансового директора, руководителя, ИТ-специалиста и команд банка.</p>
-    <p class="meta">Редакция от 08.10.2026. Примеры вопросов условные, данные организации в инструкции не приводятся. Скриншоты и видео сняты с демо-стенда на вымышленных данных; его интерфейс упрощён и внешне отличается от Cowork.</p>
+    <p class="lead">Как работать с агентом «Финансовый аналитик 1С»: что он умеет, как его спрашивать, как читать ответы и как всё устроено. Отдельные разделы для бухгалтера, казначея, финансового директора, руководителя и ИТ-специалиста.</p>
   </header>
 </div>
 
@@ -182,7 +235,6 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
     <button type="button" role="tab" id="tab-findirektor" data-target="findirektor" aria-controls="findirektor" aria-selected="false">Финдиректор</button>
     <button type="button" role="tab" id="tab-rukovoditel" data-target="rukovoditel" aria-controls="rukovoditel" aria-selected="false">Руководитель</button>
     <button type="button" role="tab" id="tab-it" data-target="it" aria-controls="it" aria-selected="false">ИТ-специалист</button>
-    <button type="button" role="tab" id="tab-bank" data-target="bank" aria-controls="bank" aria-selected="false">Команды банка</button>
   </div>
 </nav>
 
@@ -244,7 +296,7 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
   <div class="media">
   <div class="media-hd"><b>Как выглядит ответ</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <div class="shots"><figure><img src="media/svodka-chat.png" alt="Слева — вопрос и ответ в чате. Справа — ход работы: этапы, подключённые навыки, вызовы инструментов к 1С и банку" loading="lazy" width="1600" height="1000"><figcaption>Слева — вопрос и ответ в чате. Справа — ход работы: этапы, подключённые навыки, вызовы инструментов к 1С и банку</figcaption></figure><figure><img src="media/svodka-canvas.png" alt="Кнопка «Открыть» показывает полный отчёт в холсте; его можно выгрузить в Excel или Word" loading="lazy" width="1600" height="1000"><figcaption>Кнопка «Открыть» показывает полный отчёт в холсте; его можно выгрузить в Excel или Word</figcaption></figure></div>
+  <div class="shots"><figure><picture><source media="(max-width: 640px)" srcset="media/m/svodka-chat.png" width="780" height="1688"><img src="media/svodka-chat.png" alt="Слева — вопрос и ответ в чате. Справа — ход работы: этапы, подключённые навыки, вызовы инструментов к 1С и банку" loading="lazy" width="1600" height="1000"></picture><figcaption>Слева — вопрос и ответ в чате. Справа — ход работы: этапы, подключённые навыки, вызовы инструментов к 1С и банку</figcaption></figure><figure><picture><source media="(max-width: 640px)" srcset="media/m/svodka-canvas.png" width="780" height="1688"><img src="media/svodka-canvas.png" alt="Кнопка «Открыть» показывает полный отчёт в холсте; его можно выгрузить в Excel или Word" loading="lazy" width="1600" height="1000"></picture><figcaption>Кнопка «Открыть» показывает полный отчёт в холсте; его можно выгрузить в Excel или Word</figcaption></figure></div>
   </div>
 
   
@@ -308,8 +360,8 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
 <div class="media">
   <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/sverka-canvas.png" src="media/sverka.mp4"></video><figcaption>Сверка выписки с 1С за месяц: агент собирает выписку по дням, документы 1С, сопоставляет и выдаёт список расхождений с действиями</figcaption></figure>
-  <div class="shots"><figure><img src="media/sverka-canvas.png" alt="Сверка: операции, которых нет в 1С, дубли и разница остатков — с подсказкой, что сделать" loading="lazy" width="1600" height="1000"><figcaption>Сверка: операции, которых нет в 1С, дубли и разница остатков — с подсказкой, что сделать</figcaption></figure><figure><img src="media/predzakrytie-canvas.png" alt="Предзакрытие: десять проверок учёта, по каждой — результат и число найденного" loading="lazy" width="1600" height="1000"><figcaption>Предзакрытие: десять проверок учёта, по каждой — результат и число найденного</figcaption></figure></div>
+  <figure><video controls muted playsinline preload="metadata" data-src="media/sverka.mp4" data-poster="media/sverka-canvas.png" data-msrc="media/m/sverka.mp4" data-mposter="media/m/sverka-canvas.png"></video><figcaption>Сверка выписки с 1С за месяц: агент собирает выписку по дням, документы 1С, сопоставляет и выдаёт список расхождений с действиями</figcaption></figure>
+  <div class="shots"><figure><picture><source media="(max-width: 640px)" srcset="media/m/sverka-canvas.png" width="780" height="1688"><img src="media/sverka-canvas.png" alt="Сверка: операции, которых нет в 1С, дубли и разница остатков — с подсказкой, что сделать" loading="lazy" width="1600" height="1000"></picture><figcaption>Сверка: операции, которых нет в 1С, дубли и разница остатков — с подсказкой, что сделать</figcaption></figure><figure><picture><source media="(max-width: 640px)" srcset="media/m/predzakrytie-canvas.png" width="780" height="1688"><img src="media/predzakrytie-canvas.png" alt="Предзакрытие: десять проверок учёта, по каждой — результат и число найденного" loading="lazy" width="1600" height="1000"></picture><figcaption>Предзакрытие: десять проверок учёта, по каждой — результат и число найденного</figcaption></figure></div>
   </div>
 
   <h3>Ритм работы</h3>
@@ -365,8 +417,8 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
 <div class="media">
   <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/platezhki-canvas.png" src="media/platezhki.mp4"></video><figcaption>Проверка платёжек перед отправкой: по каждой платёжке — замечания и итог «отправлять / проверить / стоп»</figcaption></figure>
-  <div class="shots"><figure><img src="media/platezhki-canvas.png" alt="Таблица проверки: новый получатель с крупной суммой и вероятный дубль выделены светофором" loading="lazy" width="1600" height="1000"><figcaption>Таблица проверки: новый получатель с крупной суммой и вероятный дубль выделены светофором</figcaption></figure><figure><img src="media/kalendar-canvas.png" alt="Платёжный календарь на 14 дней: остаток по дням и день кассового разрыва" loading="lazy" width="1600" height="1000"><figcaption>Платёжный календарь на 14 дней: остаток по дням и день кассового разрыва</figcaption></figure></div>
+  <figure><video controls muted playsinline preload="metadata" data-src="media/platezhki.mp4" data-poster="media/platezhki-canvas.png" data-msrc="media/m/platezhki.mp4" data-mposter="media/m/platezhki-canvas.png"></video><figcaption>Проверка платёжек перед отправкой: по каждой платёжке — замечания и итог «отправлять / проверить / стоп»</figcaption></figure>
+  <div class="shots"><figure><picture><source media="(max-width: 640px)" srcset="media/m/platezhki-canvas.png" width="780" height="1688"><img src="media/platezhki-canvas.png" alt="Таблица проверки: новый получатель с крупной суммой и вероятный дубль выделены светофором" loading="lazy" width="1600" height="1000"></picture><figcaption>Таблица проверки: новый получатель с крупной суммой и вероятный дубль выделены светофором</figcaption></figure><figure><picture><source media="(max-width: 640px)" srcset="media/m/kalendar-canvas.png" width="780" height="1688"><img src="media/kalendar-canvas.png" alt="Платёжный календарь на 14 дней: остаток по дням и день кассового разрыва" loading="lazy" width="1600" height="1000"></picture><figcaption>Платёжный календарь на 14 дней: остаток по дням и день кассового разрыва</figcaption></figure></div>
   </div>
 
   <h3>Ритм работы</h3>
@@ -423,8 +475,8 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
 <div class="media">
   <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/svodka-canvas.png" src="media/svodka.mp4"></video><figcaption>Вопрос «Дай обзор вчерашнего дня»: один навык сводки сам собирает банк, 1С и риски банка и отдаёт короткий ответ и отчёт в холсте</figcaption></figure>
-  <div class="shots"><figure><img src="media/svodka-canvas.png" alt="Сводка дня в холсте: деньги, обороты по счетам, необычные операции, риски в банке" loading="lazy" width="1600" height="1000"><figcaption>Сводка дня в холсте: деньги, обороты по счетам, необычные операции, риски в банке</figcaption></figure><figure><img src="media/kalendar-chat.png" alt="Короткий ответ о кассовом разрыве: дата, сумма, причина и варианты" loading="lazy" width="1600" height="1000"><figcaption>Короткий ответ о кассовом разрыве: дата, сумма, причина и варианты</figcaption></figure></div>
+  <figure><video controls muted playsinline preload="metadata" data-src="media/svodka.mp4" data-poster="media/svodka-canvas.png" data-msrc="media/m/svodka.mp4" data-mposter="media/m/svodka-canvas.png"></video><figcaption>Вопрос «Дай обзор вчерашнего дня»: один навык сводки сам собирает банк, 1С и риски банка и отдаёт короткий ответ и отчёт в холсте</figcaption></figure>
+  <div class="shots"><figure><picture><source media="(max-width: 640px)" srcset="media/m/svodka-canvas.png" width="780" height="1688"><img src="media/svodka-canvas.png" alt="Сводка дня в холсте: деньги, обороты по счетам, необычные операции, риски в банке" loading="lazy" width="1600" height="1000"></picture><figcaption>Сводка дня в холсте: деньги, обороты по счетам, необычные операции, риски в банке</figcaption></figure><figure><picture><source media="(max-width: 640px)" srcset="media/m/kalendar-chat.png" width="780" height="1688"><img src="media/kalendar-chat.png" alt="Короткий ответ о кассовом разрыве: дата, сумма, причина и варианты" loading="lazy" width="1600" height="1000"></picture><figcaption>Короткий ответ о кассовом разрыве: дата, сумма, причина и варианты</figcaption></figure></div>
   </div>
 
   <h3>Ритм работы</h3>
@@ -474,8 +526,8 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
 <div class="media">
   <div class="media-hd"><b>Как это выглядит</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/riski-canvas.png" src="media/riski.mp4"></video><figcaption>Вопрос «Всё ли в порядке в банке?»: агент запускает сбор у банка, ждёт готовности и раскладывает риски по разделам</figcaption></figure>
-  <div class="shots"><figure><img src="media/riski-canvas.png" alt="Риски в банке: ограничения по счетам, долги, полномочия, задачи банка — со сроками и действиями" loading="lazy" width="1600" height="1000"><figcaption>Риски в банке: ограничения по счетам, долги, полномочия, задачи банка — со сроками и действиями</figcaption></figure></div>
+  <figure><video controls muted playsinline preload="metadata" data-src="media/riski.mp4" data-poster="media/riski-canvas.png" data-msrc="media/m/riski.mp4" data-mposter="media/m/riski-canvas.png"></video><figcaption>Вопрос «Всё ли в порядке в банке?»: агент запускает сбор у банка, ждёт готовности и раскладывает риски по разделам</figcaption></figure>
+  <div class="shots"><figure><picture><source media="(max-width: 640px)" srcset="media/m/riski-canvas.png" width="780" height="1688"><img src="media/riski-canvas.png" alt="Риски в банке: ограничения по счетам, долги, полномочия, задачи банка — со сроками и действиями" loading="lazy" width="1600" height="1000"></picture><figcaption>Риски в банке: ограничения по счетам, долги, полномочия, задачи банка — со сроками и действиями</figcaption></figure></div>
   </div>
 
   <h3>Контроль и безопасность</h3>
@@ -565,8 +617,8 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
 <div class="media">
   <div class="media-hd"><b>Как это выглядит: права на инструменты</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/ints1c.png" src="media/ints.mp4"></video><figcaption>Администрирование интеграций: запись в 1С запрещается, у «Операционного директора» оба инструмента только на чтение, авторизация — токеном пользователя</figcaption></figure>
-  <div class="shots"><figure><img src="media/ints1c.png" alt="Права агента на инструменты интеграции 1С: чтение разрешено, создание, изменение и проведение запрещены" loading="lazy" width="1600" height="1000"><figcaption>Права агента на инструменты интеграции 1С: чтение разрешено, создание, изменение и проведение запрещены</figcaption></figure></div>
+  <figure><video controls muted playsinline preload="metadata" data-src="media/ints.mp4" data-poster="media/ints1c.png" data-msrc="media/m/ints.mp4" data-mposter="media/m/ints1c.png"></video><figcaption>Администрирование интеграций: запись в 1С запрещается, у «Операционного директора» оба инструмента только на чтение, авторизация — токеном пользователя</figcaption></figure>
+  <div class="shots"><figure><picture><source media="(max-width: 640px)" srcset="media/m/ints1c.png" width="780" height="1688"><img src="media/ints1c.png" alt="Права агента на инструменты интеграции 1С: чтение разрешено, создание, изменение и проведение запрещены" loading="lazy" width="1600" height="1000"></picture><figcaption>Права агента на инструменты интеграции 1С: чтение разрешено, создание, изменение и проведение запрещены</figcaption></figure></div>
   </div>
 
   <h3>Подключение источников</h3>
@@ -599,7 +651,7 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
 
 <div class="media">
   <div class="media-hd"><b>Как это выглядит: правка описания навыка</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/skill.png" src="media/skill.mp4"></video><figcaption>В описание навыка добавляется строка «Не используй для… — навык X», затем «Сохранить»</figcaption></figure>
+  <figure><video controls muted playsinline preload="metadata" data-src="media/skill.mp4" data-poster="media/skill.png" data-msrc="media/m/skill.mp4" data-mposter="media/m/skill.png"></video><figcaption>В описание навыка добавляется строка «Не используй для… — навык X», затем «Сохранить»</figcaption></figure>
   </div>
 
   <h3>Диагностика</h3>
@@ -632,75 +684,21 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
   </div>
 </section>
 
-<!-- ============ БАНК ============ -->
-<section class="part" id="bank">
-  <div class="part-head">
-    <div class="eyebrow">Продукт СберБизнес API, команда Транзакционного агента, клиентский менеджер, безопасность, поддержка</div>
-    <h2>Как это выглядит для команд банка</h2>
-    <p>Клиент подключил банк к своему ИИ-агенту в GigaCowork. Агент только читает данные банка и строит из них финансовую аналитику для бухгалтера, казначея, финдиректора и руководителя.</p>
+
+<button type="button" class="ai-fab" id="ai-fab" aria-haspopup="dialog" aria-controls="ai-panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>Спросить ассистента</button>
+<section class="ai-panel" id="ai-panel" role="dialog" aria-modal="false" aria-labelledby="ai-title" hidden>
+  <div class="ai-head">
+    <b id="ai-title">Ассистент по инструкции</b>
+    <button type="button" class="ai-icon" id="ai-clear" title="Начать заново">Очистить</button>
+    <button type="button" class="ai-icon" id="ai-close" aria-label="Закрыть">✕</button>
+    <small>Отвечает по материалам этой страницы о том, как устроен и работает агент. Не подключён к 1С и банку и не видит данных организаций.</small>
   </div>
-
-  <h3>Два канала в банк</h3>
-  <div class="two">
-    <div class="box">
-      <h3>СберБизнес API</h3>
-      <p>Через MCP-сервер клиента в режиме «только чтение». Запросы идут с клиентским сертификатом mTLS и OAuth-токеном клиента. Используются эндпоинты API напрямую, без собственных агрегатов банка.</p>
-    </div>
-    <div class="box">
-      <h3>MCP «Транзакционный агент»</h3>
-      <p>Из Cowork напрямую в <code>/fintech/api/transactional-agent/mcp</code> с токеном пользователя (<code>MCP_COMMON</code> + <code>MCP_TRANSACT_AGENT</code>). Один сбор на вопрос: <code>summarise.agent_check_collect</code>, затем <code>summarise.agent_get_data</code> с явным списком разделов.</p>
-    </div>
-  </div>
-
-<div class="media">
-  <div class="media-hd"><b>Как это выглядит со стороны банка</b><span class="demo-note">Демо-стенд на условных данных: ООО «Ромашка» и все цифры вымышлены</span></div>
-  <figure><video controls muted playsinline preload="metadata" poster="media/log.png" src="media/log.mp4"></video><figcaption>Иллюстрация: обращения к банку во время сводки дня — только чтение, включая повтор после ответа 202</figcaption></figure>
-  <div class="shots"><figure><img src="media/log.png" alt="Журнал обращений: канал, метод, ответ банка; вызовов на запись — ноль" loading="lazy" width="1600" height="1000"><figcaption>Журнал обращений: канал, метод, ответ банка; вызовов на запись — ноль</figcaption></figure></div>
-  </div>
-
-  <h3>Какие сервисы вызывает каждый сценарий</h3>
-  <div class="table"><table>
-    <thead><tr><th>Сценарий клиента</th><th>Сервисы банка</th><th>Нагрузка</th></tr></thead>
-    <tbody>
-      <tr><td>Сводка дня</td><td>client-info; statement summary по каждому счёту за день; Транзакционный агент: разделы <code>fskk</code>, <code>udkz</code>, <code>authority</code>, <code>tasklist</code>, <code>client_profile</code></td><td>Единицы вызовов в день</td></tr>
-      <tr><td>Остатки</td><td>client-info, statement summary</td><td>Один вызов на счёт и день</td></tr>
-      <tr><td>Выписка, ДДС, деньги с контрагентом</td><td>statement summary + statement transactions «счёт × день × страница», до 100 операций на страницу</td><td>До ~150 вызовов на вопрос; при большем объёме агент предупреждает и просит сузить период. Темп — около 4 запросов в секунду</td></tr>
-      <tr><td>Исполнение платёжек</td><td>payments / state по externalId; входящие платёжные требования по дням</td><td>Десятки вызовов</td></tr>
-      <tr><td>Письма банка и ЭП</td><td>Письма из банка, письма валютного контроля, криптопрофиль</td><td>Несколько вызовов</td></tr>
-      <tr><td>Размещение</td><td>Действующие депозиты, предложения по депозитам, кредитные предложения</td><td>Несколько вызовов</td></tr>
-      <tr><td>Надёжность контрагента</td><td>СберРейтинг, светофор по ИНН</td><td>Один вызов на контрагента</td></tr>
-      <tr><td>Риски компании в банке</td><td>Транзакционный агент: все разделы из схемы</td><td>Один сбор на вопрос; опрос готовности раз в 5 секунд, не дольше 2 минут</td></tr>
-    </tbody>
-  </table></div>
-
-  <div class="box no">
-    <h3>Что не вызывается никогда</h3>
-    <p>Создание и подпись платёжных поручений, письма и заявления в банк, акцепт требований, переводы, активация сертификатов. MCP-сервер СберБизнес API у клиента работает в режиме «только чтение», а агенту запрет записан в инструкции.</p>
-  </div>
-
-  <h3>Наблюдения и пожелания</h3>
-  <p class="note">Собраны при подключении и эксплуатации. Для каждого пункта указано, какой команде он адресован.</p>
-  <div class="issues">
-    <div class="issue"><span class="tag">Транзакционный агент</span><b>Ошибка «Unexpected value 'account_turns'»</b><p>Вызов <code>agent_get_data</code> без <code>integrationName</code> периодически падает: сборщик отдаёт раздел, которого нет в enum схемы. Просьба: согласовать enum и фактическую выдачу, опубликовать перечень разделов боевого контура. В описании сервиса упомянуты обороты, балансы, операции и поручения, а в схеме их нет.</p></div>
-    <div class="issue"><span class="tag">Транзакционный агент</span><b>Объявлена outputSchema, но не приходит structuredContent</b><p>Строгие MCP-клиенты отбраковывают такие ответы. Просьба: возвращать <code>structuredContent</code> или не объявлять <code>outputSchema</code>.</p></div>
-    <div class="issue"><span class="tag">Транзакционный агент</span><b>Данные разделов — свободный текст</b><p>Даты, суммы и сроки приходится извлекать из текста GigaChat. Просьба: рядом с текстом отдавать структурированные поля — счёт, сумма, валюта, дата, срок, статус.</p></div>
-    <div class="issue"><span class="tag">Транзакционный агент</span><b>Нет даты актуальности раздела</b><p>Данные могут отставать на дни и недели. Просьба: поле «по состоянию на» в каждом разделе.</p></div>
-    <div class="issue"><span class="tag">Транзакционный агент</span><b>Ошибки внутреннего сервиса уходят клиенту как есть</b><p>При отсутствии <code>legalPersonSessionId</code> возвращается сырой ответ 422 внутреннего сервиса с его адресом. Иногда приходит 503 сервиса суммаризации. Просьба: проверять параметры на входе MCP и не раскрывать внутренние адреса.</p></div>
-    <div class="issue"><span class="tag">СберБизнес API</span><b>Не подтверждены пути части эндпоинтов чтения</b><p>Письма из банка, письма валютного контроля, депозиты и предложения, СберРейтинг, корпоративные карты: пути и параметры не подтверждены публичной спецификацией. Просьба: опубликовать или подтвердить спецификации.</p></div>
-    <div class="issue"><span class="tag">СберБизнес API</span><b>Выписка за период — сотни вызовов</b><p>Модель «счёт × день × страница» при периоде в месяц по нескольким счетам даёт сотни запросов. Просьба: выписка за период одним запросом или увеличенный размер страницы.</p></div>
-  </div>
-
-  <h3>Что важно каждой команде</h3>
-  <div class="table"><table>
-    <thead><tr><th>Команда</th><th>Что смотреть</th></tr></thead>
-    <tbody>
-      <tr><td>Продукт СберБизнес API</td><td>Сценарии и эндпоинты, профиль нагрузки, запросы на доработку API</td></tr>
-      <tr><td>Транзакционный агент («Операционный директор»)</td><td>Пять пунктов выше по агенту: enum разделов, structuredContent, структурированные поля, дата актуальности, обработка ошибок</td></tr>
-      <tr><td>Клиентский менеджер</td><td>Клиент ежедневно видит риск-сигналы банка: ограничения, долги, полномочия, задачи. Предложения по депозитам и кредитам попадают в ответы, когда у клиента появляются свободные деньги или их не хватает</td></tr>
-      <tr><td>Безопасность</td><td>Только чтение, mTLS, отдельный токен у каждого пользователя, запрет записи на уровне сервера и инструкции, журнал событий на стороне клиента</td></tr>
-      <tr><td>Поддержка</td><td>Таблица диагностики на вкладке «ИТ-специалист»: типовые ошибки и действия</td></tr>
-    </tbody>
-  </table></div>
+  <div class="ai-log" id="ai-log" aria-live="polite"></div>
+  <form class="ai-form" id="ai-form">
+    <textarea id="ai-input" rows="1" placeholder="Ваш вопрос…" aria-label="Вопрос ассистенту" maxlength="1500"></textarea>
+    <button type="submit" class="ai-send" id="ai-send">Отправить</button>
+    <span class="ai-note">Ответы генерирует ИИ (DeepSeek) и могут содержать неточности.</span>
+  </form>
 </section>
 
 <footer>Инструкция описывает работу агента и не содержит данных организации. Источник навыков и описаний — папка <code>cowork-skills/</code> в репозитории проекта.</footer>
@@ -753,6 +751,114 @@ footer { padding-block: 32px 0; font-size: 13px; color: var(--muted); }
     document.body.appendChild(o);
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var z = document.querySelector('.zoom'); if (z) z.remove(); } });
+  // таблицы: подписи колонок для карточек на телефоне
+  document.querySelectorAll('.table table').forEach(function (t) {
+    var h = Array.prototype.map.call(t.querySelectorAll('thead th'), function (x) { return x.textContent; });
+    t.querySelectorAll('tbody tr').forEach(function (r) {
+      Array.prototype.forEach.call(r.children, function (c, k) { if (h[k]) c.setAttribute('data-label', h[k]); });
+    });
+  });
+  // видео: телефонная или широкая версия
+  var phone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+  document.querySelectorAll('video[data-src]').forEach(function (v) {
+    v.poster = phone ? v.getAttribute('data-mposter') : v.getAttribute('data-poster');
+    v.src = phone ? v.getAttribute('data-msrc') : v.getAttribute('data-src');
+  });
+
+  // ---------- ассистент ----------
+  var AI_URL = 'https://finguide.195-133-94-80.sslip.io/api/chat';
+  var fab = document.getElementById('ai-fab'), panel = document.getElementById('ai-panel');
+  var log = document.getElementById('ai-log'), form = document.getElementById('ai-form');
+  var input = document.getElementById('ai-input'), sendBtn = document.getElementById('ai-send');
+  var history = [], busy = false;
+  var SUGG = {
+    ustroystvo: ['Как агент выбирает навык под вопрос?', 'Откуда агент берёт данные и насколько они свежие?', 'Что агент никогда не делает?'],
+    buhgalter: ['Как сверить выписку банка с 1С?', 'Что проверяет предзакрытие?', 'Как подготовить акт сверки?'],
+    kaznachey: ['Как проверить платёжки перед отправкой?', 'Как узнать, будет ли кассовый разрыв?', 'Как понять, ушли ли платёжки?'],
+    findirektor: ['Что входит в сводку дня?', 'Чем ДДС по 1С отличается от ДДС по банку?', 'Как получить отчёт в Excel или слайдом?'],
+    rukovoditel: ['Как агент защищён от записи в 1С и банк?', 'Что такое риски в банке и откуда они берутся?', 'Что нужно решить руководителю при запуске?'],
+    it: ['Какие права выставить на инструменты интеграций?', 'Как подключить «Операционного директора»?', 'Что делать, если агент выбрал не тот навык?']
+  };
+  function current() { var t = document.querySelector('nav.roles [aria-selected="true"]'); return t ? t.getAttribute('data-target') : 'ustroystvo'; }
+  function esc(x) { return x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function md(text) {
+    var out = [], list = null;
+    esc(text).split(/\n/).forEach(function (line) {
+      var l = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+      var m = l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
+      if (m) { var tag = /^\s*\d/.test(l) ? 'ol' : 'ul'; if (!list || list.tag !== tag) { if (list) out.push('</' + list.tag + '>'); list = { tag: tag }; out.push('<' + tag + '>'); } out.push('<li>' + m[1] + '</li>'); return; }
+      if (list) { out.push('</' + list.tag + '>'); list = null; }
+      var h = l.match(/^#{1,4}\s+(.*)$/);
+      if (h) { out.push('<p><b>' + h[1] + '</b></p>'); return; }
+      if (l.trim()) out.push('<p>' + l + '</p>');
+    });
+    if (list) out.push('</' + list.tag + '>');
+    return out.join('');
+  }
+  function add(cls, html) { var d = document.createElement('div'); d.className = 'ai-msg ' + cls; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
+  function suggestions() {
+    var box = document.createElement('div'); box.className = 'ai-sugg';
+    (SUGG[current()] || SUGG.ustroystvo).forEach(function (q) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = q;
+      b.addEventListener('click', function () { ask(q); }); box.appendChild(b);
+    });
+    log.appendChild(box);
+  }
+  function greet() {
+    log.innerHTML = '';
+    add('a', md('Здравствуйте! Я отвечаю на вопросы о том, как устроен и как работает агент «Финансовый аналитик 1С»: навыки, источники данных, роли, настройка и права. Спросите своими словами или выберите вопрос ниже.'));
+    suggestions();
+  }
+  function save() { try { sessionStorage.setItem('fin-agent-ai', JSON.stringify(history.slice(-20))); } catch (e) {} }
+  function restore() {
+    try { var h = JSON.parse(sessionStorage.getItem('fin-agent-ai') || '[]'); if (Array.isArray(h) && h.length) { history = h; log.innerHTML = ''; h.forEach(function (m) { add(m.role === 'user' ? 'u' : 'a', m.role === 'user' ? esc(m.content) : md(m.content)); }); return true; } } catch (e) {}
+    return false;
+  }
+  function open() { panel.hidden = false; fab.hidden = true; if (!log.childNodes.length && !restore()) greet(); setTimeout(function () { input.focus(); }, 50); }
+  function close() { panel.hidden = true; fab.hidden = false; fab.focus(); }
+  fab.addEventListener('click', open);
+  document.getElementById('ai-close').addEventListener('click', close);
+  document.getElementById('ai-clear').addEventListener('click', function () { history = []; save(); greet(); });
+  panel.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  input.addEventListener('input', function () { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; });
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit')); } });
+  form.addEventListener('submit', function (e) { e.preventDefault(); var q = input.value.trim(); if (q) ask(q); });
+
+  async function ask(q) {
+    if (busy) return;
+    busy = true; sendBtn.disabled = true;
+    var sg = log.querySelector('.ai-sugg'); if (sg) sg.remove();
+    add('u', esc(q)); input.value = ''; input.style.height = 'auto';
+    history.push({ role: 'user', content: q });
+    try { if (window.ym) window.ym(113153530, 'reachGoal', 'fin_agent_ai_ask'); } catch (e) {}
+    var bubble = add('a', '<span class="ai-typing"><i></i><i></i><i></i></span>'), text = '';
+    try {
+      var res = await fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ section: current(), messages: history.slice(-12) }) });
+      if (!res.ok || !res.body) {
+        var msg = res.status === 429 ? 'Слишком много вопросов подряд. Подождите несколько минут.' : 'Ассистент сейчас недоступен. Попробуйте позже.';
+        try { var ej = await res.json(); if (ej && ej.error && res.status !== 403) msg = ej.error; } catch (e2) {}
+        throw new Error(msg);
+      }
+      var reader = res.body.getReader(), dec = new TextDecoder(), buf = '';
+      for (;;) {
+        var r = await reader.read(); if (r.done) break;
+        buf += dec.decode(r.value, { stream: true });
+        var parts = buf.split('\n\n'); buf = parts.pop();
+        parts.forEach(function (ev) {
+          var line = ev.split('\n').filter(function (x) { return x.indexOf('data: ') === 0; }).map(function (x) { return x.slice(6); }).join('');
+          if (!line) return;
+          var m; try { m = JSON.parse(line); } catch (err) { return; }
+          if (m.error) throw new Error(m.error);
+          if (m.d) { text += m.d; bubble.innerHTML = md(text); log.scrollTop = log.scrollHeight; }
+        });
+      }
+      if (!text) throw new Error('Пустой ответ. Попробуйте переформулировать вопрос.');
+      history.push({ role: 'assistant', content: text }); save();
+    } catch (err) {
+      bubble.remove(); history.pop();
+      add('err', esc(err && err.message ? err.message : 'Ошибка соединения.'));
+    } finally { busy = false; sendBtn.disabled = false; }
+  }
   var start = '';
   try { start = (location.hash || '').slice(1); } catch (e) {}
   show(start || 'ustroystvo', false);
